@@ -6,14 +6,15 @@
     "name": "NM-BATII",
     "description": "Reprise des plans en modèles BIM 2D",
     "author": "data8bim",
-    "url": "https://github.com/data8bim/py-NM-BATII",
+    "url": "https://github.com/data8bim/py-NM-BATII.git",
     "website": "https://d8b.fr",
     "image": "",
     "templates": {
         "author": "data8bim (d8b)",
-        "docpath": "https://www.nm-aaaaaa.fr"
+        "docpath": "https://d8b.fr"
     },
     "dependencies": [],
 	
-	"minimum_revit_version": 2025,	
+	"minimum_revit_version": 2025
+
 }
