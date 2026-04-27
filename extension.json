@@ -6,7 +6,7 @@
     "name": "NM-BATII",
     "description": "Reprise des plans en modèles BIM 2D",
     "author": "data8bim",
-    "url": "https://github.com/d8b/nm-aaaaaa.git",
+    "url": "https://github.com/data8bim/py-NM-BATII",
     "website": "https://d8b.fr",
     "image": "",
     "templates": {
@@ -15,32 +15,5 @@
     },
     "dependencies": [],
 	
-	"minimum_revit_version": 2025,
-
-	"tab": {
-		"id": "NM-BATII",
-		"text": "NM-BATII",
-		"panels": [
-		{
-			"id": "Configuration",
-			"text": "Configuration",
-			"order": 10
-		},
-		{
-			"id": "Depuis_fichiers",
-			"text": "Depuis fichiers",
-			"order": 20
-		},
-		{
-			"id": "Depuis_fichiers_DWG",
-			"text": "Depuis fichiers DWG",
-			"order": 30
-		},
-		{
-			"id": "TESTS",
-			"text": "TESTS",
-			"order": 99
-		}
-		]
-	}
+	"minimum_revit_version": 2025,	
 }
