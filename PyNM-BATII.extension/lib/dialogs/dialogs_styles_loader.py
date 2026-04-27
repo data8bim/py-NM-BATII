@@ -1,0 +1,61 @@
+# -*- coding: utf-8 -*-
+import os
+from System.IO import StreamReader
+from System.Windows.Markup import XamlReader
+from System.Windows import Application
+from pyrevit import forms
+
+# ✅ FIX : chemin résolu depuis __file__ (robuste quel que soit l'emplacement
+# d'installation de l'extension sur le poste).
+# dialogs_styles_loader.py est dans lib\dialogs\
+# dialogs_styles.xaml   est dans lib\dialogs\  → même dossier
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+def load(file_name="dialogs_styles.xaml", subfolder="dialogs", lib_dir=None):
+    """
+    Charge un fichier XAML et l'ajoute aux styles WPF globaux.
+
+    Parameters:
+        file_name (str): Nom du fichier XAML à charger.
+        subfolder (str): Dossier dans lib_dir où se trouve le fichier (fallback uniquement).
+        lib_dir (str): Chemin racine de la bibliothèque (fallback si chemin relatif introuvable).
+
+    Returns:
+        bool: True si le chargement réussit, False sinon.
+    """
+    # 1) Chemin prioritaire : relatif à ce fichier (indépendant du poste)
+    style_path = os.path.join(_this_dir, file_name)
+
+    # 2) Fallback : lib_dir passé en argument (ancienne méthode)
+    if not os.path.isfile(style_path) and lib_dir:
+        style_path = os.path.join(lib_dir, subfolder, file_name)
+
+    if os.path.isfile(style_path):
+        try:
+            with StreamReader(style_path) as reader:
+                resource_dict = XamlReader.Load(reader.BaseStream)
+
+                # Évite le doublon
+                already_loaded = any(
+                    hasattr(d, "Source") and d.Source == resource_dict.Source
+                    for d in Application.Current.Resources.MergedDictionaries
+                    if hasattr(d, "Source")
+                )
+
+                if not already_loaded:
+                    Application.Current.Resources.MergedDictionaries.Add(resource_dict)
+
+            return True
+        except Exception as e:
+            forms.alert(
+                "💥 Erreur lors du chargement du style :\n{0}".format(str(e)),
+                title="⚠️ Chargement WPF"
+            )
+            return False
+    else:
+        forms.alert(
+            "📄 Fichier introuvable :\n{0}".format(style_path),
+            title="⚠️ Fichier manquant"
+        )
+        return False

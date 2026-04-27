@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Supprimer des paramètres — Étape 1 / 2 : Source et paramètres"
+        Height="620" Width="780"
+        MinHeight="440" MinWidth="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+
+    <Window.Resources>
+        <Style x:Key="PanelLabel" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+        <Style x:Key="RadioListItem" TargetType="ListBoxItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="0" Padding="6,3,6,3">
+                            <RadioButton Content="{TemplateBinding Content}"
+                                         GroupName="SourceGroup"
+                                         IsChecked="{Binding IsSelected,
+                                             RelativeSource={RelativeSource TemplatedParent},
+                                             Mode=TwoWay}"
+                                         IsHitTestVisible="False" Focusable="False"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#DBEAFE"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F0F4FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Instruction -->
+        <TextBlock Grid.Row="0" Margin="0,0,0,10" TextWrapping="Wrap" FontSize="13">
+            <Run FontWeight="SemiBold" Text="Étape 1 / 2 — "/>
+            <Run Text="Sélectionnez la nomenclature SOURCE puis les paramètres à supprimer (multi-sélection possible)."/>
+        </TextBlock>
+
+        <!-- Deux colonnes -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- GAUCHE : nomenclatures -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource PanelLabel}"
+                           Text="Nomenclature source"/>
+                <Grid Grid.Row="1" Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton Grid.Column="0" Width="36" Height="25"
+                                  IsEnabled="False" Margin="0,0,4,0">
+                        <TextBlock Text="AZ" FontWeight="Bold" FontSize="11"/>
+                    </ToggleButton>
+                    <TextBox x:Name="txtSearch" Grid.Column="1" Height="25"
+                             VerticalContentAlignment="Center"/>
+                </Grid>
+                <ListBox x:Name="lstSchedules" Grid.Row="2"
+                         SelectionMode="Single"
+                         ItemContainerStyle="{StaticResource RadioListItem}"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+
+            <!-- Séparateur -->
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
+                          Background="#DDDDDD" ShowsPreview="True"/>
+
+            <!-- DROITE : paramètres -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Style="{StaticResource PanelLabel}"
+                           Text="Paramètres à supprimer"/>
+
+                <Grid Grid.Row="1" Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton Grid.Column="0" Width="36" Height="25"
+                                  IsEnabled="False" Margin="0,0,4,0">
+                        <TextBlock Text="AZ" FontWeight="Bold" FontSize="11"/>
+                    </ToggleButton>
+                    <TextBox x:Name="txtSearchField" Grid.Column="1" Height="25"
+                             VerticalContentAlignment="Center" IsEnabled="False"/>
+                </Grid>
+
+                <ListBox x:Name="lstFields" Grid.Row="2"
+                         IsEnabled="False"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                <Grid Grid.Row="3" Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnCheckAllFields" Grid.Column="0"
+                            Content="Tout" IsEnabled="False"
+                            Style="{DynamicResource NMButtonStandard}"
+                            Height="26" Margin="0,0,2,0"/>
+                    <Button x:Name="btnUncheckAllFields" Grid.Column="1"
+                            Content="Aucun" IsEnabled="False"
+                            Style="{DynamicResource NMButtonStandard}"
+                            Height="26" Margin="2,0,2,0"/>
+                    <Button x:Name="btnToggleAllFields" Grid.Column="2"
+                            Content="Inverser" IsEnabled="False"
+                            Style="{DynamicResource NMButtonStandard}"
+                            Height="26" Margin="2,0,0,0"/>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Validation inline -->
+        <Border Grid.Row="2" x:Name="borderValidation"
+                Margin="0,8,0,0" Padding="10,6"
+                Background="#FEF2F2" BorderBrush="#FECACA"
+                BorderThickness="1" CornerRadius="4"
+                Visibility="Collapsed">
+            <TextBlock x:Name="txtValidation"
+                       Foreground="#DC2626" FontWeight="SemiBold"
+                       TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Bouton Suivant -->
+        <Button x:Name="btnOk" Grid.Row="3"
+                Content="Suivant  →"
+                Style="{DynamicResource NMButtonValide}"
+                Height="40" Margin="0,8,0,0" IsDefault="True"/>
+    </Grid>
+</Window>

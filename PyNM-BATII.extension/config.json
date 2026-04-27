@@ -1,0 +1,106 @@
+{
+  "creer_niveaux": {
+    "Idt_Niv_Batiment_pos": "R+", 
+    "Idt_Niv_Batiment_neg": "R-", 
+    "espacement_default": 5.0, 
+    "Idt_Niv_Origine": "O+00_0", 
+    "Idt_Niv_Rdc": "R+00_0", 
+    "Marq_Niv_Toit": "T+", 
+    "Eleva_Niv_Rdc": 0.0, 
+    "Idt_Niv_Rdc_bas": "R-00_0", 
+    "Eleva_Niv_Origine": -1.0, 
+    "Marq_Niv_Fondations": "F-"
+  }, 
+  "nomenclatures_colonnes_couleurs": {
+    "colonnes_types": [
+      232, 
+      113, 
+      134
+    ], 
+    "colonnes_readonly": [
+      192, 
+      192, 
+      192
+    ], 
+    "colonnes_occurrences": [
+      255, 
+      255, 
+      151
+    ]
+  }, 
+  "nettoyage": {
+    "dwg_liens": false, 
+    "lignes": true, 
+    "zones_pochages": true, 
+    "texts": true, 
+    "pieces_espaces": true, 
+    "dwg_imports": true
+  }, 
+  "nm_convention_noms_fichiers": {
+    "pos_code_bat": 1, 
+    "group_niveau": "niveau", 
+    "valeur_pour_vrai_niveau": "0", 
+    "valeur_pour_sans_niveau": "RXXX", 
+    "pos_code_niv": 2, 
+    "pos_code_demi_niv": 3, 
+    "group_batiment": "batiment", 
+    "group_demi": "demi", 
+    "delimiteur": "_", 
+    "pos_nom_site_court": 6, 
+    "group_site": "site", 
+    "pos_code_site": 0, 
+    "group_site_nom_court": "nom_site_court", 
+    "valeur_si_bim_2d": "_BIM-2D", 
+    "utiliser_regex": false, 
+    "group_prod": "prod", 
+    "group_rest_nom": "rest_nom", 
+    "pos_code_prod": 4, 
+    "pos_rest_nom": 7, 
+    "valeur_si_nul": "X", 
+    "regle_regex": "^(?P<site>[^_]+)_(?P<batiment>[^_]+)_(?P<niveau>R[+-]\\d{2})_(?P<demi>[0-9])_(?P<prod>[^_]+)_(?P<nom_site_court>[^_]+)_(?P<rest_nom>.+)$"
+  }, 
+  "nomenclatures_titres_couleurs": {
+    "tables_de_styles": [
+      192, 
+      192, 
+      192
+    ], 
+    "nomenclatures_presentations": [
+      241, 
+      141, 
+      0
+    ], 
+    "saisies_occurrences": [
+      255, 
+      255, 
+      151
+    ], 
+    "saisies_types": [
+      232, 
+      113, 
+      134
+    ]
+  }, 
+  "vue_type_personnalise": "Importé", 
+  "activer_logs_scripts": false, 
+  "fichiers_lies_dwg": {
+    "view_only": true, 
+    "include_sub": false, 
+    "layers_default": "Visibles", 
+    "unit_default": "Mètres", 
+    "correct_lines": true, 
+    "placement_default": "shared", 
+    "color_mode_default": "conserver"
+  }, 
+  "surface": {
+    "col_shob": "SHOB", 
+    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
+    "param_shon": "ANS - SURFACE - SHON", 
+    "param_s_plancher": "ANS - SURFACE - S Plancher", 
+    "col_filter": "Nom", 
+    "param_shob": "ANS - SURFACE - SHOB", 
+    "col_plancher": "Surface Plancher - SP", 
+    "default_shon_schedule": "SURFACES - SHON/SHOB", 
+    "col_shon": "SHON"
+  }
+}

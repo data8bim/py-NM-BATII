@@ -1,0 +1,6 @@
+title:
+  en_us: "Views\nfrom files"
+  fr_fr: "Vues\ndepuis fichiers"
+layout:
+  - 01_Vues_depuis_fichiers
+  - 02_Vues_depuis_fichiers_multi

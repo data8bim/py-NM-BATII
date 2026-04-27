@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Supprimer des paramètres — Étape 2 / 2 : Nomenclatures cibles"
+        Height="620" Width="600"
+        MinHeight="420" MinWidth="440"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- Bandeau info -->
+            <RowDefinition Height="Auto"/>   <!-- Instruction -->
+            <RowDefinition Height="Auto"/>   <!-- Recherche -->
+            <RowDefinition Height="*"/>      <!-- Liste -->
+            <RowDefinition Height="Auto"/>   <!-- Inclure source -->
+            <RowDefinition Height="Auto"/>   <!-- Boutons sélection -->
+            <RowDefinition Height="Auto"/>   <!-- Validation inline -->
+            <RowDefinition Height="Auto"/>   <!-- Bouton Supprimer -->
+        </Grid.RowDefinitions>
+
+        <!-- Bandeau info source / colonnes -->
+        <Border Grid.Row="0" Margin="0,0,0,8" Padding="10,7"
+                CornerRadius="4" Background="#EFF6FF"
+                BorderBrush="#BFDBFE" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="SemiBold"
+                           Text="Source : " VerticalAlignment="Center" Margin="0,0,4,2"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="txtSourceName"
+                           Text="—" VerticalAlignment="Center" Margin="0,0,0,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="SemiBold"
+                           Text="Colonnes : " VerticalAlignment="Top" Margin="0,0,4,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="txtFieldName"
+                           Text="—" TextWrapping="Wrap" FontStyle="Italic"/>
+            </Grid>
+        </Border>
+
+        <!-- Instruction -->
+        <TextBlock Grid.Row="1" Margin="0,0,0,8" TextWrapping="Wrap" FontSize="13">
+            <Run FontWeight="SemiBold" Text="Étape 2 / 2 — "/>
+            <Run Text="Sélectionnez les nomenclatures cibles."/>
+            <LineBreak/>
+            <Run FontSize="11" Foreground="#555555"
+                 Text="Les paramètres sélectionnés seront supprimés de chaque nomenclature cible où ils sont présents."/>
+        </TextBlock>
+
+        <!-- Recherche -->
+        <Grid Grid.Row="2" Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ToggleButton Grid.Column="0" Width="36" Height="25"
+                          IsEnabled="False" Margin="0,0,4,0">
+                <TextBlock Text="AZ" FontWeight="Bold" FontSize="11"/>
+            </ToggleButton>
+            <TextBox x:Name="txtSearch" Grid.Column="1" Height="25"
+                     VerticalContentAlignment="Center"/>
+        </Grid>
+
+        <!-- Liste destinations -->
+        <ListBox x:Name="lstSchedules" Grid.Row="3"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+        <!-- Boutons sélection -->
+        <Grid Grid.Row="4" Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnCheckAll" Grid.Column="0"
+                    Content="Tout sélectionner"
+                    Style="{DynamicResource NMButtonStandard}"
+                    Height="30" Margin="0,0,2,0"/>
+            <Button x:Name="btnUncheckAll" Grid.Column="1"
+                    Content="Tout désélectionner"
+                    Style="{DynamicResource NMButtonStandard}"
+                    Height="30" Margin="2,0,2,0"/>
+            <Button x:Name="btnToggleAll" Grid.Column="2"
+                    Content="Inverser"
+                    Style="{DynamicResource NMButtonStandard}"
+                    Height="30" Margin="2,0,0,0"/>
+        </Grid>
+
+        <!-- Case à cocher : inclure la nomenclature source -->
+        <Border Grid.Row="5" Margin="0,6,0,0" Padding="10,7"
+                CornerRadius="4" Background="#FFF7ED"
+                BorderBrush="#FED7AA" BorderThickness="1">
+            <CheckBox x:Name="chkIncludeSource"
+                      Content="Supprimer aussi dans la nomenclature SOURCE"
+                      FontWeight="SemiBold" IsChecked="False"/>
+        </Border>
+
+        <!-- Validation inline -->
+        <Border Grid.Row="6" x:Name="borderValidation"
+                Margin="0,8,0,0" Padding="10,6"
+                Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1"
+                CornerRadius="4" Visibility="Collapsed">
+            <TextBlock x:Name="txtValidation"
+                       Foreground="#DC2626" FontWeight="SemiBold" TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Bouton Appliquer -->
+        <Button x:Name="btnOk" Grid.Row="7"
+                Content="Supprimer"
+                Style="{DynamicResource NMButtonValide}"
+                Height="40" Margin="0,8,0,0" IsDefault="True"/>
+    </Grid>
+</Window>

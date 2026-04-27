@@ -1,0 +1,18 @@
+title:
+  en_us: "Views +\nfrom files"
+  fr_fr: "Vues +\ndepuis fichiers"
+tooltip:
+  en_us: "Create MULTIPLE views of the building based on the file names in a directory.
+         File names must comply with the Nantes Métropole file naming rules.
+         The created views are automatically associated with the associated level and are named with the same name as the file.
+         The levels must have been previously created using \"Levels from Files\".
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Créer des vues MULTIPLES du bâtiment sur la base des noms des fichiers d'un répertoire.
+         Les noms des fichiers doivent respecter les règles de nommages des fichiers de Nantes Métropole.
+         Les vues créées sont associées automatiquement au niveau associé et sont nommées avec le même nom que le fichier.
+         Préalablement, les niveaux doivent avoir été créés avec \"Niveaux depuis fichiers\".
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

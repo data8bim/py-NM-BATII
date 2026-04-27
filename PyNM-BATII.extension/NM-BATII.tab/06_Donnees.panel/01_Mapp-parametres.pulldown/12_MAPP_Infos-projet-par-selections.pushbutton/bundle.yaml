@@ -1,0 +1,16 @@
+title:
+  en_us: "Infos Projet → Objets par sélections"
+  fr_fr: "Infos Projet → Objets par sélections"
+
+tooltip:
+  en_us: "Transferring project information values ​​to selected objects (families) in the active view. 
+         Allows you to map project information parameters to objects (families) selected with the mouse, in order to automatically reflect the project information values ​​on all selected objects.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Transfert des valeurs d'informations de projet vers les objets (familles) sélectionnées dans la vue active.
+         Permet de mapper des paramètres d'informations de projet vers des objets (familles) sélectionnées a la souris, afin de répercuter automatiquement les valeurs des informations de projet sur tous les objets sélectionnés.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

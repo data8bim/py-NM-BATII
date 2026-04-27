@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AlertDialog.xaml
+  Boîte de message générique dans le style de l'extension NM-BATII.
+  Utilisation depuis script.py :
+      w = forms.WPFWindow(script.get_bundle_file('AlertDialog.xaml'))
+      w.Title           = u'Titre de la fenêtre'
+      w.txtMessage.Text = u'Message à afficher'
+      w.btnClose.Click += lambda s, e: setattr(w, 'DialogResult', True)
+      w.show_dialog()
+-->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Information"
+        SizeToContent="WidthAndHeight"
+        MinWidth="380"
+        MaxWidth="560"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid Margin="5">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="10"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <Border BorderBrush="DodgerBlue"
+            Grid.Row="0"
+            Grid.Column="0" Grid.ColumnSpan="3"
+            BorderThickness="1"
+            CornerRadius="3"
+            Padding="14,12"
+            Margin="5">
+      <TextBlock x:Name="txtMessage"
+                 TextWrapping="Wrap"
+                 FontSize="13"
+                 FontWeight="Medium"
+                 TextAlignment="Center"
+                 VerticalAlignment="Center"/>
+    </Border>
+
+    <Button x:Name="btnClose"
+            Content="Fermer"
+            Grid.Row="2"
+            Grid.Column="0" Grid.ColumnSpan="3"
+            HorizontalAlignment="Stretch"
+            Margin="5,0"
+            Height="30"
+            IsDefault="True"
+            IsCancel="True"/>
+  </Grid>
+</Window>

@@ -1,0 +1,16 @@
+{
+  "mappings": [
+    {
+      "source_param": "LOC - BATIMENT - Nom", 
+      "target_param": "LOC - BATIMENT - Nom"
+    }, 
+    {
+      "source_param": "LOC - BATIMENT - Code SEI", 
+      "target_param": "LOC - BATIMENT - Code SEI"
+    }, 
+    {
+      "source_param": "ANS - Nbre Etages", 
+      "target_param": "ANS - Nbre Etages"
+    }
+  ]
+}

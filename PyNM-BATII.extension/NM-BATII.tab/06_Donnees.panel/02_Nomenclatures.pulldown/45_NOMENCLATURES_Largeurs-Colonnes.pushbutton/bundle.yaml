@@ -1,0 +1,14 @@
+title:
+  en_us: "COLUMN widths"
+  fr_fr: "Largeurs COLONNES"
+
+tooltip:
+  en_us: "Configure column widths for a schedule in bulk.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Configurer en masse les largeurs de colonnes d'une nomenclature.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+         
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

@@ -1,0 +1,8 @@
+{
+  "name": "Configure.configbutton",
+  "tooltip": "Éditeur de config.json",
+  "type": "script",
+  "script": "script.py",
+  "icon": "icon.png",
+  "supportsWPF": true
+}

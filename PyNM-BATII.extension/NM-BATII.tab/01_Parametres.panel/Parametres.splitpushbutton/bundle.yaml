@@ -1,0 +1,9 @@
+title:
+  en_us: Parameters
+  fr_fr: Paramètres
+layout:
+  - 01_Parametres
+  - 02_JSON_Config
+  - 03_Recharger
+tooltip: "Paramètres du plugin"
+icon: icon.png

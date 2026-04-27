@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\00-PLANON\DEV_PYT_REP-PLANS\_pyNM-BATII_DEV\PyNM-BATII.extension\NM-BATII.tab\Traitements_donnees.panel\Nomenclatures.pulldown\11_NOMENCLATURES_Creer-Nomenclature-Base.pushbutton\script.py", line 1363, in main
+    sched = create_schedule_for(cat, ph, lbl, key, existing_names)
+  File "C:\00-PLANON\DEV_PYT_REP-PLANS\_pyNM-BATII_DEV\PyNM-BATII.extension\NM-BATII.tab\Traitements_donnees.panel\Nomenclatures.pulldown\11_NOMENCLATURES_Creer-Nomenclature-Base.pushbutton\script.py", line 257, in create_schedule_for
+    sched = ViewSchedule.CreateSchedule(doc, category.Id)
+Exception: categoryId is not a valid category for a regular schedule.
+Parameter name: categoryId

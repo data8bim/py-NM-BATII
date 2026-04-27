@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Configurer config.json"
+  Width="780" Height="660"
+  MinWidth="600" MinHeight="500"
+  ResizeMode="CanResize"
+  WindowStartupLocation="CenterScreen">
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TabControl Grid.Row="0">
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Nommages (avec sous-onglets)                           -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Nommages">
+        <TabControl Margin="5">
+
+          <!-- ─────────────────────── Sous-onglet : Fichiers ─── -->
+          <TabItem Header="Fichiers">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+              <StackPanel Margin="5">
+
+                <GroupBox Header="Positions dans le nom de fichier" Margin="0,0,0,8">
+                  <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="220"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Séparateur"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="nc_delimiteur" Margin="2,2"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Pos. code Site"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="nc_pos_site" Margin="2,2"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Pos. code Bâtiment"/>
+                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="nc_pos_bat" Margin="2,2"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Pos. code Niveau"/>
+                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="nc_pos_niv" Margin="2,2"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Pos. code Demi-niveau"/>
+                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="nc_pos_demi" Margin="2,2"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Pos. code Producteur"/>
+                    <TextBox   Grid.Row="5" Grid.Column="1" x:Name="nc_pos_prod" Margin="2,2"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,4" Text="Pos. Nom site (court)"/>
+                    <TextBox   Grid.Row="6" Grid.Column="1" x:Name="nc_pos_nom_court" Margin="2,2"/>
+                    <TextBlock Grid.Row="7" Grid.Column="0" Margin="0,4" Text="Pos. reste du nom"/>
+                    <TextBox   Grid.Row="7" Grid.Column="1" x:Name="nc_pos_rest" Margin="2,2"/>
+                  </Grid>
+                </GroupBox>
+
+                <GroupBox Header="Valeurs par défaut" Margin="0,0,0,8">
+                  <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="220"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Valeur si nul"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="nc_val_nul" Margin="2,2"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Valeur pour vrai niveau"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="nc_val_vrai_niv" Margin="2,2"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Valeur pour sans niveau"/>
+                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="nc_val_sans_niv" Margin="2,2"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Valeur si BIM 2D"/>
+                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="nc_val_bim2d" Margin="2,2"/>
+                  </Grid>
+                </GroupBox>
+
+                <GroupBox Header="Groupes nommés (Regex)" Margin="0,0,0,8">
+                  <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="220"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Groupe Site"/>
+                    <TextBox   Grid.Row="0" Grid.Column="1" x:Name="nc_grp_site" Margin="2,2"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Groupe Bâtiment"/>
+                    <TextBox   Grid.Row="1" Grid.Column="1" x:Name="nc_grp_bat" Margin="2,2"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Groupe Niveau"/>
+                    <TextBox   Grid.Row="2" Grid.Column="1" x:Name="nc_grp_niv" Margin="2,2"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Groupe Demi-niveau"/>
+                    <TextBox   Grid.Row="3" Grid.Column="1" x:Name="nc_grp_demi" Margin="2,2"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Groupe Producteur"/>
+                    <TextBox   Grid.Row="4" Grid.Column="1" x:Name="nc_grp_prod" Margin="2,2"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Groupe Nom site court"/>
+                    <TextBox   Grid.Row="5" Grid.Column="1" x:Name="nc_grp_site_court" Margin="2,2"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,4" Text="Groupe Reste du nom"/>
+                    <TextBox   Grid.Row="6" Grid.Column="1" x:Name="nc_grp_rest" Margin="2,2"/>
+                  </Grid>
+                </GroupBox>
+
+                <GroupBox Header="Regex" Margin="0,0,0,0">
+                  <StackPanel Margin="5">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                      <TextBlock Text="Utiliser Regex" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                      <CheckBox x:Name="nc_use_regex" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                      <TextBlock Text="Règle Regex" VerticalAlignment="Center" Width="220" Margin="0,0,0,0"/>
+                      <Button x:Name="btnEditRegex" Content="Editer..." Width="100"/>
+                    </StackPanel>
+                  </StackPanel>
+                </GroupBox>
+
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+
+          <!-- ─────────────────────────── Sous-onglet : Vues ─── -->
+          <TabItem Header="Vues">
+            <Grid Margin="10">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Type de vue personnalisé"/>
+              <TextBox   Grid.Row="0" Grid.Column="1" x:Name="vt_vue_type" Margin="2,2"/>
+            </Grid>
+          </TabItem>
+
+          <!-- ──────────────────────── Sous-onglet : Niveaux ─── -->
+          <TabItem Header="Niveaux">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="id. Niveau Origine"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="cn_idt_origine" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="id. Niveaux Toitures"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="cn_marq_toit" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="id. Niveaux Fondations"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="cn_marq_fondations" Margin="2,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="id. Niveaux positifs +"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="cn_idt_bat_pos" Margin="2,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="id. Niveaux négatifs  -"/>
+                <TextBox   Grid.Row="4" Grid.Column="1" x:Name="cn_idt_bat_neg" Margin="2,2"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Id. Niveau RDC ou RDC haut"/>
+                <TextBox   Grid.Row="5" Grid.Column="1" x:Name="cn_idt_rdc" Margin="2,2"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,4" Text="id. Niveau RDC bas"/>
+                <TextBox   Grid.Row="6" Grid.Column="1" x:Name="cn_idt_rdc_bas" Margin="2,2"/>
+              </Grid>
+            </ScrollViewer>
+          </TabItem>
+
+        </TabControl>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Modélisation                                           -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Modélisation">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Niveaux (Élévations et Espacement)" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Elevation RDC (m)"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="cn_eleva_rdc" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Elevation Niveau Origine (m)"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="cn_eleva_origine" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Espacement par défaut (m)"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="cn_espacement" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Liaisons et Imports DWG (réglages par défauts)" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Inclure sous-dossiers"/>
+                <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="dwg_include_sub" Margin="2,6"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Calques par défaut"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="dwg_layers" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Mode couleur par défaut"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="dwg_color_mode" Margin="2,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Unité par défaut"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="dwg_unit" Margin="2,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Placement par défaut"/>
+                <TextBox   Grid.Row="4" Grid.Column="1" x:Name="dwg_placement" Margin="2,2"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Corriger les lignes"/>
+                <CheckBox  Grid.Row="5" Grid.Column="1" x:Name="dwg_correct_lines" Margin="2,6"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,4" Text="Vue seulement"/>
+                <CheckBox  Grid.Row="6" Grid.Column="1" x:Name="dwg_view_only" Margin="2,6"/>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Nettoyage                                              -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Nettoyage">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+            <GroupBox Header="Réglages par défauts" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Imports DWG"/>
+                <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="net_dwg_imports" Margin="2,6"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Liens DWG"/>
+                <CheckBox  Grid.Row="1" Grid.Column="1" x:Name="net_dwg_liens" Margin="2,6"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Lignes"/>
+                <CheckBox  Grid.Row="2" Grid.Column="1" x:Name="net_lignes" Margin="2,6"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Textes"/>
+                <CheckBox  Grid.Row="3" Grid.Column="1" x:Name="net_texts" Margin="2,6"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Pièces et espaces"/>
+                <CheckBox  Grid.Row="4" Grid.Column="1" x:Name="net_pieces" Margin="2,6"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Zones de pochage"/>
+                <CheckBox  Grid.Row="5" Grid.Column="1" x:Name="net_zones" Margin="2,6"/>
+              </Grid>
+            </GroupBox>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Surfaces                                               -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Surfaces">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="SHON/SHOB" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Nomenclature SHON/SHOB"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_default_shon" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Colonne SHON"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="sf_col_shon" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Param. SHON"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="sf_param_shon" Margin="2,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Colonne SHOB"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="sf_col_shob" Margin="2,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Param. SHOB"/>
+                <TextBox   Grid.Row="4" Grid.Column="1" x:Name="sf_param_shob" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="SDP" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Nomenclature Surface Plancher"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_default_plancher" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Colonne Surface Plancher"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="sf_col_plancher" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Param. Surface Plancher"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="sf_param_s_plancher" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Autres" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Colonne filtre"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_col_filter" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Nomenclatures (Couleurs Titres + Colonnes)             -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Nomenclatures">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Couleurs Titres" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Tables de styles"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Saisies types"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Saisies occurrences"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,6" Text="Nomenclatures présentations"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Couleurs Colonnes" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Colonnes lecture seule"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Colonnes types"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Colonnes occurrences"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- LOG                                                     -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="LOG">
+        <Grid Margin="10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4"
+                     Text="Activer les logs des scripts"/>
+          <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="log_activer" Margin="2,6"/>
+        </Grid>
+      </TabItem>
+
+    </TabControl>
+
+    <!-- Boutons bas -->
+    <StackPanel Grid.Row="1" Orientation="Horizontal"
+                HorizontalAlignment="Right" Margin="0,8,0,0">
+      <Button x:Name="btnCancel"  Content="Annuler"      Width="90"
+              IsCancel="True" Margin="0,0,6,0"/>
+      <Button x:Name="btnSave"    Content="Enregistrer"  Width="90"
+              IsDefault="True"/>
+    </StackPanel>
+
+  </Grid>
+</Window>

@@ -1,0 +1,17 @@
+title:
+  en_us: "Create\nSCHEDULES"
+  fr_fr: "Créer\nNOMENCLATURES"
+
+tooltip:
+  en_us: "Create and configure standard schedules.
+         \nCreates multiple base schedules across all selected categories, either by duplicating an existing source schedule or by generating new schedules in empty categories to serve as a foundation.
+         \nCalculated fields and combined fields are not supported and are therefore not transferred from the source schedule to the destination schedules.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Crée et configure en masse des nomenclatures standards dans les catégories sélectionnées, par duplication d’une nomenclature source ou par création de bases dans les catégories vides.
+         \nLes champs calculés et combinés ne sont pas pris en charge.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+         
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

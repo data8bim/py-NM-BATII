@@ -1,0 +1,14 @@
+title:
+  en_us: "Color HEADERS by copy"
+  fr_fr: "Colorer ENTETES\npar copie"
+
+tooltip:
+  en_us: "Copies the header colors from a source schedule to other schedules by matching colors to parameters rather than to column positions.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Copie les couleurs d'entetes d'une nomenclature source vers d'autres en associant les couleurs aux parametres, pas aux positions.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+         
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

@@ -1,0 +1,9 @@
+title:
+  en_us: "Mapp parameters"
+  fr_fr: "Mapp paramètres"
+layout:
+  - 11_MAPP_Infos-projet-par-categories
+  - 12_MAPP_Infos-projet-par-selections
+  - -----
+  - 21_MAPP_SP-SHON-SHOB
+icon: icon.png

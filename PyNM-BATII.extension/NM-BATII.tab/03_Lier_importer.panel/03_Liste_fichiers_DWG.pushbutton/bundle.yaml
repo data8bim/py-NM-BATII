@@ -1,0 +1,16 @@
+title:
+  en_us: |
+    List
+    DWG
+  fr_fr: |
+    Liste
+    DWG
+tooltip:
+  en_us: "Lists the DWG files linked or imported into the Revit file.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Liste les fichiers DWG liés ou importés dans le fichier Revit.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

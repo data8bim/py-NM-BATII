@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Copier filtres - Sélection SOURCE"
+        Height="600" Width="600"
+        MinHeight="400" MinWidth="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+    
+    <Window.Resources>
+        <!-- Styles UNIQUEMENT pour les boutons -->
+        <Style x:Key="BoutonSelectionner" TargetType="Button" BasedOn="{StaticResource NMButtonValide}">
+            <Setter Property="Height" Value="40"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Message d'instruction -->
+        <TextBlock Grid.Row="0" 
+                   Margin="10,10,10,10"
+                   TextWrapping="Wrap"
+                   FontSize="13">
+            <Run Text="Sélectionnez la nomenclature SOURCE dont vous souhaitez copier les filtres." FontWeight="SemiBold"/>
+        </TextBlock>
+        
+        <!-- Zone de recherche -->
+        <Grid Grid.Row="1" Margin="10,0,10,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Bouton AZ (désactivé comme dans pyRevit) -->
+            <ToggleButton x:Name="btnSearchMode" 
+                          Grid.Column="0"
+                          Width="40" 
+                          Height="25"
+                          IsEnabled="False"
+                          Margin="0,0,5,0">
+                <TextBlock Text="AZ" 
+                           FontWeight="Bold"
+                           FontSize="11"/>
+            </ToggleButton>
+            
+            <!-- Zone de recherche -->
+            <TextBox x:Name="txtSearch" 
+                     Grid.Column="1"
+                     Height="25"
+                     VerticalContentAlignment="Center"/>
+        </Grid>
+        
+        <!-- Liste des nomenclatures (sélection simple avec radio buttons) -->
+        <ListBox x:Name="lstSchedules" 
+                 Grid.Row="2"
+                 Margin="10,0,10,5"
+                 SelectionMode="Single"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="0"
+                                        Padding="5,3,5,3">
+                                    <RadioButton Content="{TemplateBinding Content}"
+                                                 GroupName="SourceSchedule"
+                                                 IsChecked="{Binding IsSelected, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                                 IsHitTestVisible="False"
+                                                 Focusable="False"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#E5F3FF"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#F0F0F0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
+        
+        <!-- Bouton Sélectionner -->
+        <Button x:Name="btnOk" 
+                Grid.Row="3"
+                Content="Sélectionner" 
+                Style="{StaticResource BoutonSelectionner}"
+                Margin="10,0,10,10"
+                IsDefault="True"/>
+    </Grid>
+</Window>

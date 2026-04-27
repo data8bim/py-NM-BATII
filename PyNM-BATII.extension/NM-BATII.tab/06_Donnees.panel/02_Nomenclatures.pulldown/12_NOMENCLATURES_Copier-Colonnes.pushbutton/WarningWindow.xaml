@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Copier COLONNES - Avertissement"
+        Height="620" Width="650"
+        MinHeight="520" MinWidth="650"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style x:Key="BoutonContinuer" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#45A049"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#3D8B40"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="BoutonAnnuler" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="Background" Value="#F44336"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E53935"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#C62828"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Bandeau titre -->
+        <Grid Grid.Row="0" Background="#FFF5E6" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Viewbox Grid.Column="0" Width="40" Height="40" Margin="20,15,10,15">
+                <Canvas Width="24" Height="24">
+                    <Path Fill="#FF9800"
+                          Data="M12,2L1,21h22L12,2z M13,18h-2v-2h2V18z M13,14h-2V9h2V14z"/>
+                </Canvas>
+            </Viewbox>
+            <TextBlock Grid.Column="1"
+                       Text="Ce que ce script copie et ne copie pas"
+                       FontSize="17" FontWeight="Bold"
+                       Foreground="#E65100"
+                       VerticalAlignment="Center"
+                       Margin="0,0,20,0"/>
+        </Grid>
+
+        <!-- Contenu -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Margin="10,0,10,0">
+            <StackPanel>
+
+                <!-- Introduction -->
+                <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10">
+                    <Run Text="Ce script copie des "/>
+                    <Run Text="paramètres (colonnes)" FontWeight="Bold"/>
+                    <Run Text=" d'une nomenclature source vers des nomenclatures de destination, avec contrôle de la "/>
+                    <Run Text="position d'insertion" FontWeight="Bold"/>
+                    <Run Text=" (première, dernière, avant ou après un paramètre existant)."/>
+                </TextBlock>
+
+                <!-- CE QUI EST COPIÉ -->
+                <Border Background="#E8F5E9" BorderBrush="#4CAF50"
+                        BorderThickness="1" CornerRadius="4"
+                        Padding="10" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="✓  CE QUI EST COPIÉ AUTOMATIQUEMENT"
+                                   FontWeight="Bold" FontSize="13"
+                                   Foreground="#2E7D32" Margin="0,0,0,6"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,2">
+                            <Run Text="•  Paramètres d'occurrence (Instance)"/>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,2">
+                            <Run Text="•  Paramètres de type (ElementType)"/>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,2">
+                            <Run Text="•  Paramètres de projet (Informations sur le projet)"/>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,2">
+                            <Run Text="•  Paramètres de pièce (Room) et d'espace (Space)"/>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,2">
+                            <Run Text="•  Position dans la nomenclature cible (contrôlée par l'utilisateur)"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- CE QUI N'EST PAS COPIÉ -->
+                <Border Background="#FFEBEE" BorderBrush="#F44336"
+                        BorderThickness="2" CornerRadius="4"
+                        Padding="10" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="✗  CE QUI N'EST PAS COPIÉ"
+                                   FontWeight="Bold" FontSize="13"
+                                   Foreground="#C62828" Margin="0,0,0,6"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="12"
+                                   Foreground="#D32F2F" Margin="0,2">
+                            <Run Text="•  Paramètres calculés" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <Run Text="    L'API Revit ne permet pas de lire la formule d'un champ calculé." FontSize="11" FontStyle="Italic"/>
+                            <LineBreak/>
+                            <Run Text="    Sans formule, la recréation est impossible programmatiquement." FontSize="11" FontStyle="Italic"/>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" FontSize="12"
+                                   Foreground="#D32F2F" Margin="0,6,0,2">
+                            <Run Text="•  Paramètres combinés" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <Run Text="    (champs regroupant plusieurs paramètres en une seule colonne)" FontSize="11" FontStyle="Italic"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Raison -->
+                <Border Background="#FFF3E0" BorderBrush="#FF9800"
+                        BorderThickness="1" CornerRadius="4"
+                        Padding="12" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="⚠  Pourquoi ces limitations ?"
+                                   FontWeight="Bold" FontSize="12"
+                                   Foreground="#E65100" Margin="0,0,0,5"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="11"
+                                   Foreground="#E65100">
+                            <Run Text="L'API Revit ne fournit pas de méthodes accessibles pour copier programmatiquement les paramètres calculés et combinés."/>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run Text="Ces paramètres devront être recréés "/>
+                            <Run Text="MANUELLEMENT" FontWeight="Bold"/>
+                            <Run Text=" dans chaque nomenclature de destination via les outils de configuration de Revit."/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Note positive -->
+                <TextBlock TextWrapping="Wrap" FontSize="12"
+                           FontStyle="Italic" Foreground="#1976D2"
+                           Margin="0,0,0,4">
+                    <Run Text="💡 Malgré ces limitations, ce script copie automatiquement "/>
+                    <Run Text="la grande majorité des paramètres" FontWeight="Bold"/>
+                    <Run Text=" et les positionne précisément, ce qui représente un "/>
+                    <Run Text="gain de temps considérable" FontWeight="Bold"/>
+                    <Run Text=" !"/>
+                </TextBlock>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Boutons -->
+        <Grid Grid.Row="2" Margin="20,10,20,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnContinuer" Grid.Column="1"
+                    Content="Continuer"
+                    Style="{StaticResource BoutonContinuer}"
+                    IsDefault="True"/>
+            <Button x:Name="btnAnnuler" Grid.Column="3"
+                    Content="Annuler"
+                    Style="{StaticResource BoutonAnnuler}"/>
+        </Grid>
+    </Grid>
+</Window>

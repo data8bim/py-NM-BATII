@@ -1,0 +1,46 @@
+{
+    "builtin": "True",
+    "default_enabled": "True",
+    "type": "extension",
+    "rocket_mode_compatible": "True",
+    "name": "NM-BATII",
+    "description": "Reprise des plans en modèles BIM 2D",
+    "author": "data8bim",
+    "url": "https://github.com/d8b/nm-aaaaaa.git",
+    "website": "https://d8b.fr",
+    "image": "",
+    "templates": {
+        "author": "data8bim (d8b)",
+        "docpath": "https://www.nm-aaaaaa.fr"
+    },
+    "dependencies": [],
+	
+	"minimum_revit_version": 2025,
+
+	"tab": {
+		"id": "NM-BATII",
+		"text": "NM-BATII",
+		"panels": [
+		{
+			"id": "Configuration",
+			"text": "Configuration",
+			"order": 10
+		},
+		{
+			"id": "Depuis_fichiers",
+			"text": "Depuis fichiers",
+			"order": 20
+		},
+		{
+			"id": "Depuis_fichiers_DWG",
+			"text": "Depuis fichiers DWG",
+			"order": 30
+		},
+		{
+			"id": "TESTS",
+			"text": "TESTS",
+			"order": 99
+		}
+		]
+	}
+}

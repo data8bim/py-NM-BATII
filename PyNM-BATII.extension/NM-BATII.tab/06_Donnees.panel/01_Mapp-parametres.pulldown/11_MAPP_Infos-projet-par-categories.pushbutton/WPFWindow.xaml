@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Informations Projet -> Objets par catégories"
+        Width="860" Height="580"
+        MinWidth="680" MinHeight="440"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>  <!-- 0 : En-têtes colonnes -->
+      <RowDefinition Height="Auto"/>  <!-- 1 : Filtres / tri -->
+      <RowDefinition Height="4"/>
+      <RowDefinition Height="*"/>     <!-- 3 : Zone de mappages -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>  <!-- 5 : Groupes boutons -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>  <!-- 7 : Boutons bas -->
+    </Grid.RowDefinitions>
+
+    <!-- ═══ En-têtes colonnes ═════════════════════════════════════════════════ -->
+    <Border Grid.Row="0"
+            Background="#F4F4F4" BorderBrush="LightGray"
+            BorderThickness="1" CornerRadius="3" Padding="6,5">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="30"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="150"/>
+          <ColumnDefinition Width="32"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="Paramètre source (Informations Projet)"
+                   FontWeight="SemiBold" VerticalAlignment="Center" Margin="2,0"/>
+        <TextBlock Grid.Column="1" Text="→"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"/>
+        <TextBlock Grid.Column="2" Text="Paramètre cible (sur les objets)"
+                   FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0"/>
+        <TextBlock Grid.Column="3" Text="Catégories"
+                   FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+
+    <!-- ═══ Filtres et tri ════════════════════════════════════════════════════ -->
+    <Grid Grid.Row="1" Margin="0,4,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="30"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="150"/>
+        <ColumnDefinition Width="32"/>
+      </Grid.ColumnDefinitions>
+
+      <DockPanel Grid.Column="0">
+        <Button x:Name="btnSortSrc" DockPanel.Dock="Right"
+                Content="⇅" Width="34" Margin="3,0,0,0"
+                ToolTip="Trier les mappages par paramètre source (⇅ / A→Z / Z→A)"/>
+        <TextBox x:Name="searchSrc" Height="24" VerticalContentAlignment="Center"
+                 ToolTip="Filtrer les mappages dont le paramètre source contient ce texte"/>
+      </DockPanel>
+
+      <DockPanel Grid.Column="2">
+        <Button x:Name="btnSortTgt" DockPanel.Dock="Right"
+                Content="⇅" Width="34" Margin="3,0,4,0"
+                ToolTip="Trier les mappages par paramètre cible (⇅ / A→Z / Z→A)"/>
+        <TextBox x:Name="searchTgt" Height="24" VerticalContentAlignment="Center"
+                 Margin="4,0,0,0"
+                 ToolTip="Filtrer les mappages dont le paramètre cible contient ce texte"/>
+      </DockPanel>
+    </Grid>
+
+    <!-- ═══ Zone de mappages ══════════════════════════════════════════════════ -->
+    <ScrollViewer Grid.Row="3"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel x:Name="mappingsPanel"/>
+    </ScrollViewer>
+
+    <!-- ═══ Groupes de boutons ════════════════════════════════════════════════
+         Deux GroupBox côte à côte de même largeur :
+         [  Mappages  :  + Ajouter  |  Supprimer tous  ]  [  Configuration  :  Charger  |  Enregistrer  ]
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <Grid Grid.Row="5">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- GroupBox Mappages -->
+      <GroupBox Grid.Column="0" Header="Mappages">
+        <Grid Margin="4,4,4,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button Grid.Column="0" x:Name="btnAdd"
+                  Content="＋  Ajouter un mappage" Height="26"
+                  ToolTip="Ajouter une nouvelle règle de mappage"/>
+          <Button Grid.Column="2" x:Name="btnClearAll"
+                  Content="Supprimer tous les mappages" Height="26"
+                  ToolTip="Supprimer toutes les lignes de mappage"/>
+        </Grid>
+      </GroupBox>
+
+      <!-- GroupBox Configuration -->
+      <GroupBox Grid.Column="2" Header="Configuration">
+        <Grid Margin="4,4,4,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button Grid.Column="0" x:Name="btnLoad"
+                  Content="📂  Charger" Height="26"
+                  ToolTip="Charger un fichier de configuration JSON"/>
+          <Button Grid.Column="2" x:Name="btnSave"
+                  Content="💾  Enregistrer" Height="26"
+                  ToolTip="Enregistrer la configuration dans un fichier JSON"/>
+        </Grid>
+      </GroupBox>
+    </Grid>
+
+    <!-- ═══ Boutons bas ════════════════════════════════════════════════════════
+         Ordre : [▶ Appliquer (large, mise en avant)] [Fermer]
+         Même hauteur pour les deux.
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
+      <Button x:Name="btnApply"
+              Content="▶  Appliquer" Width="160" Height="32"
+              Style="{DynamicResource NMButtonValide}"
+              IsDefault="True" Margin="0,0,8,0"
+              ToolTip="Copier les valeurs des Informations Projet vers les paramètres des objets"/>
+      <Button x:Name="btnClose"
+              Content="Fermer" Width="90" Height="32"
+              Style="{DynamicResource NMButtonValide}"
+              IsCancel="True"/>
+    </StackPanel>
+
+  </Grid>
+</Window>

@@ -1,0 +1,15 @@
+title:
+  en_us: "SP - SHON - SHOB \n→ Levels and Project infos"
+  fr_fr: "SP - SHON - SHOB \n→ Niveaux et infos projet"
+
+tooltip:
+  en_us: "Transfer the results of regulatory surface area calculations to the levels and project information.
+         The surface area values contained in the levels are those that will be taken into account by PLANON.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Transfert les résulats des calculs de surfaces règlemantaires vers les niveaux et les informations projet.
+        Les valeurs des surfaces porté par les niveaux sont celles qui seront prise en compte par PLANON.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

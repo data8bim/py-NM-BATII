@@ -1,0 +1,12 @@
+title:
+  en_us: " Link\n x RVT"
+  fr_fr: " Lier\n x RVT"
+tooltip:
+  en_us: "Automatically link multiple RVT files.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Lier automatiquement plusieurs fichiers RVT.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

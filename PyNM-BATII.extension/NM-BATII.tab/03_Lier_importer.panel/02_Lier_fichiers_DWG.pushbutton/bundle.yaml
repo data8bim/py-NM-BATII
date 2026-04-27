@@ -1,0 +1,16 @@
+title:
+  en_us: |
+    Link DWG  
+    → Views
+  fr_fr: |
+    Lier DWG  
+    → Vues
+tooltip:
+  en_us: "Automatically links DWG files into the corresponding views.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Lie automatiquement les fichiers DWG dans les vues correspondantes.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

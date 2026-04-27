@@ -1,0 +1,12 @@
+title:
+  en_us: "Text Selection"
+  fr_fr: "Sélection Text"
+tooltip:
+  en_us: "Mass selection of all text notes in the project according to their content, color or Revit type.
+           \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Sélection en masse de toutes les notes textuelles du projet selon leur contenu, leur couleur ou leur type Revit.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

@@ -1,0 +1,12 @@
+title:
+  en_us: "Clean ✔✘"
+  fr_fr: "Nettoyer ✔✘"
+tooltip:
+  en_us: "Clear checks ✔ and ✘ text notes from the selection or active view (if no previous selection).
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Nettoyer les checks ✔ et ✘ des notes textuelles de la sélection ou de la vue active (si aucune sélection préalable).
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Créer des bases de nomenclatures"
+    Width="920" Height="680"
+    WindowStartupLocation="CenterScreen"
+    ResizeMode="CanResize">
+
+  <Window.Resources>
+    <!-- Fallbacks locaux -->
+    <SolidColorBrush x:Key="DialogBackgroundBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFF" />
+    <SolidColorBrush x:Key="PanelBorderBrush" Color="#FFDDDDDD" />
+    <SolidColorBrush x:Key="PanelTitleBrush" Color="#FF222222" />
+
+    <!-- Styles pour les boutons d'action -->
+    <Style x:Key="BoutonAction" TargetType="Button" BasedOn="{StaticResource NMButtonStandard}">
+      <Setter Property="Height" Value="30"/>
+    </Style>
+    
+    <!-- Style pour le bouton Appliquer -->
+    <Style x:Key="BoutonAppliquer" TargetType="Button" BasedOn="{StaticResource NMButtonValide}">
+      <Setter Property="Width" Value="130"/>
+      <Setter Property="Height" Value="34"/>
+    </Style>
+    
+    <!-- Style pour le bouton Annuler (aussi NMButtonValide - vert) -->
+    <Style x:Key="BoutonAnnuler" TargetType="Button" BasedOn="{StaticResource NMButtonValide}">
+      <Setter Property="Width" Value="110"/>
+      <Setter Property="Height" Value="34"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="12" Background="{DynamicResource DialogBackgroundBrush}">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="2.0*" />
+      <ColumnDefinition Width="1.6*" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- LEFT COLUMN: Categories -->
+    <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Margin="0,0,12,0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+      
+      <!-- Titre -->
+      <TextBlock Grid.Row="0" 
+                 Text="Catégories des nomenclatures à créer"
+                 FontSize="14" FontWeight="Bold" Margin="0,0,0,8" 
+                 Foreground="{DynamicResource PanelTitleBrush}" />
+      
+      <!-- Zone de recherche -->
+      <Grid Grid.Row="1" Margin="0,0,0,8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Bouton AZ (désactivé) -->
+        <ToggleButton x:Name="btnSearchMode" 
+                      Grid.Column="0"
+                      Width="40" 
+                      Height="25"
+                      IsEnabled="False"
+                      Margin="0,0,5,0">
+          <TextBlock Text="AZ" 
+                     FontWeight="Bold"
+                     FontSize="11"/>
+        </ToggleButton>
+        
+        <!-- Zone de recherche -->
+        <TextBox x:Name="txtSearchCategories" 
+                 Grid.Column="1"
+                 Height="25"
+                 VerticalContentAlignment="Center"/>
+      </Grid>
+      
+      <!-- Liste -->
+      <Border Grid.Row="2" 
+              Background="{DynamicResource PanelBackgroundBrush}" 
+              Padding="8" CornerRadius="4" 
+              BorderBrush="{DynamicResource PanelBorderBrush}" 
+              BorderThickness="1">
+        <ListBox x:Name="categories_panel" 
+                 SelectionMode="Extended" 
+                 BorderThickness="0" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+      </Border>
+
+      <!-- Boutons -->
+      <Grid Grid.Row="3" Margin="0,8,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button x:Name="btn_check_cat" Content="Tout sélectionner" 
+                Grid.Column="0" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+        <Button x:Name="btn_uncheck_cat" Content="Tout désélectionner" 
+                Grid.Column="1" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+        <Button x:Name="btn_toggle_cat" Content="Inverser" 
+                Grid.Column="2" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+      </Grid>
+    </Grid>
+
+    <!-- RIGHT COLUMN: Types et Phases -->
+    <Grid Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="1.2*"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+      
+      <!-- Types - Titre -->
+      <TextBlock Grid.Row="0" 
+                 Text="Type de nomenclatures à créer" 
+                 FontSize="13" FontWeight="Bold" Margin="0,0,0,6" 
+                 Foreground="{DynamicResource PanelTitleBrush}" />
+      
+      <!-- Types - Liste (1.2* de l'espace) -->
+      <Border Grid.Row="1" 
+              Background="{DynamicResource PanelBackgroundBrush}" 
+              Padding="8" CornerRadius="4" 
+              BorderBrush="{DynamicResource PanelBorderBrush}" 
+              BorderThickness="1">
+        <ListBox x:Name="types_panel" 
+                 SelectionMode="Extended" 
+                 BorderThickness="0" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+      </Border>
+
+      <!-- Types - Boutons -->
+      <Grid Grid.Row="2" Margin="0,8,0,12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button x:Name="btn_check_types" Content="Tout sélectionner" 
+                Grid.Column="0" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+        <Button x:Name="btn_uncheck_types" Content="Tout désélectionner" 
+                Grid.Column="1" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+        <Button x:Name="btn_toggle_types" Content="Inverser" 
+                Grid.Column="2" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+      </Grid>
+
+      <!-- Phases - Titre -->
+      <TextBlock Grid.Row="3" 
+                 Text="Phases des nomenclatures à créer" 
+                 FontSize="13" FontWeight="Bold" Margin="0,6,0,6" 
+                 Foreground="{DynamicResource PanelTitleBrush}" />
+      
+      <!-- Phases - Liste (1* de l'espace) -->
+      <Border Grid.Row="4" 
+              Background="{DynamicResource PanelBackgroundBrush}" 
+              Padding="8" CornerRadius="4" 
+              BorderBrush="{DynamicResource PanelBorderBrush}" 
+              BorderThickness="1">
+        <ListBox x:Name="phases_panel" 
+                 SelectionMode="Extended" 
+                 BorderThickness="0" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+      </Border>
+
+      <!-- Phases - Boutons -->
+      <Grid Grid.Row="5" Margin="0,8,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button x:Name="btn_check_phases" Content="Tout sélectionner" 
+                Grid.Column="0" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+        <Button x:Name="btn_uncheck_phases" Content="Tout désélectionner" 
+                Grid.Column="1" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+        <Button x:Name="btn_toggle_phases" Content="Inverser" 
+                Grid.Column="2" HorizontalAlignment="Stretch" 
+                Margin="2,0" Style="{StaticResource BoutonAction}" />
+      </Grid>
+    </Grid>
+
+    <!-- Nomenclature modèle (SOURCE) - OPTIONNEL -->
+    <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      
+      <TextBlock Grid.Column="0" 
+                 Text="Nomenclature modèle (optionnel) :" 
+                 VerticalAlignment="Center"
+                 Margin="0,0,10,0"
+                 FontSize="12"
+                 FontWeight="SemiBold"/>
+      
+      <ComboBox x:Name="combo_source" 
+                Grid.Column="1"
+                Height="30"
+                VerticalContentAlignment="Center"/>
+    </Grid>
+
+    <!-- Bottom action bar : Appliquer puis Annuler (les deux verts) -->
+    <StackPanel Grid.Row="3" Grid.ColumnSpan="2" 
+                Orientation="Horizontal" HorizontalAlignment="Right" 
+                Margin="0,12,0,0">
+      <Button x:Name="btn_ok" Content="Appliquer" 
+              Style="{StaticResource BoutonAppliquer}" 
+              Margin="0,0,8,0" IsDefault="True" />
+      <Button x:Name="btn_cancel" Content="Annuler" 
+              Style="{StaticResource BoutonAnnuler}" 
+              IsCancel="True" />
+    </StackPanel>
+  </Grid>
+</Window>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Lier fichiers Revit"
+        SizeToContent="Height"
+        Width="600"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style TargetType="Window" BasedOn="{StaticResource NMWindowStandard}" />
+        <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}" />
+        <Style TargetType="Button" BasedOn="{StaticResource NMButtonStandard}" />
+        <Style x:Key="NMButtonValideOnly" TargetType="Button" BasedOn="{StaticResource NMButtonValide}" />
+        <Style TargetType="CheckBox" BasedOn="{StaticResource NMCheckBoxStandard}" />
+        <Style TargetType="TextBox" BasedOn="{StaticResource NMTextBoxStandard}" />
+        <Style TargetType="ComboBox" BasedOn="{StaticResource NMComboBoxStandard}" />
+    </Window.Resources>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Ligne 0 : Dossier -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 1 : Chemins -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 2 : Titre Filtres -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 3 : Cadre Filtres -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 4 : Titre Fichiers -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 5 : Liste fichiers -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 6 : Boutons sélection -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 7 : Titre Positionnement -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 8 : Cadre Positionnement -->
+            <RowDefinition Height="Auto"/> <!-- Ligne 9 : Boutons finaux -->
+        </Grid.RowDefinitions>
+
+        <!-- Ligne 0 : Dossier sélectionné -->
+        <Grid Grid.Row="0" Margin="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="txtFolder" Grid.Column="0" IsReadOnly="True" Padding="0" TextAlignment="Left" TextWrapping="Wrap"/>
+            <Button x:Name="btnBrowse" Grid.Column="1" Content="Parcourir..." Width="100"/>
+        </Grid>
+
+        <!-- Ligne 1 : Choix du type de chemin -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,5">
+            <TextBlock Text="Chemins :" Width="100" VerticalAlignment="Center"/>
+            <ComboBox x:Name="cmbPathType" Width="150" SelectedIndex="0">
+                <ComboBoxItem Content="Relatif"/>
+                <ComboBoxItem Content="Absolu"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- Ligne 2 : Titre Filtres -->
+        <TextBlock Grid.Row="2" Text="Filtres :" FontWeight="Bold" Margin="5,10,5,0"/>
+
+        <!-- Ligne 3 : Cadre Filtres -->
+        <Border Grid.Row="3"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                CornerRadius="3"
+                Padding="5"
+                Margin="5,0,5,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ligne 3.1 : Filtres -->
+                <CheckBox x:Name="chkIncludeSub"
+                          Grid.Row="0"
+                          Grid.Column="0" Grid.ColumnSpan="2"
+                          HorizontalAlignment="Right"
+                          Content="Inclure les fichiers des sous-dossiers"
+                          Margin="0,5,5,5"/>
+                <CheckBox x:Name="chkExcludeBackups"
+                          Grid.Row="0"
+                          Grid.Column="2" Grid.ColumnSpan="2"
+                          HorizontalAlignment="Right"
+                          Content="Exclure les fichiers de sauvegardes"
+                          IsChecked="True"
+                          Margin="0,5,5,5"/>
+
+                <!-- Ligne 3.3 : Filtres -->
+                <TextBlock Text="Contient :" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0"/>
+                <TextBox x:Name="txtFilter" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                <TextBlock Text="Ne contient pas :" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0,0,0"/>
+                <TextBox x:Name="txtExcludeText" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </Grid>
+        </Border>
+
+        <!-- Ligne 4 : Fichiers -->
+        <TextBlock Grid.Row="4" Text="Fichiers Revit à lier :" FontWeight="Bold" Margin="5,10,5,0"/>
+
+        <!-- Ligne 5 : Liste fichiers -->
+        <Border Grid.Row="5"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                CornerRadius="3"
+                Padding="5"
+                Margin="5,0,5,0">
+            <ListBox x:Name="lstRvts"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     BorderThickness="0"
+                     Height="150">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox IsChecked="{Binding IsSelected}" ToolTip="{Binding Path}">
+                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                        </CheckBox>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <!-- Ligne 6 : Boutons sélection -->
+        <Grid Grid.Row="6" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnSelectAll" Grid.Column="0" Content="Sélectionner tout" Margin="5"/>
+            <Button x:Name="btnDeselectAll" Grid.Column="1" Content="Désélectionner tout" Margin="5"/>
+            <Button x:Name="btnInvertSelection" Grid.Column="2" Content="Inverser la sélection" Margin="5"/>
+        </Grid>
+
+        <!-- Ligne 7 : Titre Positionnement -->
+        <TextBlock Grid.Row="7" Text="Positionnement :" FontWeight="Bold" Margin="5,10,5,0"/>
+
+        <!-- Ligne 8 : Positionnement -->
+        <Border Grid.Row="8"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                CornerRadius="3"
+                Padding="5"
+                Margin="5,0,5,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ligne 8.1 : Positionnement -->
+                <ComboBox x:Name="cmbPlacement"
+                          Grid.Row="0"
+                          Grid.Column="0"
+                          Grid.ColumnSpan="2"
+                          SelectedIndex="0"
+                          Margin="5,5,15,5">
+                    <ComboBoxItem>Automatique – Emplacement partagé</ComboBoxItem>
+                    <ComboBoxItem>Automatique – Origine vers origine</ComboBoxItem>
+					<ComboBoxItem>Automatique – Point de base du projet vers point de base du projet</ComboBoxItem>
+					<ComboBoxItem>Automatique – Centre à centre</ComboBoxItem>
+                </ComboBox>
+
+                <!-- Ligne 8.2 : Verrouillage -->
+                <CheckBox x:Name="chkPinLinks" Content="Verrouiller les liens"
+                          IsChecked="True"
+                          Grid.Row="0"
+                          Grid.Column="2"
+                          Grid.ColumnSpan="2"/>
+            </Grid>
+        </Border>
+
+        <!-- Ligne 9 : Validation -->
+        <Grid Grid.Row="9">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnOk" Content="Lier"
+                    Style="{StaticResource NMButtonValideOnly}" BorderBrush="LightBlue" Grid.Column="1"/>
+            <Button x:Name="btnCancel" Content="Annuler"
+                    Style="{StaticResource NMButtonValideOnly}" Grid.Column="2"/>
+        </Grid>
+    </Grid>
+</Window>

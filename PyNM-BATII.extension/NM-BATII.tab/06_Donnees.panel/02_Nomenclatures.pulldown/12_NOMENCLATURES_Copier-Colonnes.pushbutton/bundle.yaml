@@ -1,0 +1,14 @@
+title:
+  en_us: "Copy\nCOLUMNS"
+  fr_fr: "Copier\nCOLONNES"
+
+tooltip:
+  en_us: "Copies the columns from a source schedule to the selected destination schedules, with the option to reorder the columns.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Copie les colonnes d’une nomenclature source vers les nomenclatures de destination sélectionnées, avec possibilité de réorganiser l’ordre des colonnes.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+         
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'

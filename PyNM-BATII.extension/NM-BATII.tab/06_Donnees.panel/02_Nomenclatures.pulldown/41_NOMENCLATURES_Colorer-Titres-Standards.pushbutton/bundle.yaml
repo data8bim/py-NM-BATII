@@ -1,0 +1,14 @@
+title:
+  en_us: "Color TITLES"
+  fr_fr: "Colorer TITRES"
+
+tooltip:
+  en_us: "Apply color to schedule titles according to the Nantes Métropole standards.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+  fr_fr: "Coloriser les titres des nomenclatures en suivant les standards Nantes Metropole.
+         \n\nVersion: 3.3
+         \nDate: 2026-04-17"
+         
+help_url: '{{docpath}}po0lCldSGmk'
+author: '{{author}}'
