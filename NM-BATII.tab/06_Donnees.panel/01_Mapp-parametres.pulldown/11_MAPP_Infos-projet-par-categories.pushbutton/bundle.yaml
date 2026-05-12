@@ -1,14 +1,13 @@
 title:
-  en_us: "Project Infos → Objects by category"
-  fr_fr: "Infos Projet → Objets par catégories"
+  en_us: "Project Infos\n→ Objects by category"
+  fr_fr: "Infos Projet\n→ Objets par catégories"
 
 tooltip:
   en_us: "Transfer project information values to selected object categories. Allows mapping project information parameters to object (family) categories.
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
-  fr_fr: "Transfert des valeurs d'informations de projet vers les catégories d'objets sélectionnées. Permet de mapper les paramètres d'informations de projet vers des catégories d'objets (familles).
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
+         \n\nVersion: {{version}}-[{{date}}.002]"
          
-help_url: '{{docpath}}po0lCldSGmk'
+  fr_fr: "Transfert des valeurs d'informations de projet vers les catégories d'objets sélectionnées. Permet de mapper les paramètres d'informations de projet vers des catégories d'objets (familles).
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
 author: '{{author}}'

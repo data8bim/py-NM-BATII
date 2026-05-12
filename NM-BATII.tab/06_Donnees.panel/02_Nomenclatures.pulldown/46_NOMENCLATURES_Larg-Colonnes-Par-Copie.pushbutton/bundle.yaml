@@ -1,0 +1,15 @@
+title:
+  en_us: "COLUMN widths\nby copy"
+  fr_fr: "Largeurs COLONNES\npar copie"
+
+tooltip:
+  en_us: "Copy the column widths from a source schedule to a selection of destination schedules.
+         \nWidths are applied to columns with the same name in each target schedule.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Copier les largeurs de colonnes d'une nomenclature source vers une sélection de nomenclatures de destination.
+         \nLes largeurs sont copiées vers les colonnes de même nom présentes dans chaque nomenclature cible.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

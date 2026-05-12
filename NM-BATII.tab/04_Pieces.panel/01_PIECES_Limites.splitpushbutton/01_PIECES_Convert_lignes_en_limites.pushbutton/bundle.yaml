@@ -1,0 +1,12 @@
+title:
+  en_us: "Lines →\nRoom limits"
+  fr_fr: "Lignes →\nSép. Pièces"
+tooltip:
+  en_us: "Convert (Copy) selected lines to room separators.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Convertie (Recopie) les lignes sélectionnées en séparateurs de pièces.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

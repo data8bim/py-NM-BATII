@@ -1,0 +1,6 @@
+title:
+  en_us: L → Room limits
+  fr_fr: L → Sép. Pièces
+layout:
+  - 01_PIECES_Convert_lignes_en_limites
+  - 02_PIECES_Detect

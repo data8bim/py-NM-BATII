@@ -6,18 +6,18 @@ layout:
   - 12_NOMENCLATURES_Copier-Colonnes
   - -----
   - 21_NOMENCLATURES_Filtres-Par-Copie
-  - 22_NOMENCLATURES_Tri-Regroupement-Par-Copie
+  - 22_NOMENCLATURES_Tri-Regroup-Par-Copie
   - 23_NOMENCLATURE_Mise-En-Forme-Par-Copie
   - -----
-  - 33_NOMENCLATURES_Grouper-Entetes-Par-Copie
+  - 33_NOMENCLATURES_Group-Entetes-Par-Copie
   - -----
-  - 41_NOMENCLATURES_Colorer-Titres-Standards
-  - 42_NOMENCLATURES_Colorer-Entetes-Standards
-  - 43_NOMENCLATURES_Colorer-Entetes-Par-Copie
-  - 44_NOMENCLATURES_Colorer-Regroupements-Entetes-Par-Copie
+  - 41_NOMENCLATURES_Color-Titres-Standards
+  - 42_NOMENCLATURES_Color-Entetes-Standards
+  - 43_NOMENCLATURES_Color-Entetes-Par-Copie
+  - 44_NOMENCLATURES_Color-Group-Entetes-Par-Copie
   - -----
-  - 45_NOMENCLATURES_Largeurs-Colonnes
-  - 46_NOMENCLATURES_Largeurs-Colonnes-Par-Copie
+  - 45_NOMENCLATURES_Larg-Colonnes
+  - 46_NOMENCLATURES_Larg-Colonnes-Par-Copie
   - -----
-  - 47_NOMENCLATURES_Supprimer-Colonnes
+  - 47_NOMENCLATURES_Supp-Colonnes
 icon: icon.png

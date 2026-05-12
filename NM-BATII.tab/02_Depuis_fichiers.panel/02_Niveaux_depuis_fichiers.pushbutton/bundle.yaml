@@ -2,8 +2,15 @@ title:
   en_us: "levels\nfrom files"
   fr_fr: "Niveaux\ndepuis fichiers"
 tooltip:
-  en_us: "Create the building levels based on the file names in a directory.\nFile names must comply with the Nantes Métropole file naming rules.\nThe created levels comply with the Nantes Métropole level identification standard.\n\nVersion: 3.3\nDate: 2026-04-17"
-  fr_fr: "Créé les niveaux du bâtiment sur la base des noms des fichiers d'un répertoire.\nLes noms des fichiers doivent respecter les règles de nommages des fichiers de Nantes Métropole.\nLes niveaux créés respectent le standard d'identification des niveaux du référentiel Nantes Métropole.\n\nVersion: 3.3\nDate: 2026-04-17"
+  en_us: "Create the building levels based on the file names in a directory.
+         File names must comply with the Nantes Métropole file naming rules.
+         The created levels comply with the Nantes Métropole level identification standard.
+         \n\nVersion: {{version}}-[{{date}}.002]"
          
-help_url: '{{docpath}}po0lCldSGmk'
+  fr_fr: "Créé les niveaux du bâtiment sur la base des noms des fichiers d'un répertoire.
+         Les noms des fichiers doivent respecter les règles de nommages des fichiers de Nantes Métropole.
+         Les niveaux créés respectent le standard d'identification des niveaux du référentiel Nantes Métropole.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
 author: '{{author}}'

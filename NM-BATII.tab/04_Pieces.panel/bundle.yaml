@@ -1,0 +1,6 @@
+title:
+  en_us: "Rooms"
+  fr_fr: "Pièces"
+layout:
+  - 01_PIECES_Limites
+  - 02_PIECES_Notes-Textes

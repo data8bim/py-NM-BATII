@@ -1,0 +1,13 @@
+title:
+  en_us: "Color HEADERS"
+  fr_fr: "Colorer ENTETES"
+
+tooltip:
+  en_us: "Apply color to schedule headers according to the Nantes Métropole standards.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Coloriser les entetes des nomenclatures en suivant les standards Nantes Metropole.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

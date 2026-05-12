@@ -3,6 +3,7 @@
 # Script original pyRevit (GPL-3.0)
 # Auteur : Ehsan Iran-Nejad
 # Copié tel quel pour accès rapide dans un onglet personnalisé
+# Aucune modification n’a été apportée.
 
 """Reload pyRevit into new session."""
 

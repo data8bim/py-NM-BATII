@@ -7,10 +7,9 @@ title:
     Config
 tooltip:
   en_us: "JSON of the Extension Function Settings.
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
+         \n\nVersion: {{version}}-[{{date}}.002]"
   fr_fr: "JSON des Paramètres des fonctions de l'extension.
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
-help_url: '{{docpath}}po0lCldSGmk'
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
 author: '{{author}}'

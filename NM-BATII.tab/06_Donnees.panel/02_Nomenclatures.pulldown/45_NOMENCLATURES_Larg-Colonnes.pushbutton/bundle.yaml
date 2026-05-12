@@ -1,0 +1,13 @@
+title:
+  en_us: "COLUMN widths"
+  fr_fr: "Largeurs COLONNES"
+
+tooltip:
+  en_us: "Configure column widths for a schedule in bulk.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Configurer en masse les largeurs de colonnes d'une nomenclature.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

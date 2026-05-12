@@ -5,12 +5,11 @@ title:
 tooltip:
   en_us: "Copies the field formatting from a source schedule to the selected destination schedules.
          \n\nWARNING: Does not copy column widths, calculated parameters, or combined parameters.
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
   fr_fr: "Copie les mises en forme des champs d'une nomenclature source vers les nomenclatures de destinations sélectionnées.
          \n\nATTENTION : Ne copie pas les largeurs de colonnes, ni les paramètres calculés, ni paramètres combinés.
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
-         
-help_url: '{{docpath}}po0lCldSGmk'
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
 author: '{{author}}'

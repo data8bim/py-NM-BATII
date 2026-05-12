@@ -3,10 +3,10 @@ title:
   fr_fr: "Gestion\ndes liens"
 tooltip:
   en_us: "Opens the Revit Link Management dialog box.
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
   fr_fr: "Ouvre la boite de dialogue Revit de gestion des liens.
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
-help_url: '{{docpath}}po0lCldSGmk'
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
 author: '{{author}}'

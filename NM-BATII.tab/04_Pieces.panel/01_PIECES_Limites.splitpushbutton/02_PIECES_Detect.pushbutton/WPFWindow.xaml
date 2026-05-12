@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Détection de Pièces depuis DWG"
+        Width="540" Height="660"
+        MinWidth="440" MinHeight="520"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False">
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Sélection DWG ═══════════════════════════════════════════════════ -->
+    <GroupBox Grid.Row="0" Header="Fichier DWG à analyser">
+      <StackPanel Margin="4,4,4,6">
+        <ComboBox x:Name="cmb_dwg" Height="26"/>
+        <TextBlock x:Name="lbl_aucun_dwg"
+                   Text="Aucun DWG importé ou lié dans la vue active."
+                   Foreground="OrangeRed" FontStyle="Italic"
+                   Visibility="Collapsed" Margin="0,4,0,0"/>
+      </StackPanel>
+    </GroupBox>
+
+    <!-- ═══ Paramètres de détection ══════════════════════════════════════════ -->
+    <GroupBox Grid.Row="2" Header="Paramètres de détection">
+      <Grid Margin="4,4,4,6">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="8"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="6"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="6"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Column="0" Grid.Row="0">
+          <TextBlock Text="Résolution (m/pixel)" FontSize="11" Foreground="#555"/>
+          <TextBox x:Name="txt_resolution" Height="24" Margin="0,2,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="0">
+          <TextBlock Text="Dilatation (pixels)" FontSize="11" Foreground="#555"/>
+          <TextBox x:Name="txt_dilatation" Height="24" Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="0" Grid.Row="2">
+          <TextBlock Text="Aire min pièce (m²)" FontSize="11" Foreground="#555"/>
+          <TextBox x:Name="txt_aire_min" Height="24" Margin="0,2,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="2">
+          <TextBlock Text="Tolérance simplif. (m)" FontSize="11" Foreground="#555"/>
+          <TextBox x:Name="txt_simplifier" Height="24" Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="0" Grid.Row="4">
+          <TextBlock Text="Marge DWG (m)" FontSize="11" Foreground="#555"/>
+          <TextBox x:Name="txt_marge" Height="24" Margin="0,2,0,0"/>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="4">
+          <TextBlock Text="Grille max (pixels)" FontSize="11" Foreground="#555"/>
+          <TextBox x:Name="txt_grille_max" Height="24" Margin="0,2,0,0"/>
+        </StackPanel>
+      </Grid>
+    </GroupBox>
+
+    <!-- ═══ Filtrage des calques ══════════════════════════════════════════════ -->
+    <GroupBox Grid.Row="4" Header="Filtrage des calques DWG (un mot-clé par ligne)">
+      <Grid Margin="4,4,4,6">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="8"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Column="0">
+          <TextBlock DockPanel.Dock="Top" Text="Mots-clés INCLURE"
+                     FontSize="11" Foreground="#2A7A2A" FontWeight="SemiBold"
+                     Margin="0,0,0,2"/>
+          <TextBox x:Name="txt_inclure"
+                   AcceptsReturn="True" TextWrapping="Wrap"
+                   VerticalScrollBarVisibility="Auto"
+                   FontFamily="Consolas" FontSize="11"/>
+        </DockPanel>
+        <DockPanel Grid.Column="2">
+          <TextBlock DockPanel.Dock="Top" Text="Mots-clés EXCLURE"
+                     FontSize="11" Foreground="#C33333" FontWeight="SemiBold"
+                     Margin="0,0,0,2"/>
+          <TextBox x:Name="txt_exclure"
+                   AcceptsReturn="True" TextWrapping="Wrap"
+                   VerticalScrollBarVisibility="Auto"
+                   FontFamily="Consolas" FontSize="11"/>
+        </DockPanel>
+      </Grid>
+    </GroupBox>
+
+    <!-- ═══ Boutons d'action ══════════════════════════════════════════════════ -->
+	<!-- ═══ Configuration + Boutons d'action en bas ══════════════════════════ -->
+	<Grid Grid.Row="6">
+	  <Grid.RowDefinitions>
+		<RowDefinition Height="Auto"/>  <!-- GroupBox Configuration -->
+		<RowDefinition Height="6"/>
+		<RowDefinition Height="Auto"/>  <!-- Ligne des 3 boutons -->
+	  </Grid.RowDefinitions>
+
+	  <!-- GroupBox Configuration en bas -->
+	  <GroupBox Grid.Row="0" Header="Configuration spécifique">
+		<Grid Margin="4,4,4,6">
+		  <Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="4"/>
+			<ColumnDefinition Width="*"/>
+		  </Grid.ColumnDefinitions>
+
+		  <Button Grid.Column="0" x:Name="btn_charger"
+				  Content="📂  Charger" Height="26"
+				  ToolTip="Charger une configuration .NM-RoomLim"/>
+
+		  <Button Grid.Column="2" x:Name="btn_enregistrer"
+				  Content="💾  Enregistrer" Height="26"
+				  ToolTip="Enregistrer la configuration .NM-RoomLim"/>
+		</Grid>
+	  </GroupBox>
+
+	  <!-- Ligne des 3 boutons alignés à droite -->
+	  <Grid Grid.Row="2">
+		<Grid.ColumnDefinitions>
+		  <ColumnDefinition Width="*"/>       <!-- pousse à droite -->
+		  <ColumnDefinition Width="Auto"/>     <!-- Une piece (clic) -->
+		  <ColumnDefinition Width="6"/>
+		  <ColumnDefinition Width="Auto"/>     <!-- Toutes les pieces -->
+		  <ColumnDefinition Width="6"/>
+		  <ColumnDefinition Width="Auto"/>     <!-- Fermer -->
+		</Grid.ColumnDefinitions>
+
+		<Button Grid.Column="1" x:Name="btn_une_piece"
+				Content="Une piece (clic)" Height="32"
+				Style="{DynamicResource NMButtonValide}"
+				ToolTip="Cliquer dans une pièce pour la détecter seule"/>
+
+		<Button Grid.Column="3" x:Name="btn_toutes"
+				Content="Toutes les pieces" Height="32"
+				Style="{DynamicResource NMButtonValide}"
+				ToolTip="Détecter et créer toutes les pièces fermées du DWG"/>
+
+		<Button Grid.Column="5" x:Name="btn_fermer"
+				Content="Fermer" Height="32"
+				Style="{DynamicResource NMButtonValide}"
+				IsCancel="True"
+				ToolTip="Fermer la palette"/>
+	  </Grid>
+	</Grid>
+  </Grid>
+</Window>

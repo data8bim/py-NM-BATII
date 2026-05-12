@@ -1,0 +1,12 @@
+title:
+  en_us: "List\nDWG"
+  fr_fr: "Liste\nDWG"
+tooltip:
+  en_us: "Lists the DWG files linked or imported into the Revit file.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Liste les fichiers DWG liés ou importés dans le fichier Revit.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

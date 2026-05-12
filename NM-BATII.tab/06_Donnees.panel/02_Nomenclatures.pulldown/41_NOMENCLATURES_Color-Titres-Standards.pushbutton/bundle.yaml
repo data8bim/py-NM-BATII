@@ -1,0 +1,13 @@
+title:
+  en_us: "Color TITLES"
+  fr_fr: "Colorer TITRES"
+
+tooltip:
+  en_us: "Apply color to schedule titles according to the Nantes Métropole standards.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Coloriser les titres des nomenclatures en suivant les standards Nantes Metropole.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

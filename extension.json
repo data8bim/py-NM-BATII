@@ -1,20 +1,58 @@
 {
-    "builtin": "False",
+    "builtin": "True",
     "default_enabled": "True",
     "type": "extension",
     "rocket_mode_compatible": "True",
     "name": "NM-BATII",
     "description": "Reprise des plans en modèles BIM 2D",
-    "author": "data8bim",
-    "url": "https://github.com/data8bim/py-NM-BATII.git",
+    "author": "data8bim (d8b)",
+    "url": "https://github.com/data8bim/py-NM-BATII",
     "website": "https://d8b.fr",
     "image": "",
     "templates": {
-        "author": "data8bim (d8b)",
-        "docpath": "https://d8b.fr"
+        "version": "0.09.0",
+		"author": "data8bim (d8b)",
+        "docpath": "https://d8b.fr/",
+		"date": "26-05-07"
     },
     "dependencies": [],
 	
-	"minimum_revit_version": 2025
+	"minimum_revit_version": 2025,
 
+	"tab": {
+		"id": "NM-BATII",
+		"text": "NM-BATII",
+		"panels": [
+		{
+			"id": "Parameters",
+			"text": "Parameters",
+			"order": 10
+		},
+		{
+			"id": "From files",
+			"text": "From files",
+			"order": 20
+		},
+		{
+			"id": "Link or import",
+			"text": "Link or import",
+			"order": 30
+		},
+		{
+			"id": "Rooms",
+			"text": "Rooms",
+			"order": 40
+		},
+		{
+			"id": "Clean",
+			"text": "Clean",
+			"order": 50
+		},
+		{
+			"id": "Data processing",
+			"text": "Data processing",
+			"order": 60
+		}
+		]
+	}
 }

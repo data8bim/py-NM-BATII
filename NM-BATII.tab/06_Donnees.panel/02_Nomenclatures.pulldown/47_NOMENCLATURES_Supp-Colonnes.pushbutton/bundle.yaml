@@ -1,0 +1,15 @@
+title:
+  en_us: "Delete PARAMETERS"
+  fr_fr: "Supprimer PARAMÈTRES"
+
+tooltip:
+  en_us: "Select parameters (columns) from a source schedule and delete them in bulk across a selection of destination schedules.
+         \nOnly parameters that actually exist in each target schedule are deleted. Missing parameters are ignored without error.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Sélectionner des paramètres (colonnes) d'une nomenclature source et les supprimer en masse sur une sélection de nomenclatures de destination.
+         \nSeuls les paramètres effectivement présents dans chaque nomenclature cible sont supprimés. Les paramètres absents sont ignorés sans erreur.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

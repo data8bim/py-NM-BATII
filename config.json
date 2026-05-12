@@ -1,64 +1,142 @@
 {
-  "creer_niveaux": {
-    "Idt_Niv_Batiment_pos": "R+", 
-    "Idt_Niv_Batiment_neg": "R-", 
-    "espacement_default": 5.0, 
-    "Idt_Niv_Origine": "O+00_0", 
-    "Idt_Niv_Rdc": "R+00_0", 
-    "Marq_Niv_Toit": "T+", 
-    "Eleva_Niv_Rdc": 0.0, 
-    "Idt_Niv_Rdc_bas": "R-00_0", 
-    "Eleva_Niv_Origine": -1.0, 
-    "Marq_Niv_Fondations": "F-"
-  }, 
-  "nomenclatures_colonnes_couleurs": {
-    "colonnes_types": [
-      232, 
-      113, 
-      134
-    ], 
-    "colonnes_readonly": [
-      192, 
-      192, 
-      192
-    ], 
-    "colonnes_occurrences": [
-      255, 
-      255, 
-      151
-    ]
-  }, 
-  "nettoyage": {
-    "dwg_liens": false, 
-    "lignes": true, 
-    "zones_pochages": true, 
-    "texts": true, 
-    "pieces_espaces": true, 
-    "dwg_imports": true
-  }, 
+  "activer_logs_scripts": false, 
   "nm_convention_noms_fichiers": {
+    "delimiteur": "_",
+    "valeur_si_bim_2d": "_BIM-2D",
+    "valeur_si_nul": "X", 
+    "group_site": "site", 
+    "pos_code_site": 0, 
+    "group_batiment": "batiment", 
     "pos_code_bat": 1, 
     "group_niveau": "niveau", 
     "valeur_pour_vrai_niveau": "0", 
     "valeur_pour_sans_niveau": "RXXX", 
     "pos_code_niv": 2, 
     "pos_code_demi_niv": 3, 
-    "group_batiment": "batiment", 
     "group_demi": "demi", 
-    "delimiteur": "_", 
-    "pos_nom_site_court": 6, 
-    "group_site": "site", 
-    "pos_code_site": 0, 
-    "group_site_nom_court": "nom_site_court", 
-    "valeur_si_bim_2d": "_BIM-2D", 
-    "utiliser_regex": false, 
-    "group_prod": "prod", 
-    "group_rest_nom": "rest_nom", 
+    "group_prod": "prod",
     "pos_code_prod": 4, 
+    "group_site_nom_court": "nom_site_court",	
+    "pos_nom_site_court": 6, 
+    "group_rest_nom": "rest_nom", 
     "pos_rest_nom": 7, 
-    "valeur_si_nul": "X", 
+    "utiliser_regex": false, 
     "regle_regex": "^(?P<site>[^_]+)_(?P<batiment>[^_]+)_(?P<niveau>R[+-]\\d{2})_(?P<demi>[0-9])_(?P<prod>[^_]+)_(?P<nom_site_court>[^_]+)_(?P<rest_nom>.+)$"
   }, 
+  "creer_niveaux": {
+    "espacement_default": 5.0,
+    "Eleva_Niv_Origine": -1.0, 
+    "Eleva_Niv_Rdc": 0.0,
+    "Idt_Niv_Origine": "O+00_0",
+    "Marq_Niv_Fondations": "F-",
+    "Idt_Niv_Rdc_bas": "R-00_0", 
+     "Idt_Niv_Rdc": "R+00_0", 
+    "Marq_Niv_Toit": "T+", 	
+    "Idt_Niv_Batiment_pos": "R+", 
+    "Idt_Niv_Batiment_neg": "R-"
+  }, 
+  "vue_type_personnalise": "Importé", 
+  "fichiers_lies_dwg": {
+    "include_sub": false, 
+    "layers_default": "Visibles", 
+    "unit_default": "Mètres", 
+    "correct_lines": true, 
+    "placement_default": "shared", 
+    "color_mode_default": "conserver",
+    "view_only": true
+  }, 
+  "detect_pieces_dwg": {
+    "resolution_m": 0.10000000000000001, 
+    "dilatation_pix": 2, 
+    "aire_min_m2": 2.0,
+    "simplifier_tol_m": 0.10000000000000001, 
+    "marge_m": 1.0, 
+    "grille_max_px": 5000000, 
+    "mots_cles_inclure": [
+      "mur", 
+      "cloison", 
+      "poteau", 
+      "refend", 
+      "porteur", 
+      "facade", 
+      "paroi", 
+      "voile", 
+      "gaine", 
+      "separation", 
+      "limite", 
+      "contour", 
+      "porte", 
+      "menuiserie", 
+      "ouverture", 
+      "fenetre", 
+      "chassis", 
+      "wall", 
+      "partition", 
+      "column", 
+      "col", 
+      "struct", 
+      "door", 
+      "opening", 
+      "glazing", 
+      "curtain", 
+      "window", 
+      "a-wall", 
+      "a-glaz", 
+      "a-door", 
+      "a-cols", 
+      "s-wall"
+    ], 
+    "mots_cles_exclure": [
+      "meuble", 
+      "mobilier", 
+      "equipement", 
+      "cuisine", 
+      "rangement", 
+      "placard", 
+      "sanitaire", 
+      "plomberie", 
+      "wc", 
+      "baignoire", 
+      "douche", 
+      "evier", 
+      "lavabo", 
+      "robinet", 
+      "electrique", 
+      "electricite", 
+      "reseau", 
+      "gaine_elec", 
+      "cote", 
+      "texte", 
+      "annotation", 
+      "repere", 
+      "legende", 
+      "hachure", 
+      "hatch", 
+      "dim", 
+      "vegetal", 
+      "arbre", 
+      "parking"
+    ]
+  },
+  "nettoyage": {
+    "dwg_imports": true,
+    "dwg_liens": false, 
+    "lignes": true, 
+    "texts": true, 
+    "pieces_espaces": true, 
+    "zones_pochages": true
+  }, 
+  "surface": {
+    "col_filter": "Nom", 
+    "default_shon_schedule": "SURFACES - SHON/SHOB", 
+    "param_shon": "ANS - SURFACE - SHON",
+    "col_shon": "SHON",	
+    "param_shob": "ANS - SURFACE - SHOB", 	
+    "col_shob": "SHOB", 
+    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
+    "param_s_plancher": "ANS - SURFACE - S Plancher", 
+    "col_plancher": "Surface Plancher - SP"
+  },
   "nomenclatures_titres_couleurs": {
     "tables_de_styles": [
       192, 
@@ -81,26 +159,21 @@
       134
     ]
   }, 
-  "vue_type_personnalise": "Importé", 
-  "activer_logs_scripts": false, 
-  "fichiers_lies_dwg": {
-    "view_only": true, 
-    "include_sub": false, 
-    "layers_default": "Visibles", 
-    "unit_default": "Mètres", 
-    "correct_lines": true, 
-    "placement_default": "shared", 
-    "color_mode_default": "conserver"
-  }, 
-  "surface": {
-    "col_shob": "SHOB", 
-    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
-    "param_shon": "ANS - SURFACE - SHON", 
-    "param_s_plancher": "ANS - SURFACE - S Plancher", 
-    "col_filter": "Nom", 
-    "param_shob": "ANS - SURFACE - SHOB", 
-    "col_plancher": "Surface Plancher - SP", 
-    "default_shon_schedule": "SURFACES - SHON/SHOB", 
-    "col_shon": "SHON"
+  "nomenclatures_colonnes_couleurs": {
+    "colonnes_types": [
+      232, 
+      113, 
+      134
+    ], 
+    "colonnes_readonly": [
+      192, 
+      192, 
+      192
+    ], 
+    "colonnes_occurrences": [
+      255, 
+      255, 
+      151
+    ]
   }
 }

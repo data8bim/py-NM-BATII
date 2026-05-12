@@ -3,10 +3,10 @@ title:
   fr_fr: "Nettoyer\nvues"
 tooltip:
   en_us: "Cleans up in one pass: imported DWGs, linked DWGs, lines, text notes, unnamed rooms and spaces, and hatches from exploded DWGs (sketch areas).
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
   fr_fr: "Nettoie en une passe : DWG importés, DWG liés, lignes, notes textuelles, pièces et espaces non nommés et hachures issues des dwg décomposés (zones de pochages).
-         \n\nVersion: 3.3
-         \nDate: 2026-04-17"
-help_url: '{{docpath}}po0lCldSGmk'
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
 author: '{{author}}'

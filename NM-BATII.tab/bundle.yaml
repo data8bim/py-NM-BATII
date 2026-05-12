@@ -2,7 +2,6 @@ layout:
   - 01_Parametres
   - 02_Depuis_fichiers
   - 03_Lier_importer
-  - 04_Lignes_et_textes
+  - 04_Pieces
   - 05_Nettoyer
   - 06_Donnees
-  - DEV
