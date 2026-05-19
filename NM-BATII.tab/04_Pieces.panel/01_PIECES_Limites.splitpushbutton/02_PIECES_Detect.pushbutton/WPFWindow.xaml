@@ -39,36 +39,60 @@
           <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>  <!-- Row 0 : sélecteur de préset -->
+          <RowDefinition Height="8"/>     <!-- Row 1 : séparateur -->
+          <RowDefinition Height="Auto"/>  <!-- Row 2 : résolution + dilatation -->
           <RowDefinition Height="6"/>
-          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>  <!-- Row 4 : aire_min + simplifier -->
           <RowDefinition Height="6"/>
-          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>  <!-- Row 6 : marge + grille_max -->
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="0" Grid.Row="0">
+        <!-- ── Sélecteur de niveau de qualité ─────────────────────────────── -->
+        <!-- Les réglages sont stockés dans config.json → "detect_pieces_dwg" → "presets_qualite". -->
+        <!-- Éditer ce fichier pour ajouter de nouveaux niveaux de qualité.    -->
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0">
+          <TextBlock Text="Niveau de qualité de détection" FontSize="11" Foreground="#555"/>
+          <!--
+            PopupAnimation="None" sur le Popup interne du ComboBox supprime l'animation
+            WPF de fermeture du dropdown (~150 ms). Cela rend la mise à jour des champs
+            perceptible immédiatement après le clic, sans délai visuel.
+          -->
+          <ComboBox x:Name="cmb_preset" Height="26" Margin="0,2,0,0"
+                    ToolTip="Sélectionner un niveau prédéfini (config.json › detect_pieces_dwg › presets_qualite).&#x0a;Les valeurs ci-dessous sont mises à jour automatiquement.&#x0a;Vous pouvez ajouter vos propres niveaux en éditant config.json manuellement.">
+            <ComboBox.Resources>
+              <!-- Désactive l'animation slide/fade du popup de liste déroulante. -->
+              <Style TargetType="{x:Type Popup}">
+                <Setter Property="PopupAnimation" Value="None"/>
+              </Style>
+            </ComboBox.Resources>
+          </ComboBox>
+        </StackPanel>
+
+        <!-- ── Paramètres numériques ────────────────────────────────────────── -->
+        <StackPanel Grid.Column="0" Grid.Row="2">
           <TextBlock Text="Résolution (m/pixel)" FontSize="11" Foreground="#555"/>
           <TextBox x:Name="txt_resolution" Height="24" Margin="0,2,0,0"/>
         </StackPanel>
-        <StackPanel Grid.Column="2" Grid.Row="0">
+        <StackPanel Grid.Column="2" Grid.Row="2">
           <TextBlock Text="Dilatation (pixels)" FontSize="11" Foreground="#555"/>
           <TextBox x:Name="txt_dilatation" Height="24" Margin="0,2,0,0"/>
         </StackPanel>
 
-        <StackPanel Grid.Column="0" Grid.Row="2">
+        <StackPanel Grid.Column="0" Grid.Row="4">
           <TextBlock Text="Aire min pièce (m²)" FontSize="11" Foreground="#555"/>
           <TextBox x:Name="txt_aire_min" Height="24" Margin="0,2,0,0"/>
         </StackPanel>
-        <StackPanel Grid.Column="2" Grid.Row="2">
+        <StackPanel Grid.Column="2" Grid.Row="4">
           <TextBlock Text="Tolérance simplif. (m)" FontSize="11" Foreground="#555"/>
           <TextBox x:Name="txt_simplifier" Height="24" Margin="0,2,0,0"/>
         </StackPanel>
 
-        <StackPanel Grid.Column="0" Grid.Row="4">
+        <StackPanel Grid.Column="0" Grid.Row="6">
           <TextBlock Text="Marge DWG (m)" FontSize="11" Foreground="#555"/>
           <TextBox x:Name="txt_marge" Height="24" Margin="0,2,0,0"/>
         </StackPanel>
-        <StackPanel Grid.Column="2" Grid.Row="4">
+        <StackPanel Grid.Column="2" Grid.Row="6">
           <TextBlock Text="Grille max (pixels)" FontSize="11" Foreground="#555"/>
           <TextBox x:Name="txt_grille_max" Height="24" Margin="0,2,0,0"/>
         </StackPanel>
@@ -76,32 +100,18 @@
     </GroupBox>
 
     <!-- ═══ Filtrage des calques ══════════════════════════════════════════════ -->
-    <GroupBox Grid.Row="4" Header="Filtrage des calques DWG (un mot-clé par ligne)">
-      <Grid Margin="4,4,4,6">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="8"/>
-          <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <DockPanel Grid.Column="0">
-          <TextBlock DockPanel.Dock="Top" Text="Mots-clés INCLURE"
-                     FontSize="11" Foreground="#2A7A2A" FontWeight="SemiBold"
-                     Margin="0,0,0,2"/>
-          <TextBox x:Name="txt_inclure"
-                   AcceptsReturn="True" TextWrapping="Wrap"
-                   VerticalScrollBarVisibility="Auto"
-                   FontFamily="Consolas" FontSize="11"/>
-        </DockPanel>
-        <DockPanel Grid.Column="2">
-          <TextBlock DockPanel.Dock="Top" Text="Mots-clés EXCLURE"
-                     FontSize="11" Foreground="#C33333" FontWeight="SemiBold"
-                     Margin="0,0,0,2"/>
-          <TextBox x:Name="txt_exclure"
-                   AcceptsReturn="True" TextWrapping="Wrap"
-                   VerticalScrollBarVisibility="Auto"
-                   FontFamily="Consolas" FontSize="11"/>
-        </DockPanel>
-      </Grid>
+    <!-- Seuls les calques VISIBLES dans la vue active sont traités.           -->
+    <!-- Les calques dont le nom contient un mot-clé ci-dessous sont ignorés. -->
+    <GroupBox Grid.Row="4" Header="Calques DWG ignorés — Mots-clés EXCLURE (un par ligne)">
+      <DockPanel Margin="4,4,4,6">
+        <TextBlock DockPanel.Dock="Top"
+                   Text="Calques visibles mais à exclure du traitement (sanitaires, mobilier, cotation…)"
+                   FontSize="10" Foreground="#888" Margin="0,0,0,4"/>
+        <TextBox x:Name="txt_exclure"
+                 AcceptsReturn="True" TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 FontFamily="Consolas" FontSize="11"/>
+      </DockPanel>
     </GroupBox>
 
     <!-- ═══ Boutons d'action ══════════════════════════════════════════════════ -->

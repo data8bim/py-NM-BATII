@@ -15,11 +15,10 @@
 # limitations under the License.
 
 
-#__title__ = "Nettoyer ✔✘"
-#__doc__ = """Nettoyer les checks ✔ et ✘
-#Description : Nettoyer les checks ✔ et ✘ des notes textuelles de la sélection ou de la vue active (si aucune sélection préalable).
+#__title__ = "Réinitialiser ✔✘"
+#__doc__ = """Réinitialiser les checks ✔ et ✘
+#Description : Réinitialiser les checks ✔ et ✘ des notes textuelles de la sélection ou de la vue active (si aucune sélection préalable).
 
-#Version : 3.3 — 2026-04-17
 #Auteur : data8bim (d8b)
 #"""
 

@@ -1,91 +1,148 @@
 {
-  "activer_logs_scripts": false, 
-  "nm_convention_noms_fichiers": {
-    "delimiteur": "_",
-    "valeur_si_bim_2d": "_BIM-2D",
-    "valeur_si_nul": "X", 
-    "group_site": "site", 
-    "pos_code_site": 0, 
-    "group_batiment": "batiment", 
-    "pos_code_bat": 1, 
-    "group_niveau": "niveau", 
-    "valeur_pour_vrai_niveau": "0", 
-    "valeur_pour_sans_niveau": "RXXX", 
-    "pos_code_niv": 2, 
-    "pos_code_demi_niv": 3, 
-    "group_demi": "demi", 
-    "group_prod": "prod",
-    "pos_code_prod": 4, 
-    "group_site_nom_court": "nom_site_court",	
-    "pos_nom_site_court": 6, 
-    "group_rest_nom": "rest_nom", 
-    "pos_rest_nom": 7, 
-    "utiliser_regex": false, 
-    "regle_regex": "^(?P<site>[^_]+)_(?P<batiment>[^_]+)_(?P<niveau>R[+-]\\d{2})_(?P<demi>[0-9])_(?P<prod>[^_]+)_(?P<nom_site_court>[^_]+)_(?P<rest_nom>.+)$"
-  }, 
-  "creer_niveaux": {
-    "espacement_default": 5.0,
-    "Eleva_Niv_Origine": -1.0, 
-    "Eleva_Niv_Rdc": 0.0,
-    "Idt_Niv_Origine": "O+00_0",
-    "Marq_Niv_Fondations": "F-",
-    "Idt_Niv_Rdc_bas": "R-00_0", 
-     "Idt_Niv_Rdc": "R+00_0", 
-    "Marq_Niv_Toit": "T+", 	
-    "Idt_Niv_Batiment_pos": "R+", 
-    "Idt_Niv_Batiment_neg": "R-"
-  }, 
-  "vue_type_personnalise": "Importé", 
   "fichiers_lies_dwg": {
-    "include_sub": false, 
-    "layers_default": "Visibles", 
     "unit_default": "Mètres", 
-    "correct_lines": true, 
     "placement_default": "shared", 
-    "color_mode_default": "conserver",
+    "include_sub": false, 
+    "color_mode_default": "conserver", 
+    "correct_lines": true, 
+    "layers_default": "Visibles", 
     "view_only": true
   }, 
-  "detect_pieces_dwg": {
-    "resolution_m": 0.10000000000000001, 
-    "dilatation_pix": 2, 
-    "aire_min_m2": 2.0,
-    "simplifier_tol_m": 0.10000000000000001, 
-    "marge_m": 1.0, 
-    "grille_max_px": 5000000, 
-    "mots_cles_inclure": [
-      "mur", 
-      "cloison", 
-      "poteau", 
-      "refend", 
-      "porteur", 
-      "facade", 
-      "paroi", 
-      "voile", 
-      "gaine", 
-      "separation", 
-      "limite", 
-      "contour", 
-      "porte", 
-      "menuiserie", 
-      "ouverture", 
-      "fenetre", 
-      "chassis", 
-      "wall", 
-      "partition", 
-      "column", 
-      "col", 
-      "struct", 
-      "door", 
-      "opening", 
-      "glazing", 
-      "curtain", 
-      "window", 
-      "a-wall", 
-      "a-glaz", 
-      "a-door", 
-      "a-cols", 
-      "s-wall"
+  "activer_logs_scripts": false, 
+  "nm_convention_noms_fichiers": {
+    "group_prod": "prod", 
+    "group_batiment": "batiment", 
+    "delimiteur": "_", 
+    "group_site_nom_court": "nom_site_court", 
+    "pos_nom_site_court": 6, 
+    "group_niveau": "niveau", 
+    "pos_code_niv": 2, 
+    "group_rest_nom": "rest_nom", 
+    "valeur_pour_vrai_niveau": "0", 
+    "valeur_pour_sans_niveau": "RXXX", 
+    "utiliser_regex": false, 
+    "pos_code_site": 0, 
+    "group_demi": "demi", 
+    "valeur_si_nul": "X", 
+    "pos_code_bat": 1, 
+    "regle_regex": "^(?P<site>[^_]+)_(?P<batiment>[^_]+)_(?P<niveau>R[+-]\\d{2})_(?P<demi>[0-9])_(?P<prod>[^_]+)_(?P<nom_site_court>[^_]+)_(?P<rest_nom>.+)$", 
+    "pos_code_demi_niv": 3, 
+    "pos_rest_nom": 7, 
+    "group_site": "site", 
+    "valeur_si_bim_2d": "_BIM-2D", 
+    "pos_code_prod": 4
+  }, 
+  "nomenclatures_titres_couleurs": {
+    "saisies_types": [
+      232, 
+      113, 
+      134
     ], 
+    "saisies_occurrences": [
+      255, 
+      255, 
+      151
+    ], 
+    "tables_de_styles": [
+      192, 
+      192, 
+      192
+    ], 
+    "nomenclatures_presentations": [
+      241, 
+      141, 
+      0
+    ]
+  }, 
+  "nomenclatures_colonnes_couleurs": {
+    "colonnes_occurrences": [
+      255, 
+      255, 
+      151
+    ], 
+    "colonnes_types": [
+      232, 
+      113, 
+      134
+    ], 
+    "colonnes_readonly": [
+      192, 
+      192, 
+      192
+    ]
+  }, 
+  "surface": {
+    "col_shob": "SHOB", 
+    "col_plancher": "Surface Plancher - SP", 
+    "param_s_plancher": "ANS - SURFACE - S Plancher", 
+    "param_shon": "ANS - SURFACE - SHON", 
+    "col_shon": "SHON", 
+    "param_shob": "ANS - SURFACE - SHOB", 
+    "col_filter": "Nom", 
+    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
+    "default_shon_schedule": "SURFACES - SHON/SHOB"
+  }, 
+  "nettoyage": {
+    "texts": true, 
+    "dwg_imports": true, 
+    "pieces_espaces": true, 
+    "dwg_liens": false, 
+    "zones_pochages": true, 
+    "lignes": true
+  }, 
+  "creer_niveaux": {
+    "Marq_Niv_Toit": "T+", 
+    "Idt_Niv_Rdc": "R+00_0", 
+    "Eleva_Niv_Origine": -1.0, 
+    "Marq_Niv_Fondations": "F-", 
+    "Idt_Niv_Origine": "O+00_0", 
+    "Eleva_Niv_Rdc": 0.0, 
+    "Idt_Niv_Batiment_neg": "R-", 
+    "espacement_default": 5.0, 
+    "Idt_Niv_Rdc_bas": "R-00_0", 
+    "Idt_Niv_Batiment_pos": "R+"
+  }, 
+  "detect_pieces_dwg": {
+    "marge_m": 1.0, 
+    "dilatation_pix": 2, 
+    "aire_min_m2": 2.0, 
+    "simplifier_tol_m": 0.10000000000000001, 
+    "presets_qualite": [
+      {
+        "description": "Résolution grossière, forte dilatation. Convient aux DWG dégradés ou très chargés.", 
+        "marge_m": 1.5, 
+        "dilatation_pix": 4, 
+        "aire_min_m2": 3.0, 
+        "nom": "Rapide — DWG très sale (grosse maille, beaucoup de micro-gaps)", 
+        "simplifier_tol_m": 0.20000000000000001, 
+        "seuil_long_m": 0.29999999999999999, 
+        "grille_max_px": 3000000, 
+        "resolution_m": 0.20000000000000001
+      }, 
+      {
+        "description": "Réglages équilibrés, adaptés à la majorité des DWG de plans architecturaux.", 
+        "marge_m": 1.0, 
+        "dilatation_pix": 2, 
+        "aire_min_m2": 2.0, 
+        "nom": "Standard — DWG courant (réglages par défaut)", 
+        "simplifier_tol_m": 0.10000000000000001, 
+        "seuil_long_m": 0.20000000000000001, 
+        "grille_max_px": 5000000, 
+        "resolution_m": 0.10000000000000001
+      }, 
+      {
+        "description": "Haute résolution pour les DWG bien dessinés sans micro-gaps. Plus lent.", 
+        "marge_m": 0.5, 
+        "dilatation_pix": 1, 
+        "aire_min_m2": 1.0, 
+        "nom": "Précis — DWG propre (fine maille, peu de micro-gaps)", 
+        "simplifier_tol_m": 0.050000000000000003, 
+        "seuil_long_m": 0.080000000000000002, 
+        "grille_max_px": 10000000, 
+        "resolution_m": 0.050000000000000003
+      }
+    ], 
+    "resolution_m": 0.10000000000000001, 
     "mots_cles_exclure": [
       "meuble", 
       "mobilier", 
@@ -116,64 +173,8 @@
       "vegetal", 
       "arbre", 
       "parking"
-    ]
-  },
-  "nettoyage": {
-    "dwg_imports": true,
-    "dwg_liens": false, 
-    "lignes": true, 
-    "texts": true, 
-    "pieces_espaces": true, 
-    "zones_pochages": true
-  }, 
-  "surface": {
-    "col_filter": "Nom", 
-    "default_shon_schedule": "SURFACES - SHON/SHOB", 
-    "param_shon": "ANS - SURFACE - SHON",
-    "col_shon": "SHON",	
-    "param_shob": "ANS - SURFACE - SHOB", 	
-    "col_shob": "SHOB", 
-    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
-    "param_s_plancher": "ANS - SURFACE - S Plancher", 
-    "col_plancher": "Surface Plancher - SP"
-  },
-  "nomenclatures_titres_couleurs": {
-    "tables_de_styles": [
-      192, 
-      192, 
-      192
     ], 
-    "nomenclatures_presentations": [
-      241, 
-      141, 
-      0
-    ], 
-    "saisies_occurrences": [
-      255, 
-      255, 
-      151
-    ], 
-    "saisies_types": [
-      232, 
-      113, 
-      134
-    ]
-  }, 
-  "nomenclatures_colonnes_couleurs": {
-    "colonnes_types": [
-      232, 
-      113, 
-      134
-    ], 
-    "colonnes_readonly": [
-      192, 
-      192, 
-      192
-    ], 
-    "colonnes_occurrences": [
-      255, 
-      255, 
-      151
-    ]
-  }
+    "grille_max_px": 5000000
+  },  
+  "vue_type_personnalise": "Importé"
 }

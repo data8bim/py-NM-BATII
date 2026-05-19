@@ -102,34 +102,13 @@ SIMPLIFIER_TOL_M = 0.10
 # Marge autour du DWG pour garantir le flood fill extérieur (mètres)
 MARGE_M = 1.0
 
-# Couches DWG à utiliser comme murs — liste vide = toutes les couches
-# Exemple : COUCHES_MURS = ["A-WALL", "MURS", "Wall"]
-# Si COUCHES_MURS est vide, le script propose une détection automatique par mots-clés.
-COUCHES_MURS = []
-
-# Mots-clés INCLUS : couches dont le nom contient un de ces termes sont
-# considérées comme des limites de pièces (murs, cloisons, menuiseries…).
+# Mots-clés EXCLUS : les calques dont le nom contient un de ces termes sont
+# ignorés du traitement, même s'ils sont visibles dans la vue.
 # Comparaison insensible à la casse et aux accents.
-# Étendre selon les conventions DWG du projet.
-MOTS_CLES_INCLURE = [
-    # Français — structure et séparations
-    #"mur", "cloison", "poteau", "refend", "porteur", "facade", "paroi",
-    #"voile", "gaine", "separation", "limite", "contour",
-    # Français — menuiseries (servent de limite de pièce)
-    #"porte", "menuiserie", "ouverture", "fenetre", "chassis",
-    # Anglais — AIA / NCS / AutoCAD standard
-    #"wall", "partition", "column", "col", "struct",
-    "door", "opening", "glazing", "curtain", "window",
-    # Préfixes AutoCAD courants
-    #"a-wall", "a-glaz", "a-door", "a-cols", "s-wall",
-]
-
-# Mots-clés EXCLUS : couches dont le nom contient un de ces termes sont
-# ignorées même si elles matchent un mot-clé INCLUS.
-# Permet d'éviter les faux positifs (mobilier, sanitaires, annotations…).
+# Tous les autres calques VISIBLES dans la vue active sont traités.
 MOTS_CLES_EXCLURE = [
     # Mobilier et équipements
-    "meuble", "mobilier", "mobilier", "equipement", "cuisine",
+    "meuble", "mobilier", "equipement", "cuisine",
     "rangement", "placard",
     # Sanitaires et fluides
     "sanitaire", "plomberie", "wc", "baignoire", "douche",
@@ -143,12 +122,15 @@ MOTS_CLES_EXCLURE = [
     "vegetal", "arbre", "parking",
 ]
 
-# Si True : filtre automatique INCLURE/EXCLURE appliqué sans dialogue.
-# Si False : dialogue de confirmation affiché (l'utilisateur peut ajuster).
-FILTRAGE_COUCHES_AUTO = True
-
 # Taille maximale de grille autorisée (pixels total)
 GRILLE_MAX_PX = 5000000
+
+# Longueur minimale (mètres) des courbes DWG retenues par construire_carte_pieces_par_courbe.
+# Les hachures DWG (lignes courtes ≈ épaisseur de mur, 5–20 cm) sont rejetées,
+# ce qui réduit fortement le volume traité (592 k → ~20-50 k courbes) et
+# élimine les éléments Revit parasites qui déclenchent la "Jonction automatique" O(n²).
+# Régler à 0 pour désactiver (toutes les courbes conservées).
+SEUIL_LONG_M = 0.20
 
 # ===========================================================================
 # CONSTANTES INTERNES
@@ -177,7 +159,7 @@ def m_en_pied(v):
 # EXTRACTION GÉOMÉTRIE DWG
 # ===========================================================================
 
-def extraire_courbes_dwg(instance, vue, couches_actives=None, couches_exclues=None):
+def extraire_courbes_dwg(instance, vue, couches_actives=None, couches_exclues=None, cats_masquees=None):
     """
     Extrait toutes les courbes d'un ImportInstance DWG en coordonnées monde.
 
@@ -187,16 +169,18 @@ def extraire_courbes_dwg(instance, vue, couches_actives=None, couches_exclues=No
     - On utilise GetSymbolGeometry() + composition explicite des DB.Transform
       pour éviter le double-transform des appels GetInstanceGeometry() récursifs.
     - NOTE : GetSymbolGeometry() ignore options.View → la visibilité des calques
-      doit être filtrée via couches_exclues (blacklist), pas via les options Revit.
+      doit être filtrée via couches_exclues (blacklist) + cats_masquees (fallback
+      BYBLOCK), pas via les options Revit.
 
-    couches_actives : whitelist de noms de couches (None/[] = tout accepter hors blacklist).
-    couches_exclues : blacklist de noms (toujours rejetés, priorité absolue).
+    couches_actives : set d'int (GraphicsStyleId) — whitelist (None = tout accepter).
+    couches_exclues : set d'int (GraphicsStyleId) — blacklist BYLAYER.
+    cats_masquees   : set d'int (Category.Id) — blacklist pour objets BYBLOCK/explicite.
     Retourne une liste de DB.Curve en coordonnées monde (pieds Revit).
     """
     options = DB.Options()
     options.ComputeReferences = False
-    options.IncludeNonVisibleObjects = False
-    options.View = vue   # ← indispensable : ancre la géométrie dans l'espace monde de la vue
+    options.IncludeNonVisibleObjects = True   # GetSymbolGeometry ignore View de toute façon
+    options.View = vue   # ancre la géométrie dans l'espace monde de la vue
 
     courbes = []
     try:
@@ -207,15 +191,12 @@ def extraire_courbes_dwg(instance, vue, couches_actives=None, couches_exclues=No
         for obj in geom_elem:
             try:
                 if isinstance(obj, DB.GeometryInstance):
-                    # Premier niveau = GeometryInstance du bloc DWG racine.
-                    # obj.Transform est la matrice d'insertion du DWG dans Revit
-                    # (position, rotation, échelle). C'est l'unique source de vérité.
                     sym = obj.GetSymbolGeometry()
                     if sym is not None:
-                        _extraire_sym(sym, courbes, obj.Transform, couches_actives, couches_exclues)
+                        _extraire_sym(sym, courbes, obj.Transform,
+                                      couches_actives, couches_exclues, cats_masquees)
                 elif isinstance(obj, DB.Curve):
-                    # Courbes au niveau racine (rare pour les ImportInstance)
-                    if _couche_autorisee(obj, couches_actives, couches_exclues):
+                    if _couche_autorisee(obj, couches_actives, couches_exclues, cats_masquees):
                         courbes.append(obj)
             except Exception:
                 pass
@@ -226,7 +207,8 @@ def extraire_courbes_dwg(instance, vue, couches_actives=None, couches_exclues=No
     return courbes
 
 
-def _extraire_sym(geom_elem, courbes, transform_vers_monde, couches_actives, couches_exclues=None):
+def _extraire_sym(geom_elem, courbes, transform_vers_monde,
+                  couches_actives, couches_exclues=None, cats_masquees=None):
     """
     Parcourt récursivement la géométrie SYMBOLIQUE (coordonnées locales).
     transform_vers_monde : DB.Transform qui convertit les coords locales → monde.
@@ -235,8 +217,9 @@ def _extraire_sym(geom_elem, courbes, transform_vers_monde, couches_actives, cou
       nouveau_transform = transform_vers_monde * obj.Transform
       (applique d'abord le transform local du bloc, puis le transform vers monde)
 
-    couches_actives : whitelist de noms de couches (None/[] = tout accepter hors blacklist).
-    couches_exclues : blacklist de noms de couches (toujours rejetées, priorité absolue).
+    couches_actives : set d'int (GraphicsStyleId) — whitelist.
+    couches_exclues : set d'int (GraphicsStyleId) — blacklist BYLAYER.
+    cats_masquees   : set d'int (Category.Id) — blacklist BYBLOCK/explicite.
     """
     if geom_elem is None:
         return
@@ -244,27 +227,24 @@ def _extraire_sym(geom_elem, courbes, transform_vers_monde, couches_actives, cou
     for obj in geom_elem:
         try:
             if isinstance(obj, DB.GeometryInstance):
-                # Composer le transform : local_bloc → local_parent → monde
                 try:
                     t_compose = transform_vers_monde * obj.Transform
                 except Exception:
-                    # Fallback si la multiplication échoue (rare)
                     t_compose = transform_vers_monde
                 sym = obj.GetSymbolGeometry()
                 if sym is not None:
-                    _extraire_sym(sym, courbes, t_compose, couches_actives, couches_exclues)
+                    _extraire_sym(sym, courbes, t_compose,
+                                  couches_actives, couches_exclues, cats_masquees)
 
             elif isinstance(obj, DB.Curve):
-                if _couche_autorisee(obj, couches_actives, couches_exclues):
+                if _couche_autorisee(obj, couches_actives, couches_exclues, cats_masquees):
                     try:
-                        # Transformer la courbe locale → coordonnées monde
                         courbes.append(obj.CreateTransformed(transform_vers_monde))
                     except Exception:
                         courbes.append(obj)
 
             elif hasattr(obj, 'GetCoordinates'):
-                # PolyLine — décomposer en segments et transformer point par point
-                if _couche_autorisee(obj, couches_actives, couches_exclues):
+                if _couche_autorisee(obj, couches_actives, couches_exclues, cats_masquees):
                     try:
                         pts = list(obj.GetCoordinates())
                         for i in range(len(pts) - 1):
@@ -281,31 +261,73 @@ def _extraire_sym(geom_elem, courbes, transform_vers_monde, couches_actives, cou
             pass
 
 
-def _couche_autorisee(obj, couches_actives=None, couches_exclues=None):
+# Cache {GraphicsStyleId.IntegerValue → Category.Id.IntegerValue}.
+# Rempli à la demande durant l'extraction ; évite d'appeler doc.GetElement()
+# pour chaque courbe (seuls les IDs non encore vus entraînent un appel API).
+# Doit être vidé au début de chaque pipeline (voir _lancer_pipeline).
+_cache_gs_a_cat = {}
+
+
+def _resoudre_cat_id(gs_int_id):
+    """
+    Résout le Category.Id.IntegerValue d'un GraphicsStyle donné par son IntegerValue.
+    Utilise _cache_gs_a_cat pour ne pas répéter doc.GetElement() à chaque courbe.
+    Retourne None si impossible.
+    """
+    if gs_int_id in _cache_gs_a_cat:
+        return _cache_gs_a_cat[gs_int_id]
+    val = None
+    try:
+        gs = doc.GetElement(DB.ElementId(gs_int_id))
+        if gs is not None and hasattr(gs, 'GraphicsStyleCategory'):
+            cat = gs.GraphicsStyleCategory
+            if cat is not None:
+                val = cat.Id.IntegerValue
+    except Exception:
+        pass
+    _cache_gs_a_cat[gs_int_id] = val
+    return val
+
+
+def _couche_autorisee(obj, couches_actives=None, couches_exclues=None, cats_masquees=None):
     """
     Retourne True si l'objet appartient aux couches autorisées.
 
     couches_actives : set d'int (GraphicsStyleId.IntegerValue) — whitelist.
                       Vide/None = tout accepter (sauf couches_exclues).
     couches_exclues : set d'int (GraphicsStyleId.IntegerValue) — blacklist.
-                      Priorité absolue : ces IDs sont TOUJOURS rejetés.
-                      Contient les calques EXCLURE + calques masqués dans la vue.
-
-    Comparaison par identifiant entier (IntegerValue) — aucun appel doc.GetElement()
-    pendant l'extraction, aucune comparaison de chaînes, aucun problème d'encodage.
+                      Priorité absolue. Couvre les objets BYLAYER (style = calque).
+    cats_masquees   : set d'int (Category.Id.IntegerValue) des calques masqués.
+                      Fallback pour les objets BYBLOCK ou à style explicite dont
+                      GraphicsStyleId ne correspond pas à l'ID de la sous-catégorie
+                      mais dont GraphicsStyle.GraphicsStyleCategory pointe bien
+                      vers la sous-catégorie du calque.
     """
     try:
-        int_id = obj.GraphicsStyleId.IntegerValue
+        gid = obj.GraphicsStyleId
+        if gid is None:
+            return True
+        int_id = gid.IntegerValue
         # -1 = ElementId.InvalidElementId → objet sans couche identifiable → accepter
         if int_id < 0:
             return True
-        # 1. Blacklist prioritaire (calques exclus + masqués)
+
+        # 1. Vérification rapide par ID de style (objets BYLAYER)
         if couches_exclues and int_id in couches_exclues:
             return False
-        # 2. Whitelist : si définie, n'accepter que ces couches
+
+        # 2. Fallback pour objets BYBLOCK / couleur explicite :
+        #    résoudre la Category via le GraphicsStyle element
+        if cats_masquees:
+            cat_id = _resoudre_cat_id(int_id)
+            if cat_id is not None and cat_id in cats_masquees:
+                return False
+
+        # 3. Whitelist : si définie, n'accepter que ces couches
         if couches_actives:
             return int_id in couches_actives
-        # 3. Pas de whitelist → accepter tout (blacklist déjà vérifiée)
+
+        # 4. Pas de whitelist → accepter tout (blacklists déjà vérifiées)
         return True
     except Exception:
         return True  # en cas d'erreur, ne pas bloquer
@@ -834,15 +856,22 @@ def scanner_couches_dwg(instance, vue=None):
 
     Un calque DWG est représenté dans Revit comme une SOUS-CATEGORIE de la
     catégorie principale de l'import (instance.Category.SubCategories).
-    C'est la source officielle et fiable des calques DWG dans l'API Revit.
 
-    Pour chaque calque (sous-catégorie), on récupère son GraphicsStyle de
-    projection. C'est cet ID (GraphicsStyle.Id) qui est stocké dans
-    obj.GraphicsStyleId sur chaque objet géométrique du DWG.
+    Retourne un dict trié :
+      {nom_calque: (gs_ref, subcat, ids_gs)}
+        gs_ref  : GraphicsStyle de référence (pour le nom, toujours non-None)
+        subcat  : Category de la sous-catégorie (pour le test de visibilité)
+        ids_gs  : set d'ints (GraphicsStyleId.IntegerValue) de ce calque
+                  → inclut les styles PROJECTION ET CUT.
 
-    Retourne un dict trié {nom_calque: GraphicsStyle}.
+    Pourquoi stocker les deux styles :
+      Revit assigne à chaque objet géométrique un GraphicsStyleId qui peut être
+      le style Projection OU Cut selon son positionnement relatif au plan de coupe
+      de la vue. Pour les DWG plan importés dans une vue de niveau, les deux cas
+      peuvent se produire. Stocker les deux IDs garantit que _couche_autorisee()
+      reconnaît l'objet quel que soit le style utilisé.
     """
-    couches = {}
+    couches = {}   # {nom: (gs_ref, subcat, ids_gs)}
 
     # --- Méthode principale : sous-catégories de l'import (= calques DWG) ---
     try:
@@ -851,10 +880,17 @@ def scanner_couches_dwg(instance, vue=None):
             for subcat in cat_import.SubCategories:
                 try:
                     nom = subcat.Name
-                    # Le GraphicsStyle de projection correspond à obj.GraphicsStyleId
-                    gs = subcat.GetGraphicsStyle(DB.GraphicsStyleType.Projection)
-                    if gs and nom not in couches:
-                        couches[nom] = gs
+                    gs_proj = subcat.GetGraphicsStyle(DB.GraphicsStyleType.Projection)
+                    gs_cut  = subcat.GetGraphicsStyle(DB.GraphicsStyleType.Cut)
+                    gs_ref  = gs_proj or gs_cut
+                    if gs_ref is None or nom in couches:
+                        continue
+                    ids_gs = set()
+                    if gs_proj is not None:
+                        ids_gs.add(gs_proj.Id.IntegerValue)
+                    if gs_cut is not None:
+                        ids_gs.add(gs_cut.Id.IntegerValue)
+                    couches[nom] = (gs_ref, subcat, ids_gs)
                 except Exception:
                     pass
     except Exception as e:
@@ -864,6 +900,8 @@ def scanner_couches_dwg(instance, vue=None):
         return dict(sorted(couches.items()))
 
     # --- Fallback : scan géométrique (si SubCategories ne fonctionne pas) ---
+    # Dans le fallback, on n'a pas accès à la subcat directement → on stocke None.
+    # Les IDs sont lus directement depuis les objets géométriques → toujours corrects.
     _log("*Fallback : scan géométrique des calques...*")
     options = DB.Options()
     options.ComputeReferences = False
@@ -880,8 +918,16 @@ def scanner_couches_dwg(instance, vue=None):
                     gid = obj.GraphicsStyleId
                     if gid and gid != DB.ElementId.InvalidElementId:
                         gs = doc.GetElement(gid)
-                        if gs and gs.Name not in couches:
-                            couches[gs.Name] = gs
+                        if gs:
+                            try:
+                                sub_cat = gs.GraphicsStyleCategory
+                            except Exception:
+                                sub_cat = None
+                            nom_gs = gs.Name
+                            if nom_gs not in couches:
+                                couches[nom_gs] = (gs, sub_cat, {gid.IntegerValue})
+                            else:
+                                couches[nom_gs][2].add(gid.IntegerValue)
             except Exception:
                 pass
 
@@ -898,8 +944,17 @@ def scanner_couches_dwg(instance, vue=None):
                         gid = obj.GraphicsStyleId
                         if gid and gid != DB.ElementId.InvalidElementId:
                             gs = doc.GetElement(gid)
-                            if gs and gs.Name not in couches:
-                                couches[gs.Name] = gs
+                            if gs:
+                                try:
+                                    sub_cat = gs.GraphicsStyleCategory
+                                except Exception:
+                                    sub_cat = None
+                                nom_gs = gs.Name
+                                if nom_gs not in couches:
+                                    couches[nom_gs] = (gs, sub_cat, {gid.IntegerValue})
+                                else:
+                                    # Ajouter l'ID supplémentaire (Projection ou Cut)
+                                    couches[nom_gs][2].add(gid.IntegerValue)
                 except Exception:
                     pass
     except Exception as e:
@@ -924,180 +979,100 @@ def _normaliser_chaine(s):
     return s
 
 
-def filtrer_couches_par_mots_cles(noms_couches):
-    """
-    Retourne les noms de couches servant de limites de pièces.
-
-    Logique en deux passes :
-    1. INCLURE : la couche doit contenir au moins un terme de MOTS_CLES_INCLURE.
-    2. EXCLURE : la couche est rejetée si elle contient un terme de MOTS_CLES_EXCLURE,
-       même si elle passait le filtre INCLURE (ex : "porte_sanitaire" → exclue).
-
-    Comparaison insensible à la casse et aux accents (via _normaliser_chaine).
-    """
-    inclure_normes = [_normaliser_chaine(m) for m in MOTS_CLES_INCLURE]
-    exclure_normes = [_normaliser_chaine(m) for m in MOTS_CLES_EXCLURE]
-
-    pertinentes = []
-    for nom in noms_couches:
-        nom_norm = _normaliser_chaine(nom)
-
-        # 1. Vérifier qu'au moins un mot-clé INCLURE correspond
-        inclus = any(motcle in nom_norm for motcle in inclure_normes)
-        if not inclus:
-            continue
-
-        # 2. Vérifier qu'aucun mot-clé EXCLURE ne correspond
-        exclu = any(motcle in nom_norm for motcle in exclure_normes)
-        if exclu:
-            continue
-
-        pertinentes.append(nom)
-
-    return pertinentes
 
 
 def choisir_couches_limites(instance, vue):
     """
-    Détermine les couches DWG à utiliser pour la détection des murs.
+    Construit la blacklist des calques DWG à ignorer dans le traitement.
 
-    Retourne : tuple (ids_actives, ids_exclues)
-      - ids_actives : set d'int (GraphicsStyleId.IntegerValue) — whitelist.
-                      Vide = tout accepter sauf ids_exclues.
-      - ids_exclues : set d'int (GraphicsStyleId.IntegerValue) — blacklist.
-                      Contient les calques EXCLURE + calques masqués dans la vue.
-                      Priorité absolue — appliqués même si ids_actives est vide.
+    Règles (par ordre de priorité) :
+      1. Calque masqué dans la vue active → ignoré (blacklist).
+      2. Nom contient un terme de MOTS_CLES_EXCLURE → ignoré (blacklist).
+      3. Tous les autres calques visibles → traités.
 
-    La comparaison pendant l'extraction se fait par entier (IntegerValue),
-    sans appel doc.GetElement() ni comparaison de chaînes → fiable et rapide.
+    Retourne : tuple (couches_actives, ids_exclues, cats_masquees)
+      - couches_actives : set() toujours vide (pas de whitelist).
+      - ids_exclues : set d'ints (GraphicsStyleId.IntegerValue Projection+Cut)
+        des calques masqués/exclus. Filtre les objets BYLAYER.
+      - cats_masquees : set d'ints (Category.Id.IntegerValue) des calques masqués
+        uniquement. Filtre les objets BYBLOCK/style explicite via
+        _couche_autorisee fallback → _resoudre_cat_id().
+
+    Détection de visibilité :
+      - subcat.get_Visible(vue) : méthode principale.
+      - vue.GetCategoryHidden(subcat.Id) : double vérification indépendante.
+      Les deux sont testés séparément pour couvrir les variantes de comportement
+      selon la version Revit et le type d'import DWG.
     """
-    if COUCHES_MURS:
-        _log("**Couches murs (config)** : {}".format(
-            ", ".join(["`{}`".format(c) for c in COUCHES_MURS])))
-        # En mode COUCHES_MURS, pas d'ID disponible ici — on revient à la whitelist par nom.
-        # On résout les noms en IDs via un scan rapide.
-        toutes = scanner_couches_dwg(instance)
-        ids_actives = set()
-        for nom, gs in toutes.items():
-            if nom in COUCHES_MURS:
-                ids_actives.add(gs.Id.IntegerValue)
-        return (ids_actives, set())
-
     _log("**Scan des couches DWG...**")
     toutes = scanner_couches_dwg(instance)
 
     if not toutes:
-        _log("*Aucune couche identifiée — toutes les couches utilisées.*")
-        return (set(), set())
+        _log("*Aucune couche identifiée — toutes les couches traitées.*")
+        return (set(), set(), set())
 
     noms_tries = sorted(toutes.keys())
-    _log("**{}** couche(s) trouvée(s) dans le DWG :".format(len(noms_tries)))
-    for n in noms_tries:
-        _log("  - `{}` (GraphicsStyleId={})".format(n, toutes[n].Id.IntegerValue))
+    _log("**{}** couche(s) trouvée(s).".format(len(noms_tries)))
 
-    inclure_normes = [_normaliser_chaine(m) for m in MOTS_CLES_INCLURE]
     exclure_normes = [_normaliser_chaine(m) for m in MOTS_CLES_EXCLURE]
-
-    # -------------------------------------------------------------------------
-    # Construction des sets d'IDs entiers (GraphicsStyleId.IntegerValue)
-    # Comparaison par entier pendant l'extraction → fiable, sans doc.GetElement()
-    # -------------------------------------------------------------------------
-    ids_exclues = set()   # blacklist : toujours rejetés
-    ids_actives = set()   # whitelist : INCLURE (vide = accepter tout sauf blacklist)
-
-    masquees_noms  = []
-    exclues_noms   = []
-    retenues_noms  = []
-    ignorees_noms  = []
+    ids_exclues  = set()
+    cats_masquees = set()
+    masquees_noms = []
+    exclues_noms  = []
 
     for nom in noms_tries:
-        gs = toutes[nom]
-        int_id = gs.Id.IntegerValue
+        _gs_ref, subcat, ids_gs = toutes[nom]
         nom_norm = _normaliser_chaine(nom)
 
-        # 1. Calque masqué dans la vue → blacklist
-        # Category.get_Visible(vue) est plus fiable que GetCategoryHidden()
-        # pour les sous-catégories de DWG importés.
+        # ── Règle 1 : calque masqué dans la vue ──────────────────────────────
+        # Deux méthodes testées indépendamment car get_Visible() peut être
+        # unreliable pour les sous-catégories DWG importées selon la version Revit.
         masquee = False
-        try:
-            subcat = gs.GraphicsStyleCategory
-            if subcat is not None:
+        if subcat is not None:
+            try:
+                if not subcat.get_Visible(vue):
+                    masquee = True
+            except Exception:
+                pass
+            if not masquee:
                 try:
-                    masquee = not subcat.get_Visible(vue)
+                    if bool(vue.GetCategoryHidden(subcat.Id)):
+                        masquee = True
                 except Exception:
-                    masquee = bool(vue.GetCategoryHidden(subcat.Id))
-        except Exception:
-            pass
+                    pass
 
         if masquee:
-            ids_exclues.add(int_id)
+            ids_exclues.update(ids_gs)
+            # cats_masquees permet le fallback BYBLOCK dans _couche_autorisee
+            if subcat is not None:
+                try:
+                    cats_masquees.add(subcat.Id.IntegerValue)
+                except Exception:
+                    pass
             masquees_noms.append(nom)
-            continue  # ne pas tester INCLURE/EXCLURE sur un calque masqué
-
-        # 2. Nom contient un terme EXCLURE → blacklist
-        if any(m in nom_norm for m in exclure_normes):
-            ids_exclues.add(int_id)
-            exclues_noms.append(nom)
             continue
 
-        # 3. Nom contient un terme INCLURE → whitelist
-        if any(m in nom_norm for m in inclure_normes):
-            ids_actives.add(int_id)
-            retenues_noms.append(nom)
-        else:
-            ignorees_noms.append(nom)
+        # ── Règle 2 : nom contient un terme EXCLURE ───────────────────────────
+        if any(m in nom_norm for m in exclure_normes):
+            ids_exclues.update(ids_gs)
+            if subcat is not None:
+                try:
+                    cats_masquees.add(subcat.Id.IntegerValue)
+                except Exception:
+                    pass
+            exclues_noms.append(nom)
 
-    _log("**Filtrage couches (IDs entiers) :**")
-    _log("  - Blacklist masquées ({}) : {}".format(
+    _log("  Masqués ignorés  ({}) : {}".format(
         len(masquees_noms),
-        ", ".join(["`{}`".format(c) for c in masquees_noms]) or "*aucune*"))
-    _log("  - Blacklist EXCLURE  ({}) : {}".format(
+        u", ".join([u"`{}`".format(c) for c in masquees_noms]) or u"aucun"))
+    _log("  Mot-clé ignorés  ({}) : {}".format(
         len(exclues_noms),
-        ", ".join(["`{}`".format(c) for c in exclues_noms]) or "*aucune*"))
-    _log("  - Whitelist INCLURE  ({}) : {}".format(
-        len(retenues_noms),
-        ", ".join(["`{}`".format(c) for c in retenues_noms]) or "*aucune*"))
-    _log("  - Ignorées           ({}) : {}".format(
-        len(ignorees_noms),
-        ", ".join(["`{}`".format(c) for c in ignorees_noms]) or "*aucune*"))
-    _log("  - IDs blacklist : {}".format(sorted(ids_exclues)))
-    _log("  - IDs whitelist : {}".format(sorted(ids_actives)))
+        u", ".join([u"`{}`".format(c) for c in exclues_noms]) or u"aucun"))
+    _log("  Traités          ({}) : {}".format(
+        len(noms_tries) - len(masquees_noms) - len(exclues_noms),
+        u"tous les autres calques visibles"))
 
-    if FILTRAGE_COUCHES_AUTO:
-        # En mode auto, MOTS_CLES_EXCLURE crée la blacklist (+ calques masqués).
-        # Les calques visibles et non-exclus sont TOUS traités, qu'ils matchent
-        # MOTS_CLES_INCLURE ou non — aucune whitelist restrictive n'est appliquée.
-        # MOTS_CLES_INCLURE sert uniquement à l'information (log) et à la pré-sélection
-        # dans le dialogue (mode FILTRAGE_COUCHES_AUTO = False).
-        _log(
-            "*Mode auto → blacklist {} ID(s) | tous les calques visibles non-exclus traités.*".format(
-                len(ids_exclues)))
-        return (set(), ids_exclues)
-
-    # Mode dialogue : proposer les couches non-exclues (par nom)
-    noms_proposables = retenues_noms + ignorees_noms
-    selection = forms.SelectFromList.show(
-        sorted(noms_proposables),
-        title="NM-BATII — Couches DWG servant de limites de pièces",
-        button_name="Utiliser ces couches",
-        multiselect=True,
-        default_values=retenues_noms if retenues_noms else None
-    )
-
-    if not selection:
-        _log("*Sélection vide/annulée — toutes couches non-exclues utilisées.*")
-        return (set(), ids_exclues)
-
-    # Résoudre les noms sélectionnés en IDs
-    ids_selection = set()
-    for nom in selection:
-        if nom in toutes:
-            ids_selection.add(toutes[nom].Id.IntegerValue)
-
-    _log("**{} couche(s) sélectionnée(s) :**".format(len(selection)))
-    for c in selection:
-        _log("  - `{}`".format(c))
-    return (ids_selection, ids_exclues)
+    return (set(), ids_exclues, cats_masquees)
 
 
 # ===========================================================================
@@ -1187,35 +1162,45 @@ def construire_carte_pieces_par_courbe(courbes, grille, grille_orig, nb_cols, nb
     grille_orig: grille AVANT dilatation (CELL_VIDE=0, CELL_MUR=1).
 
     Retourne : dict {id_piece: [DB.Curve, ...]}
+
+    Optimisations vs version précédente :
+    ─────────────────────────────────────
+    1. Pré-filtre longueur (SEUIL_LONG_M) : réduit 592 k → 20-50 k courbes.
+       Élimine les hachures DWG (≈ épaisseur mur) qui ne sont pas des limites de pièces
+       et qui, si elles passaient, créeraient des milliers d'éléments Revit parasites.
+
+    2. Dict pixel_vers_pieces remplacé par une recherche directe :
+       Pour chaque pixel Bresenham de la courbe, on vérifie grille_orig[pixel] == CELL_MUR
+       PUIS on cherche les IDs de pièces dans le voisinage dans grille.
+       → Supprime la passe O(n_pixels_total × rayon²) préliminaire.
+       → Un seul parcours des données (meilleure localité de cache).
+
+    3. Bresenham inline (pas de générateur Python) :
+       Les générateurs en IronPython 2.7 ont un overhead significatif par `yield`.
+       La boucle while inline évite ~3 M appels de yield pour 592 k courbes × 5 px moyen.
+
+    4. Sortie anticipée par pixel : si un pixel CELL_MUR est trouvé sur la courbe,
+       on cherche les pièces adjacentes et on continue. Si la courbe ne touche aucun
+       pixel CELL_MUR (hachure ou annotation), on ne fait rien (O(curve_len) seulement).
     """
-    # --- Étape 1 : pixel MUR original → pièces adjacentes ---
-    pixel_vers_pieces = {}   # idx bytearray → set(id_piece)
+    courbes_par_piece = {}
+    rayon = DILATATION_PIX + 1
 
-    for lig in range(nb_lignes):
-        for col in range(nb_cols):
-            idx = lig * nb_cols + col
-            if grille_orig[idx] != CELL_MUR:
-                continue
-            # Ce pixel est un vrai mur DWG — chercher les pièces dans un rayon
-            # = DILATATION_PIX + 1 (les pixels de pièce sont séparés du mur orig
-            # par la zone dilatée dont l'épaisseur = DILATATION_PIX)
-            rayon = DILATATION_PIX + 1
-            for dl in range(-rayon, rayon + 1):
-                for dc in range(-rayon, rayon + 1):
-                    nl = lig + dl
-                    nc = col + dc
-                    if 0 <= nl < nb_lignes and 0 <= nc < nb_cols:
-                        id_p = grille[nl * nb_cols + nc]
-                        if id_p >= 3:
-                            if idx not in pixel_vers_pieces:
-                                pixel_vers_pieces[idx] = set()
-                            pixel_vers_pieces[idx].add(id_p)
-
-    # --- Étape 2 : rasteriser chaque courbe DWG et vérifier les pixels ---
-    courbes_par_piece = {}   # id_piece → list[DB.Curve]
+    # Pré-filtre longueur : élimine les courbes trop courtes (hachures DWG).
+    seuil_long_pied = m_en_pied(SEUIL_LONG_M) if SEUIL_LONG_M > 0 else 0.0
 
     for courbe in courbes:
+
+        # ── Filtre longueur ──────────────────────────────────────────────────
+        if seuil_long_pied > 0:
+            try:
+                if courbe.Length < seuil_long_pied:
+                    continue
+            except Exception:
+                pass   # courbe sans Length → on la garde
+
         pieces_touchees = set()
+
         try:
             if isinstance(courbe, DB.Line):
                 pt0 = courbe.GetEndPoint(0)
@@ -1224,27 +1209,62 @@ def construire_carte_pieces_par_courbe(courbes, grille, grille_orig, nb_cols, nb
                 l0 = int((pied_en_m(pt0.Y) - y_orig_m) / res_m)
                 c1 = int((pied_en_m(pt1.X) - x_orig_m) / res_m)
                 l1 = int((pied_en_m(pt1.Y) - y_orig_m) / res_m)
-                for col, lig in _pixels_bresenham(c0, l0, c1, l1):
-                    if 0 <= col < nb_cols and 0 <= lig < nb_lignes:
-                        ids = pixel_vers_pieces.get(lig * nb_cols + col)
-                        if ids:
-                            pieces_touchees.update(ids)
+
+                # ── Bresenham inline ─────────────────────────────────────────
+                dx = abs(c1 - c0); dy = abs(l1 - l0)
+                sx = 1 if c0 < c1 else -1
+                sy = 1 if l0 < l1 else -1
+                err = dx - dy
+                cx, lx = c0, l0
+                while True:
+                    if 0 <= cx < nb_cols and 0 <= lx < nb_lignes:
+                        # Vérification directe dans grille_orig (pas de dict lookup)
+                        if grille_orig[lx * nb_cols + cx] == CELL_MUR:
+                            for dl in range(-rayon, rayon + 1):
+                                nl = lx + dl
+                                if nl < 0 or nl >= nb_lignes:
+                                    continue
+                                for dc in range(-rayon, rayon + 1):
+                                    nc = cx + dc
+                                    if 0 <= nc < nb_cols:
+                                        id_p = grille[nl * nb_cols + nc]
+                                        if id_p >= 3:
+                                            pieces_touchees.add(id_p)
+                    if cx == c1 and lx == l1:
+                        break
+                    e2 = 2 * err
+                    if e2 > -dy:
+                        err -= dy
+                        cx += sx
+                    if e2 < dx:
+                        err += dx
+                        lx += sy
+
             else:
-                # Arc ou courbe non-linéaire : échantillonnage
+                # Arc ou courbe quelconque : échantillonnage + même logique
                 lon_m = pied_en_m(courbe.Length)
                 n = max(2, int(lon_m / res_m) + 1)
                 for i in range(n + 1):
                     t = float(i) / n
                     try:
                         pt = courbe.Evaluate(t, True)
-                        col = int((pied_en_m(pt.X) - x_orig_m) / res_m)
-                        lig = int((pied_en_m(pt.Y) - y_orig_m) / res_m)
-                        if 0 <= col < nb_cols and 0 <= lig < nb_lignes:
-                            ids = pixel_vers_pieces.get(lig * nb_cols + col)
-                            if ids:
-                                pieces_touchees.update(ids)
+                        cx = int((pied_en_m(pt.X) - x_orig_m) / res_m)
+                        lx = int((pied_en_m(pt.Y) - y_orig_m) / res_m)
+                        if 0 <= cx < nb_cols and 0 <= lx < nb_lignes:
+                            if grille_orig[lx * nb_cols + cx] == CELL_MUR:
+                                for dl in range(-rayon, rayon + 1):
+                                    nl = lx + dl
+                                    if nl < 0 or nl >= nb_lignes:
+                                        continue
+                                    for dc in range(-rayon, rayon + 1):
+                                        nc = cx + dc
+                                        if 0 <= nc < nb_cols:
+                                            id_p = grille[nl * nb_cols + nc]
+                                            if id_p >= 3:
+                                                pieces_touchees.add(id_p)
                     except Exception:
                         pass
+
         except Exception:
             pass
 
@@ -1413,33 +1433,84 @@ def executer_pipeline(grille, nb_cols, nb_lignes, x_orig_m, y_orig_m, res_m,
     nb_pieces  = 0
     nb_limites = 0
 
+    # =========================================================================
+    # COLLECTE ET DÉDUPLICATION DES COURBES DWG
+    # =========================================================================
+    # Problème sans déduplication :
+    #   Un mur entre la pièce A et la pièce B apparaît dans courbes_par_piece[A]
+    #   ET dans courbes_par_piece[B]. Itérer les composantes sans dédup crée ce
+    #   mur en DOUBLE dans Revit, ce qui :
+    #     - double le nombre d'éléments Room Boundary Line,
+    #     - aggrave exponentiellement la "Jonction automatique" O(n²) de Revit.
+    #
+    # Solution : collecter toutes les courbes uniques (via id(courbe)) AVANT la
+    # transaction, puis les créer en UN SEUL appel NewRoomBoundaryLines (ou en
+    # batches de BATCH_LIMITES si le volume est grand).
+    # =========================================================================
+
+    _seen_obj_ids  = set()   # id() Python → unicité d'objet DWG
+    _courbes_uniq  = []      # courbes DWG dédupliquées (toutes pièces confondues)
+    _ids_avec_dwg  = set()   # ids de composantes ayant au moins une courbe DWG
+
+    for id_piece, _, _ in composantes:
+        liste = courbes_par_piece.get(id_piece)
+        if not liste:
+            continue
+        _ids_avec_dwg.add(id_piece)
+        for c in liste:
+            oid = id(c)
+            if oid not in _seen_obj_ids:
+                _seen_obj_ids.add(oid)
+                _courbes_uniq.append(c)
+
+    _log("- {} courbe(s) DWG uniques à créer ({} composante(s) avec fallback raster).".format(
+        len(_courbes_uniq),
+        len(composantes) - len(_ids_avec_dwg)
+    ))
+
     if progress_cb: progress_cb(70, u"Création des éléments Revit...")
     with revit.Transaction("NM-BATII : Créer limites et pièces depuis DWG"):
 
         sketch_plane = creer_sketch_plane(doc, niveau)
+        z = sketch_plane.GetPlane().Origin.Z
 
-        for id_piece, centroide_px, aire_px in composantes:
-            aire_m2 = aire_px * res_m * res_m
-            _log("\n**Zone** id={} — {:.1f} m²".format(id_piece, aire_m2))
+        # ─── 1. Créer TOUTES les limites DWG en un seul lot (ou par batches) ─
+        # Un seul lot → une seule invocation de la "Jonction automatique" Revit.
+        # BATCH_LIMITES évite les timeouts sur les très grandes collections.
+        if _courbes_uniq:
+            if progress_cb: progress_cb(73, u"Création des Room Boundary Lines (DWG)...")
+            curves_batch = DB.CurveArray()
+            for courbe in _courbes_uniq:
+                try:
+                    courbe_z = _projeter_courbe_sur_z(courbe, z)
+                    if courbe_z is None:
+                        continue
+                    curves_batch.Append(courbe_z)
+                    if curves_batch.Size >= BATCH_LIMITES:
+                        try:
+                            doc.Create.NewRoomBoundaryLines(sketch_plane, curves_batch, vue)
+                            nb_limites += curves_batch.Size
+                        except Exception as _be:
+                            _log(u"  *Avertissement batch DWG* : {}".format(str(_be)))
+                        curves_batch = DB.CurveArray()
+                except Exception:
+                    pass
+            if curves_batch.Size > 0:
+                try:
+                    doc.Create.NewRoomBoundaryLines(sketch_plane, curves_batch, vue)
+                    nb_limites += curves_batch.Size
+                except Exception as _be:
+                    _log(u"  *Avertissement batch DWG (fin)* : {}".format(str(_be)))
+            _log("  [vecteur] {} segment(s) DWG créé(s).".format(nb_limites))
 
-            # Centroïde en pieds Revit
-            lig_c_px, col_c_px = centroide_px
-            centroide_pieds = px_en_revit(col_c_px, lig_c_px, x_orig_m, y_orig_m, res_m)
-
-            nb_seg = 0
-
-            # --- Approche vectorielle (prioritaire) ---
-            # Utilise les courbes DWG originales → coïncidence parfaite, pas de chanfrein.
-            limites_dwg = courbes_par_piece.get(id_piece, [])
-            if limites_dwg:
-                nb_seg = creer_limites_depuis_courbes_dwg(doc, vue, sketch_plane, limites_dwg)
-                if nb_seg > 0:
-                    _log("  [vecteur] {} segment(s) DWG créé(s).".format(nb_seg))
-
-            # --- Fallback raster ---
-            # Utilisé si aucune courbe DWG n'a été trouvée (DWG très lacunaire, etc.)
-            if nb_seg == 0:
-                _log("  [fallback raster] aucune courbe DWG — contour pixélisé.")
+        # ─── 2. Fallback raster pour les pièces sans courbe DWG ──────────────
+        # Seulement pour les composantes sans aucune courbe DWG associée.
+        composantes_fallback = [c for c in composantes if c[0] not in _ids_avec_dwg]
+        if composantes_fallback:
+            if progress_cb: progress_cb(82, u"Fallback raster ({} pièce(s))...".format(
+                len(composantes_fallback)))
+            for id_piece, _, _ in composantes_fallback:
+                _log("  [fallback raster] pièce id={} — contour pixélisé.".format(id_piece))
                 aretes = extraire_aretes_contour(grille, nb_cols, nb_lignes, id_piece)
                 if aretes:
                     polylignes_px = chainer_en_polylignes(aretes)
@@ -1451,16 +1522,20 @@ def executer_pipeline(grille, nb_cols, nb_lignes, x_orig_m, y_orig_m, res_m,
                                          for c, l in polyligne_rdp]
                             nb_seg = creer_limites_piece(doc, vue, sketch_plane, pts_revit)
                             if nb_seg > 0:
+                                nb_limites += nb_seg
                                 _log("  [fallback] {} segment(s) créé(s).".format(nb_seg))
 
-            if nb_seg > 0:
-                nb_limites += 1
-
-            # Créer la pièce au centroïde
+        # ─── 3. Placer les pièces ─────────────────────────────────────────────
+        if progress_cb: progress_cb(90, u"Placement des pièces Revit...")
+        for id_piece, centroide_px, aire_px in composantes:
+            aire_m2 = aire_px * res_m * res_m
+            lig_c_px, col_c_px = centroide_px
+            centroide_pieds = px_en_revit(col_c_px, lig_c_px, x_orig_m, y_orig_m, res_m)
             piece = creer_piece_revit(doc, niveau, centroide_pieds)
             if piece is not None:
                 nb_pieces += 1
-                _log("  Pièce {} créée.".format(_linkify(piece.Id)))
+                _log("  Pièce {} créée — {:.1f} m²".format(
+                    _linkify(piece.Id), aire_m2))
 
     return nb_pieces, nb_limites
 
@@ -1617,6 +1692,13 @@ class FenetrePiecesDetect(forms.WPFWindow):
         self._vue    = vue
         self._niveau = niveau
 
+        # Config capturée sur le thread UI avant chaque lancement (voir btn_*_Click).
+        # _lancer_pipeline s'exécute sur le thread Revit API : il ne peut PAS accéder
+        # aux contrôles WPF. On stocke ici la config lue depuis l'interface AVANT
+        # de déclencher l'ExternalEvent, puis on la réapplique dans _lancer_pipeline.
+        # → Corrige le bug de restauration des globals IronPython (voir _restaurer_globals).
+        self._cfg_courant = {}
+
         # Câbler les événements boutons (non déclarés en XAML)
         self.btn_toutes.Click      += self.btn_toutes_Click
         self.btn_une_piece.Click   += self.btn_une_piece_Click
@@ -1647,23 +1729,78 @@ class FenetrePiecesDetect(forms.WPFWindow):
             self.btn_toutes.IsEnabled     = False
             self.btn_une_piece.IsEnabled  = False
 
+        # ── Cache des contrôles WPF ───────────────────────────────────────────
+        # pyRevit's WPFWindow.__getattr__ appelle FindName() à CHAQUE accès
+        # self.txt_xxx. FindName parcourt l'arbre visuel à chaque appel. Cacher
+        # les références ici élimine cette traversée répétée, ce qui accélère
+        # _appliquer_preset (6 accès) et _appliquer_config (8 accès).
+        self._c_resolution = self.FindName('txt_resolution')
+        self._c_dilatation = self.FindName('txt_dilatation')
+        self._c_aire_min   = self.FindName('txt_aire_min')
+        self._c_simplifier = self.FindName('txt_simplifier')
+        self._c_marge      = self.FindName('txt_marge')
+        self._c_grille_max = self.FindName('txt_grille_max')
+        self._c_exclure    = self.FindName('txt_exclure')
+
+        # ── Initialisation de TOUS les champs depuis config.json ─────────────
+        # Fait en PREMIER pour que txt_inclure et txt_exclure soient toujours
+        # remplis (les présets ne modifient que les champs numériques).
         self._appliquer_config(config)
+
+        # ── Présets de qualité ────────────────────────────────────────────────
+        # Chargés depuis config.json › detect_pieces_dwg › presets_qualite.
+        # L'utilisateur peut ajouter de nouveaux présets en éditant config.json
+        # manuellement : chaque entrée est un dict avec les mêmes clés que cfg.
+        # Le ComboBox est peuplé ici ; SelectionChanged applique les valeurs.
+        self._presets = []   # list[dict] — présets dans l'ordre de config.json
+        try:
+            presets_cfg = config.get('presets_qualite', [])
+            if isinstance(presets_cfg, list):
+                for p in presets_cfg:
+                    if isinstance(p, dict) and 'nom' in p:
+                        self._presets.append(p)
+        except Exception:
+            pass
+
+        # ── Peuplement du ComboBox des présets ───────────────────────────────
+        if self._presets:
+            for p in self._presets:
+                self.cmb_preset.Items.Add(p['nom'])
+
+            # Sélectionner "Standard" par défaut (préset dont le nom contient
+            # "standard", insensible à la casse). Si absent : premier préset.
+            idx_std = 0
+            for i, p in enumerate(self._presets):
+                if u'standard' in p.get('nom', u'').lower():
+                    idx_std = i
+                    break
+            # Câbler l'événement AVANT de fixer SelectedIndex pour que le handler
+            # soit actif dès la première sélection (y compris l'init).
+            # SelectedIndex = idx_std déclenche SelectionChanged → _appliquer_preset
+            # qui surcharge les champs numériques avec les valeurs du préset Standard.
+            self.cmb_preset.SelectionChanged += self.cmb_preset_SelectionChanged
+            self.cmb_preset.SelectedIndex = idx_std
+        else:
+            self.cmb_preset.Items.Add(u"(aucun préset dans config.json)")
+            self.cmb_preset.IsEnabled = False
+            # _appliquer_config a déjà été appelé plus haut
 
     # ------------------------------------------------------------------
     # Configuration
     # ------------------------------------------------------------------
 
     def _appliquer_config(self, cfg):
-        self.txt_resolution.Text = str(cfg.get('resolution_m',     RESOLUTION_M))
-        self.txt_dilatation.Text = str(cfg.get('dilatation_pix',   DILATATION_PIX))
-        self.txt_aire_min.Text   = str(cfg.get('aire_min_m2',      AIRE_MIN_M2))
-        self.txt_simplifier.Text = str(cfg.get('simplifier_tol_m', SIMPLIFIER_TOL_M))
-        self.txt_marge.Text      = str(cfg.get('marge_m',          MARGE_M))
-        self.txt_grille_max.Text = str(cfg.get('grille_max_px',    GRILLE_MAX_PX))
-        inclure = cfg.get('mots_cles_inclure', MOTS_CLES_INCLURE)
+        # Utilise les références cachées (self._c_*) pour éviter FindName() répété.
+        # Fallback sur les constantes du module pour les clés manquantes.
+        self._c_resolution.Text = str(cfg.get('resolution_m',     RESOLUTION_M))
+        self._c_dilatation.Text = str(cfg.get('dilatation_pix',   DILATATION_PIX))
+        self._c_aire_min.Text   = str(cfg.get('aire_min_m2',      AIRE_MIN_M2))
+        self._c_simplifier.Text = str(cfg.get('simplifier_tol_m', SIMPLIFIER_TOL_M))
+        self._c_marge.Text      = str(cfg.get('marge_m',          MARGE_M))
+        self._c_grille_max.Text = str(cfg.get('grille_max_px',    GRILLE_MAX_PX))
         exclure = cfg.get('mots_cles_exclure', MOTS_CLES_EXCLURE)
-        self.txt_inclure.Text = u'\n'.join([u'{}'.format(m) for m in inclure])
-        self.txt_exclure.Text = u'\n'.join([u'{}'.format(m) for m in exclure])
+        if exclure:
+            self._c_exclure.Text = u'\n'.join([u'{}'.format(m) for m in exclure])
 
     def _lire_config(self):
         def _float(txt, defaut):
@@ -1678,14 +1815,13 @@ class FenetrePiecesDetect(forms.WPFWindow):
             return [l.strip() for l in txt.splitlines() if l.strip()]
 
         return {
-            'resolution_m':      _float(self.txt_resolution.Text, RESOLUTION_M),
-            'dilatation_pix':    _int(self.txt_dilatation.Text,   DILATATION_PIX),
-            'aire_min_m2':       _float(self.txt_aire_min.Text,   AIRE_MIN_M2),
-            'simplifier_tol_m':  _float(self.txt_simplifier.Text, SIMPLIFIER_TOL_M),
-            'marge_m':           _float(self.txt_marge.Text,      MARGE_M),
-            'grille_max_px':     _int(self.txt_grille_max.Text,   GRILLE_MAX_PX),
-            'mots_cles_inclure': _mots_cles(self.txt_inclure.Text),
-            'mots_cles_exclure': _mots_cles(self.txt_exclure.Text),
+            'resolution_m':      _float(self._c_resolution.Text, RESOLUTION_M),
+            'dilatation_pix':    _int(self._c_dilatation.Text,   DILATATION_PIX),
+            'aire_min_m2':       _float(self._c_aire_min.Text,   AIRE_MIN_M2),
+            'simplifier_tol_m':  _float(self._c_simplifier.Text, SIMPLIFIER_TOL_M),
+            'marge_m':           _float(self._c_marge.Text,      MARGE_M),
+            'grille_max_px':     _int(self._c_grille_max.Text,   GRILLE_MAX_PX),
+            'mots_cles_exclure': _mots_cles(self._c_exclure.Text),
         }
 
     @property
@@ -1721,6 +1857,37 @@ class FenetrePiecesDetect(forms.WPFWindow):
     # Handlers boutons
     # ------------------------------------------------------------------
 
+    def _appliquer_preset(self, preset):
+        """
+        Applique UNIQUEMENT les paramètres numériques d'un préset dans les TextBox.
+
+        Pourquoi une méthode séparée de _appliquer_config :
+          _appliquer_config accède aux globaux du module via les constantes de
+          fallback. Dans une fenêtre non-modale, ces globaux peuvent être None
+          (nettoyés par IronPython après le retour de IExternalCommand.Execute),
+          ce qui lèverait une TypeError silencieuse et annulerait toute la mise
+          à jour. Cette méthode n'accède JAMAIS aux globaux : les valeurs de
+          fallback sont des littéraux Python purs.
+
+        Utilise les références cachées (self._c_*) : aucun appel FindName().
+        """
+        try:
+            self._c_resolution.Text = str(preset.get('resolution_m',     0.10))
+            self._c_dilatation.Text = str(preset.get('dilatation_pix',   2))
+            self._c_aire_min.Text   = str(preset.get('aire_min_m2',      2.0))
+            self._c_simplifier.Text = str(preset.get('simplifier_tol_m', 0.10))
+            self._c_marge.Text      = str(preset.get('marge_m',          1.0))
+            self._c_grille_max.Text = str(preset.get('grille_max_px',    5000000))
+        except Exception as ex:
+            _log(u"  *Avertissement préset* : {}".format(str(ex)))
+
+    def cmb_preset_SelectionChanged(self, sender, args):
+        """Applique les valeurs numériques du préset sélectionné dans les champs."""
+        idx = self.cmb_preset.SelectedIndex
+        if idx < 0 or idx >= len(self._presets):
+            return
+        self._appliquer_preset(self._presets[idx])
+
     def btn_charger_Click(self, sender, args):
         self._restaurer_globals()
         dlg = OpenFileDialog()
@@ -1754,7 +1921,11 @@ class FenetrePiecesDetect(forms.WPFWindow):
         if instance is None:
             _afficher_message(u"Aucun DWG sélectionné.", owner=self)
             return
-        self._appliquer_constantes(self._lire_config())
+        # Capturer la config ICI (thread UI) : les contrôles WPF ne sont
+        # accessibles que depuis ce thread. _lancer_pipeline tourne sur le
+        # thread Revit API et ne peut pas appeler _lire_config() directement.
+        self._cfg_courant = self._lire_config()
+        self._appliquer_constantes(self._cfg_courant)
         _inst = [instance]
         _self = [self]
         def _action():
@@ -1769,7 +1940,9 @@ class FenetrePiecesDetect(forms.WPFWindow):
         if instance is None:
             _afficher_message(u"Aucun DWG sélectionné.", owner=self)
             return
-        self._appliquer_constantes(self._lire_config())
+        # Même raison que btn_toutes_Click : capturer config sur le thread UI.
+        self._cfg_courant = self._lire_config()
+        self._appliquer_constantes(self._cfg_courant)
         _inst = [instance]
         _self = [self]
         def _action():
@@ -1790,19 +1963,31 @@ class FenetrePiecesDetect(forms.WPFWindow):
     def _appliquer_constantes(self, cfg):
         global RESOLUTION_M, DILATATION_PIX, AIRE_MIN_M2
         global SIMPLIFIER_TOL_M, MARGE_M, GRILLE_MAX_PX
-        global MOTS_CLES_INCLURE, MOTS_CLES_EXCLURE
+        global MOTS_CLES_EXCLURE, SEUIL_LONG_M
         RESOLUTION_M      = cfg['resolution_m']
         DILATATION_PIX    = cfg['dilatation_pix']
         AIRE_MIN_M2       = cfg['aire_min_m2']
         SIMPLIFIER_TOL_M  = cfg['simplifier_tol_m']
         MARGE_M           = cfg['marge_m']
         GRILLE_MAX_PX     = cfg['grille_max_px']
-        MOTS_CLES_INCLURE = cfg['mots_cles_inclure']
         MOTS_CLES_EXCLURE = cfg['mots_cles_exclure']
+        # seuil_long_m est un paramètre de perf (pas dans l'UI) — optionnel dans cfg
+        if 'seuil_long_m' in cfg:
+            SEUIL_LONG_M = float(cfg['seuil_long_m'])
 
     def _lancer_pipeline(self, instance, mode_auto, point_revit=None):
         """Prépare et exécute le pipeline avec fenêtre de progression."""
+        # ─── Restauration des globals IronPython ──────────────────────────────
+        # 1. _restaurer_globals() remet les valeurs d'infrastructure qui auraient
+        #    été vidées (doc, uidoc, DB) depuis la copie _G prise à l'init.
+        # 2. _appliquer_constantes(_cfg_courant) réécrit TOUS les paramètres
+        #    métier (MOTS_CLES_EXCLURE, résolution…) depuis la config capturée
+        #    sur le thread UI dans btn_*_Click.
+        #    ← Sans cette étape, _restaurer_globals restaurerait _G qui contient
+        #    les valeurs par défaut du module, ignorant la config utilisateur.
         self._restaurer_globals()
+        if self._cfg_courant:
+            self._appliquer_constantes(self._cfg_courant)
         vue    = self._vue
         niveau = self._niveau
 
@@ -1815,11 +2000,13 @@ class FenetrePiecesDetect(forms.WPFWindow):
         try:
             prog.mettre_a_jour(5,  u"Scan des couches DWG...")
             _log(u"\n### Étape 1 — Sélection des couches DWG")
-            couches_actives, couches_exclues = choisir_couches_limites(instance, vue)
+            # Vider le cache GraphicsStyle→Catégorie avant chaque pipeline
+            _cache_gs_a_cat.clear()
+            couches_actives, ids_exclues, cats_masquees = choisir_couches_limites(instance, vue)
 
             prog.mettre_a_jour(15, u"Extraction de la géométrie DWG...")
             _log(u"\n### Étape 2 — Extraction géométrie")
-            courbes = extraire_courbes_dwg(instance, vue, couches_actives, couches_exclues)
+            courbes = extraire_courbes_dwg(instance, vue, couches_actives, ids_exclues, cats_masquees)
             _log(u"**{}** courbe(s) extraite(s).".format(len(courbes)))
 
             if not courbes:

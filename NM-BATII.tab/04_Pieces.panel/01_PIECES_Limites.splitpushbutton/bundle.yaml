@@ -4,3 +4,4 @@ title:
 layout:
   - 01_PIECES_Convert_lignes_en_limites
   - 02_PIECES_Detect
+  - 03_PIECES_Simpl_Limites
