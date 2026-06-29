@@ -1,7 +1,8 @@
 layout:
   - 01_Parametres
   - 02_Depuis_fichiers
-  - 03_Lier_importer
-  - 04_Pieces
-  - 05_Donnees
-  - 06_Nettoyer
+  - 03_Vues
+  - 04_Lier_importer
+  - 05_Pieces
+  - 06_Donnees
+  - 07_Nettoyer

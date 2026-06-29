@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Mise à jour NM-BATII"
+        Width="500" Height="320"
+        MinWidth="420" MinHeight="260"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI"
+        FontSize="13">
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="4"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Barre de statut colorée -->
+    <Border x:Name="statusBar" Grid.Row="0" Background="DodgerBlue"/>
+
+    <!-- Contenu -->
+    <StackPanel Grid.Row="1" Margin="16,14,16,8">
+
+      <!-- Bloc versions -->
+      <Border Background="#F5F5F5"
+              BorderBrush="#DDDDDD"
+              BorderThickness="1"
+              CornerRadius="4"
+              Padding="12,8"
+              Margin="0,0,0,12">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="160"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+
+          <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Version installée :"
+                     Foreground="#555555"/>
+          <TextBlock x:Name="txtVersionInstallee" Grid.Row="0" Grid.Column="1" Margin="0,4"
+                     FontWeight="Bold" Foreground="#333333"/>
+
+          <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Version disponible :"
+                     Foreground="#555555"/>
+          <TextBlock x:Name="txtVersionDispo" Grid.Row="1" Grid.Column="1" Margin="0,4"
+                     FontWeight="Bold" Foreground="#333333" Text="Vérification en cours..."/>
+        </Grid>
+      </Border>
+
+      <!-- Zone de message -->
+      <Border x:Name="msgBorder"
+              Background="#F0F8FF"
+              BorderBrush="DodgerBlue"
+              BorderThickness="1"
+              CornerRadius="4"
+              Padding="12,8">
+        <TextBlock x:Name="txtMessage"
+                   TextWrapping="Wrap"
+                   Foreground="#333333"
+                   Text=""/>
+      </Border>
+
+    </StackPanel>
+
+    <!-- Boutons -->
+    <StackPanel Grid.Row="2" Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Margin="16,0,16,14">
+
+      <Button x:Name="btnInstaller"
+              Content="Installer la mise à jour"
+              Margin="0,0,8,0"
+              Padding="14,7"
+              IsEnabled="False">
+        <Button.Template>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd"
+                    Background="#1E90FF"
+                    CornerRadius="4">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="{TemplateBinding Padding}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#1C86EE"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#1565C0"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="bd" Property="Background" Value="#BBBBBB"/>
+                <Setter Property="Foreground" Value="#888888"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Button.Template>
+        <Button.Foreground>White</Button.Foreground>
+        <Button.FontWeight>SemiBold</Button.FontWeight>
+      </Button>
+
+      <Button x:Name="btnFermer"
+              Content="Fermer"
+              Padding="14,7"
+              IsCancel="True">
+        <Button.Template>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd"
+                    Background="#F0F0F0"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1"
+                    CornerRadius="4">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="{TemplateBinding Padding}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#E0F0FF"/>
+                <Setter TargetName="bd" Property="BorderBrush" Value="DodgerBlue"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="bd" Property="Background" Value="#C0D8F0"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Button.Template>
+      </Button>
+
+    </StackPanel>
+  </Grid>
+</Window>

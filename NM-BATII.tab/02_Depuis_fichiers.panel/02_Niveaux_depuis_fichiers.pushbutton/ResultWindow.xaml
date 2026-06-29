@@ -5,6 +5,8 @@
         Title="Terminé"
 		SizeToContent="WidthAndHeight"
 		MinWidth="400"
+		MaxWidth="450"
+		MaxHeight="600"
         ResizeMode="NoResize"
 		WindowStartupLocation="CenterScreen">  
   
@@ -16,37 +18,72 @@
 	
 	<Grid Margin="5">
 		<Grid.RowDefinitions>
-			<RowDefinition Height="*"/>
-            <RowDefinition Height="10"/>
-			<RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-		
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="*"/>
-		</Grid.ColumnDefinitions>  
-		
-		<Border BorderBrush="DodgerBlue"
-				Grid.Row="0"
-				Grid.Column="0" Grid.ColumnSpan="3"
-				BorderThickness="1"
-				CornerRadius="3"
-				Padding="10"
-				Margin="5">
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
 
-			<TextBlock	x:Name="txtMessage"
-						TextWrapping="Wrap"
-						FontSize="25"
-						FontWeight="Medium"
-						TextAlignment="Center"
-						VerticalAlignment="Center" />
-		</Border>
+		<!-- Titre -->
+		<TextBlock x:Name="txtTitle"
+				   Grid.Row="0"
+				   FontSize="16"
+				   FontWeight="Bold"
+				   TextAlignment="Center"
+				   Margin="5,5,5,8"/>
 
-		<Button	x:Name="btnClose"
+		<!-- Tableau des résultats -->
+		<DataGrid x:Name="dataGrid"
+				  Grid.Row="1"
+				  AutoGenerateColumns="False"
+				  IsReadOnly="True"
+				  HeadersVisibility="Column"
+				  CanUserAddRows="False"
+				  CanUserDeleteRows="False"
+				  CanUserResizeRows="False"
+				  CanUserSortColumns="False"
+				  RowHeaderWidth="0"
+				  GridLinesVisibility="Horizontal"
+				  BorderBrush="DodgerBlue"
+				  BorderThickness="1"
+				  Margin="5">
+
+			<DataGrid.RowStyle>
+				<Style TargetType="DataGridRow">
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding [IsTotal]}" Value="1">
+							<Setter Property="FontWeight" Value="Bold"/>
+						</DataTrigger>
+						<DataTrigger Binding="{Binding [IsSep]}" Value="1">
+							<Setter Property="FontWeight" Value="Bold"/>
+							<Setter Property="Focusable" Value="False"/>
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</DataGrid.RowStyle>
+
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Catégorie"
+									Binding="{Binding [Categorie]}"
+									Width="*"/>
+				<DataGridTextColumn Header="Nombre"
+									Binding="{Binding [Nombre]}"
+									Width="80">
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="HorizontalAlignment" Value="Right"/>
+							<Setter Property="Margin" Value="0,0,8,0"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+				<DataGridTextColumn Binding="{Binding [IsTotal]}" Visibility="Collapsed"/>
+				<DataGridTextColumn Binding="{Binding [IsSep]}"   Visibility="Collapsed"/>
+			</DataGrid.Columns>
+		</DataGrid>
+
+		<Button x:Name="btnClose"
 				Content="Fermer"
-				Grid.Row="2"
-				Grid.Column="0" Grid.ColumnSpan="3"
+				Grid.Row="3"
 				HorizontalAlignment="Stretch"
 				IsDefault="True"/>
 

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Gabarits de vues"
+  Width="780" Height="280"
+  MinWidth="500" MinHeight="220"
+  ResizeMode="CanResize"
+  WindowStartupLocation="CenterOwner">
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0" Margin="0,0,0,8"
+               Text="Renseignez le nom exact du gabarit de vue Revit à appliquer pour chaque type de vue. Laisser vide pour ne pas appliquer de gabarit."
+               FontStyle="Italic" Foreground="Gray" FontSize="11"
+               TextWrapping="Wrap"/>
+
+    <DataGrid x:Name="dgGabarits"
+              Grid.Row="1"
+              AutoGenerateColumns="False"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              HeadersVisibility="Column"
+              Margin="0,0,0,8"/>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal"
+                HorizontalAlignment="Right">
+      <Button x:Name="btnCancel" Content="Annuler" Width="80"
+              IsCancel="True" Margin="0,0,6,0"/>
+      <Button x:Name="btnOK" Content="OK" Width="80"
+              IsDefault="True"/>
+    </StackPanel>
+  </Grid>
+</Window>

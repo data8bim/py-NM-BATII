@@ -1,0 +1,12 @@
+title:
+  en_us: "Link CAO\n\u2192 Views"
+  fr_fr: "Lier CAO\n\u2192 Vues"
+tooltip:
+  en_us: "Creates Revit views from DWG/PDF files (naming convention) then links the DWG files to the corresponding views in one operation.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+  fr_fr: "Cree les vues Revit depuis les fichiers DWG/PDF (convention de nommage) puis lie les fichiers DWG aux vues correspondantes en une seule operation.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

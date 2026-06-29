@@ -1,0 +1,8 @@
+title:
+  en_us: "Vues +"
+  fr_fr: "Vues +"
+tooltip:
+  en_us: "Create floor plan views in bulk.\nSelect a custom view type and the building levels to process.\nViews are named according to the template defined in config.json.\nExisting views with the same name are skipped and reported.\n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Crée en masse des vues en plan.\nSélectionnez un type de vue personnalisé et les niveaux bâtiment à traiter.\nLes vues sont nommées selon le template défini dans config.json.\nLes vues existantes portant le même nom sont ignorées et signalées.\n\nVersion: {{version}}-[{{date}}.001]"
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

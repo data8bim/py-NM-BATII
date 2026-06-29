@@ -5,6 +5,20 @@ from System.Windows.Markup import XamlReader
 from System.Windows import Application
 from pyrevit import forms
 
+_ALERT_XAML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "AlertWindow.xaml")
+
+
+def show_alert(title, message):
+    """Affiche un message dans le style graphique de l'extension NM-BATII."""
+    try:
+        w = forms.WPFWindow(_ALERT_XAML)
+        w.Title = title
+        w.txtMessage.Text = message
+        w.btnClose.Click += lambda s, e: setattr(w, 'DialogResult', True)
+        w.ShowDialog()
+    except Exception:
+        forms.alert(message, title=title)
+
 # ✅ FIX : chemin résolu depuis __file__ (robuste quel que soit l'emplacement
 # d'installation de l'extension sur le poste).
 # dialogs_styles_loader.py est dans lib\dialogs\

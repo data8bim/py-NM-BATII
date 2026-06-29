@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Types de vues"
+  Width="780" Height="280"
+  MinWidth="500" MinHeight="220"
+  ResizeMode="CanResize"
+  WindowStartupLocation="CenterOwner">
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0" Margin="0,0,0,8"
+               Text="Renseignez le nom exact du type de vue Revit à appliquer (ou à créer s'il est absent) pour chaque type de nommage. Laisser vide pour utiliser le type par défaut de la famille."
+               FontStyle="Italic" Foreground="Gray" FontSize="11"
+               TextWrapping="Wrap"/>
+
+    <DataGrid x:Name="dgTypesVues"
+              Grid.Row="1"
+              AutoGenerateColumns="False"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              HeadersVisibility="Column"
+              Margin="0,0,0,8"/>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal"
+                HorizontalAlignment="Right">
+      <Button x:Name="btnCancel" Content="Annuler" Width="80"
+              IsCancel="True" Margin="0,0,6,0"/>
+      <Button x:Name="btnOK" Content="OK" Width="80"
+              IsDefault="True"/>
+    </StackPanel>
+  </Grid>
+</Window>

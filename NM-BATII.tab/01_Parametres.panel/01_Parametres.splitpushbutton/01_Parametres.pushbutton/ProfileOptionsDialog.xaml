@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Options de liaisons"
+  Width="480"
+  SizeToContent="Height"
+  ResizeMode="NoResize"
+  WindowStartupLocation="CenterScreen">
+
+  <Window.Resources>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}"/>
+    <Style TargetType="ComboBox"  BasedOn="{StaticResource NMComboBoxStandard}"/>
+    <Style TargetType="CheckBox"  BasedOn="{StaticResource NMCheckBoxStandard}"/>
+    <Style TargetType="Button"    BasedOn="{StaticResource NMButtonStandard}"/>
+  </Window.Resources>
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="12"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="160"/>
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <TextBlock Text="Couleurs :" VerticalAlignment="Center"
+               Grid.Row="0" Grid.Column="0" Margin="0,4"/>
+    <ComboBox x:Name="cmbColorMode" Grid.Row="0" Grid.Column="1" Margin="0,2">
+      <ComboBoxItem>Conserver</ComboBoxItem>
+      <ComboBoxItem>Inverser</ComboBoxItem>
+      <ComboBoxItem>Noir et blanc</ComboBoxItem>
+    </ComboBox>
+
+    <TextBlock Text="Calques :" VerticalAlignment="Center"
+               Grid.Row="1" Grid.Column="0" Margin="0,4"/>
+    <ComboBox x:Name="cmbLayers" Grid.Row="1" Grid.Column="1" Margin="0,2">
+      <ComboBoxItem>Tous</ComboBoxItem>
+      <ComboBoxItem>Visibles</ComboBoxItem>
+    </ComboBox>
+
+    <TextBlock Text="Unités :" VerticalAlignment="Center"
+               Grid.Row="2" Grid.Column="0" Margin="0,4"/>
+    <ComboBox x:Name="cmbUnits" Grid.Row="2" Grid.Column="1" Margin="0,2">
+      <ComboBoxItem>Metres</ComboBoxItem>
+      <ComboBoxItem>Centimetres</ComboBoxItem>
+      <ComboBoxItem>Millimetres</ComboBoxItem>
+      <ComboBoxItem>Automatique</ComboBoxItem>
+    </ComboBox>
+
+    <TextBlock Text="Positionnement :" VerticalAlignment="Center"
+               Grid.Row="3" Grid.Column="0" Margin="0,4"/>
+    <ComboBox x:Name="cmbPlacement" Grid.Row="3" Grid.Column="1" Margin="0,2">
+      <ComboBoxItem>Automatique - Emplacement partage</ComboBoxItem>
+      <ComboBoxItem>Automatique - Centre a centre</ComboBoxItem>
+      <ComboBoxItem>Automatique - Origine vers origine interne</ComboBoxItem>
+    </ComboBox>
+
+    <CheckBox x:Name="chkCorrectLines"
+              Content="Corriger les lignes légèrement décalées"
+              Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4"/>
+
+    <CheckBox x:Name="chkViewOnly"
+              Content="Vue active uniquement"
+              Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4"/>
+
+    <Grid Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Button x:Name="btnOK"     Content="OK"      Grid.Column="0" Margin="0,0,4,0"/>
+      <Button x:Name="btnCancel" Content="Annuler" Grid.Column="1" Margin="4,0,0,0" IsCancel="True"/>
+    </Grid>
+  </Grid>
+</Window>

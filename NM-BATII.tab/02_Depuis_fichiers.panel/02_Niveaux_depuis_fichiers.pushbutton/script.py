@@ -22,7 +22,6 @@
 import sys
 import os
 import re
-import csv
 import traceback
 import clr
 
@@ -51,31 +50,22 @@ if lib_dir not in sys.path:
 # Import des modules partagés
 from utils.config_loader import load_config
 from utils.selection_fichier import pick_file_info
-from utils.extrac_nom_fichier_convention import extract_file_name_info
+from utils.extrac_nom_fichier_convention import extract_file_name_info, resolve_template, get_convention_template
 
 # 🔥 Charger les styles personnalisés WPF
-from dialogs.dialogs_styles_loader import load
+from dialogs.dialogs_styles_loader import load, show_alert
 load(lib_dir=lib_dir)
 
 
-def read_ordered_codes(csv_path):
-    codes = []
-    with open(csv_path, 'r') as f:
-        rdr = csv.DictReader(f, delimiter=';')
-        for row in rdr:
-            c = row.get('Type-Niv-Demi')
-            if c:
-                codes.append(c)
-    return codes
-
-def parse_code_key(code):
-    m = re.match(r"([A-Z])([+-])(\d+)_([0-9])", code)
+def parse_code_key(code, n_num=2, n_demi=1):
+    pat = r"([A-Z])([+-])(\d{" + str(n_num) + r"})_(\d{" + str(n_demi) + r"})"
+    m = re.match(pat, code)
     if not m:
         return 0.0
     _, sign, num, demi = m.groups()
     num, demi = int(num), int(demi)
     base = num if sign == '+' else -(num + 1)
-    return base + demi / 10.0
+    return base + demi / float(10 ** n_demi)
 
 def get_user_params(default_esp, origin_label):
     xaml_file = os.path.join(os.path.dirname(__file__), "LevelParamsWindow.xaml")
@@ -108,18 +98,43 @@ def get_user_params(default_esp, origin_label):
 def main():
     try:
         cfg         = load_config()
-        naming_cfg  = cfg.get('nm_convention_noms_fichiers', {})
         prm         = cfg.get('creer_niveaux', {})
         esp_default = prm.get('espacement_default', 5.0)
 
-        mark_toit   = prm.get('Marq_Niv_Toit', '')
-        mark_fond   = prm.get('Marq_Niv_Fondations', '')
-        mark_pos    = prm.get('Idt_Niv_Batiment_pos', '')
-        mark_neg    = prm.get('Idt_Niv_Batiment_neg', '')
-        idt_rdc     = prm.get('Idt_Niv_Rdc', '')
-        idt_rdc_bas = prm.get('Idt_Niv_Rdc_bas', '')
+        prefixes_cfg = prm.get('prefixes', [])
+        sign_pos     = prm.get('signe_positif', '+')
+        sign_neg     = prm.get('signe_negatif', '-')
+
+        bat_prefix  = next((p['prefixe'] for p in prefixes_cfg if p.get('definition') == 'Batiment'),   'R')
+        toit_prefix = next((p['prefixe'] for p in prefixes_cfg if p.get('definition') == 'Toiture'),    'T')
+        fond_prefix = next((p['prefixe'] for p in prefixes_cfg if p.get('definition') == 'Fondations'), 'F')
+        orig_prefix = next((p['prefixe'] for p in prefixes_cfg if p.get('definition') == 'Origine'),    'O')
+
+        mark_toit   = toit_prefix + sign_pos
+        mark_fond   = fond_prefix + sign_neg
+        mark_pos    = bat_prefix  + sign_pos
+        mark_neg    = bat_prefix  + sign_neg
+
+        # Patterns depuis nm_convention_noms_fichiers.groupes (fallback creer_niveaux)
+        nm       = cfg.get('nm_convention_noms_fichiers', {})
+        _grp_map = {g.get('id', ''): g.get('regex', '') for g in nm.get('groupes', [])}
+        _id_demi = _grp_map.get('demi-niv') or prm.get('id_demi_niveaux',   r'\d{1}')
+        _id_num  = _grp_map.get('num-niv') or prm.get('id_numero_niveaux', r'\d{2}')
+
+        _m_n    = re.search(r'\\d(?:\{(\d+)\})?', _id_demi)
+        _n_demi = int(_m_n.group(1)) if (_m_n and _m_n.group(1)) else 1
+        valeur_vrai_niveau = '_' + '0' * _n_demi
+
+        _m_num = re.search(r'\\d(?:\{(\d+)\})?', _id_num)
+        _n_num = int(_m_num.group(1)) if (_m_num and _m_num.group(1)) else 2
+
+        # Identifiants de niveaux dérivés de la configuration
+        _zeros_num  = '0' * _n_num
+        _zeros_demi = '0' * _n_demi
+        idt_rdc     = bat_prefix  + sign_pos + _zeros_num + '_' + _zeros_demi
+        idt_rdc_bas = bat_prefix  + sign_neg + _zeros_num + '_' + _zeros_demi
+        idt_orig    = orig_prefix + sign_pos + _zeros_num + '_' + _zeros_demi
         eleva_rdc   = prm.get('Eleva_Niv_Rdc', 0.0)
-        idt_orig    = prm.get('Idt_Niv_Origine', '')
         eleva_orig  = prm.get('Eleva_Niv_Origine', 0.0)
 
         file_info = pick_file_info(file_ext='dwg;*.pdf', title='Sélectionnez un DWG ou PDF')
@@ -128,12 +143,9 @@ def main():
         dwg_dir  = file_info['folder']
         basename = file_info['basename']
 
-        info = extract_file_name_info(basename, naming_cfg)
+        info = extract_file_name_info(basename, cfg)
         if not info:
-            forms.alert(
-                "Nom non conforme à la convention :\n{}".format(basename),
-                title='❌ Erreur Créer niveaux'
-            )
+            show_alert(u'❌ Erreur Créer niveaux', u"Nom non conforme à la convention :\n{}".format(basename))
             return
         bat_code = info.get('building', '')
 
@@ -147,7 +159,7 @@ def main():
         rdc_bas_present = False
         for fn in fichiers:
             base = os.path.splitext(fn)[0]
-            fi = extract_file_name_info(base, naming_cfg)
+            fi = extract_file_name_info(base, cfg)
             if not fi or fi.get('building') != bat_code:
                 continue
             code = "{}_{}".format(fi.get('level',''), fi.get('half',''))
@@ -158,50 +170,70 @@ def main():
                 rdc_bas_present = True
 
         if not codes_found:
-            forms.alert(
-                "Aucun niveau valide trouvé pour le bâtiment '{}'".format(bat_code),
-                title='❌ Erreur Créer niveaux'
-            )
+            show_alert(u'❌ Erreur Créer niveaux', u"Aucun niveau valide trouvé pour la construction '{}'".format(bat_code))
             return
 
-        csv_path = os.path.join(os.path.dirname(__file__), 'Niv_depuis_fichiers_ORDRE_NIV.csv')
-        if not os.path.isfile(csv_path):
-            forms.alert(
-                "Le fichier CSV d'ordre est introuvable :\n{}".format(csv_path),
-                title='❌ Erreur Créer niveaux'
-            )
-            return
-        all_codes   = read_ordered_codes(csv_path)
-        full_global = [c for c in all_codes if c.endswith('_0')]
-        demi_global = [c for c in all_codes if not c.endswith('_0')]
+        # --- Génération algorithmique des univers de niveaux ---
+        def _get_num(code, mark):
+            if not code.startswith(mark):
+                return None
+            rest = code[len(mark):]
+            m = re.match(r'^(\d+)_', rest)
+            return int(m.group(1)) if m else None
 
-        missing = []
-        if mark_toit and not any(c.startswith(mark_toit) for c in full_global):
-            missing.append("Toit '{}'".format(mark_toit))
-        if mark_fond and not any(c.startswith(mark_fond) for c in full_global):
-            missing.append("Fondations '{}'".format(mark_fond))
-        if mark_pos and not any(c.startswith(mark_pos) for c in full_global):
-            missing.append("Bât pos '{}'".format(mark_pos))
-        if mark_neg and not any(c.startswith(mark_neg) for c in full_global):
-            missing.append("Bât neg '{}'".format(mark_neg))
-        if idt_rdc and idt_rdc not in full_global:
-            missing.append("RDC '{}' absent du CSV".format(idt_rdc))
-        if missing:
-            forms.alert("Le fichier CSV ne contient pas :\n- " + "\n- ".join(missing),
-                        title='❌ Vérification CSV')
-            return
+        max_pos = max_neg = max_toit = max_fond = 0
+        for code in codes_found:
+            n = _get_num(code, mark_pos)
+            if n is not None:
+                max_pos = max(max_pos, n)
+                continue
+            n = _get_num(code, mark_neg)
+            if n is not None:
+                max_neg = max(max_neg, n)
+                continue
+            n = _get_num(code, mark_toit)
+            if n is not None:
+                max_toit = max(max_toit, n)
+                continue
+            n = _get_num(code, mark_fond)
+            if n is not None:
+                max_fond = max(max_fond, n)
 
-        roof_global = [c for c in full_global if c.startswith(mark_toit)]
-        fond_global = [c for c in full_global if c.startswith(mark_fond)]
-        bat_global  = [c for c in full_global if c.startswith(mark_pos) or c.startswith(mark_neg)]
+        # bat_global : R+ décroissant (max→00), puis R- croissant (00→max)
+        bat_global = []
+        for i in range(max_pos, -1, -1):
+            bat_global.append(mark_pos + str(i).zfill(_n_num) + valeur_vrai_niveau)
+        for i in range(0, max_neg + 1):
+            bat_global.append(mark_neg + str(i).zfill(_n_num) + valeur_vrai_niveau)
+
+        # roof_global : T+00 (gestion, premier), puis T+01→T+max
+        roof_ref    = mark_toit + _zeros_num + valeur_vrai_niveau
+        roof_global = [roof_ref]
+        for i in range(1, max_toit + 1):
+            roof_global.append(mark_toit + str(i).zfill(_n_num) + valeur_vrai_niveau)
+
+        # fond_global : F-01→F-max (croissant), puis F-00 (gestion, dernier)
+        fond_ref    = mark_fond + _zeros_num + valeur_vrai_niveau
+        fond_global = []
+        for i in range(1, max_fond + 1):
+            fond_global.append(mark_fond + str(i).zfill(_n_num) + valeur_vrai_niveau)
+        fond_global.append(fond_ref)
 
         if not rdc_bas_present:
             bat_global = [c for c in bat_global if c != idt_rdc_bas]
 
-        roof_found = [c for c in roof_global if c in codes_found]
-        fond_found = [c for c in fond_global if c in codes_found]
-        bat_found  = [c for c in bat_global if c in codes_found]
-        if idt_rdc and idt_rdc not in bat_found:
+        # Niveaux pleins vs demi
+        full_codes_found = set(c for c in codes_found if c.endswith(valeur_vrai_niveau))
+        demi_found       = [c for c in codes_found if not c.endswith(valeur_vrai_niveau)]
+
+        # Séparation demi-niveaux bâtiment / toiture (évite une interpolation croisée)
+        bat_demi_found  = [c for c in demi_found if not c.startswith(mark_toit)]
+        roof_demi_found = [c for c in demi_found if c.startswith(mark_toit)]
+
+        roof_found = [c for c in roof_global if c in full_codes_found and c != roof_ref]
+        fond_found = [c for c in fond_global if c in full_codes_found and c != fond_ref]
+        bat_found  = [c for c in bat_global  if c in full_codes_found]
+        if idt_rdc not in bat_found:
             bat_found.append(idt_rdc)
         if rdc_bas_present and idt_rdc_bas not in bat_found:
             bat_found.append(idt_rdc_bas)
@@ -224,14 +256,16 @@ def main():
         for i, lvl in enumerate(bat_range):
             pos_m[lvl] = eleva_rdc + (idx_rdc - i) * esp
 
-        key_map    = {c: parse_code_key(c) for c in all_codes}
-        demi_found = [c for c in demi_global if c in codes_found]
+        # key_map : codes_found + niveaux obligatoires + bat_range (niveaux intermédiaires)
+        mandatory = set([idt_rdc, idt_rdc_bas, idt_orig, roof_ref, fond_ref])
+        key_map   = {c: parse_code_key(c, _n_num, _n_demi)
+                     for c in codes_found | mandatory | set(bat_range)}
         bat_bt     = list(reversed(bat_range))
         for lo, hi in zip(bat_bt, bat_bt[1:]):
             h_lo, h_hi = pos_m[lo], pos_m[hi]
             k_lo, k_hi = key_map[lo], key_map[hi]
-            for d in demi_found:
-                k_d = key_map[d]
+            for d in bat_demi_found:
+                k_d = key_map.get(d, 0.0)
                 if d in pos_m:
                     continue
                 if k_lo < k_d < k_hi:
@@ -245,6 +279,28 @@ def main():
                     sorted(roof_found, key=lambda x: key_map[x]), 1):
                 pos_m[lvl] = max_b + idx * esp
             pos_m[general_roof] = max_b + (len(roof_found) + 1) * esp
+
+            # Demi-niveaux de toiture : interpolation entre niveaux pleins consécutifs
+            if roof_demi_found:
+                roof_full_by_elev = sorted(
+                    [(c, pos_m[c]) for c in roof_global if c in pos_m],
+                    key=lambda x: x[1]
+                )
+                for _i in range(len(roof_full_by_elev) - 1):
+                    lo_code, lo_elev = roof_full_by_elev[_i]
+                    hi_code, hi_elev = roof_full_by_elev[_i + 1]
+                    _m_lo = re.match(r'[A-Z][+-](\d+)_', lo_code)
+                    if not _m_lo:
+                        continue
+                    lo_num = int(_m_lo.group(1))
+                    for d in roof_demi_found:
+                        if d in pos_m:
+                            continue
+                        _m_d = re.match(r'[A-Z][+-](\d+)_(\d+)', d)
+                        if not _m_d or int(_m_d.group(1)) != lo_num:
+                            continue
+                        fraction = int(_m_d.group(2)) / float(10 ** _n_demi)
+                        pos_m[d] = lo_elev + fraction * (hi_elev - lo_elev)
 
         # 15) Fondation générale
         if fond_global:
@@ -268,15 +324,29 @@ def main():
                 .WhereElementIsNotElementType()
         }
         created = []
+        created_codes = []
 
-        t = Transaction(doc, "Créer niveaux depuis CSV+DWG")
+        _tpl_nom_niveau = get_convention_template(
+            cfg, 'niveaux-revit', '{construction}_{niveau}_{demi-niv}')
+
+        _pat_code = r'^([A-Z])([+\-])(\d{' + str(_n_num) + r'})_(\d{' + str(_n_demi) + r'})$'
+
+        t = Transaction(doc, "Créer niveaux depuis fichiers")
         t.Start()
         for code, elev_m in sorted_levels:
-            name = "{}_{}".format(bat_code, code)
+            _mc = re.match(_pat_code, code)
+            if _mc:
+                _pref, _sens, _num_str, _demi_str = _mc.groups()
+            else:
+                _pref = _sens = _num_str = _demi_str = ''
+            _sous_tpl = {'niveau': _pref + _sens + _num_str}
+            _vals     = {'construction': bat_code, 'demi-niv': _demi_str}
+            name = resolve_template(_tpl_nom_niveau, _vals, _sous_tpl)
             if name not in existing:
                 lvl = Level.Create(doc, to_ft(elev_m))
                 lvl.Name = name
                 created.append(name)
+                created_codes.append(code)
         t.Commit()
 
         # 18) Confirmation finale
@@ -285,21 +355,87 @@ def main():
 
         nb = len(created)
 
-        if nb == 0:
-            msg = "❌ {} Aucun niveau n'a été créé.".format(nb)
-        elif nb == 1:
-            msg = "✅ {} niveau créé.".format(nb)
-        else:
-            msg = "✅ {} niveaux créés.".format(nb)
+        # Niveaux de gestion des vues (créés systématiquement)
+        management_fond = fond_global[-1] if fond_global else None
+        management_toit = roof_global[0]  if roof_global else None
 
-        res_win.txtMessage.Text = msg
+        # Comptage par catégorie
+        nb_niveaux   = 0
+        nb_demi      = 0
+        nb_fond      = 0
+        nb_toit      = 0
+        nb_orig      = 0
+        nb_mgmt_fond = 0
+        nb_mgmt_toit = 0
+        nb_mgmt_orig = 0
+        for name, code in zip(created, created_codes):
+            if idt_orig and code == idt_orig:
+                nb_mgmt_orig += 1
+            elif management_toit and code == management_toit:
+                nb_mgmt_toit += 1
+            elif management_fond and code == management_fond:
+                nb_mgmt_fond += 1
+            elif mark_toit and code.startswith(mark_toit):
+                nb_toit += 1
+            elif mark_fond and code.startswith(mark_fond):
+                nb_fond += 1
+            elif code.endswith(valeur_vrai_niveau):
+                nb_niveaux += 1
+            else:
+                nb_demi += 1
+
+        # Construction du tableau de résultats (DataTable → DataGrid WPF)
+        clr.AddReference("System.Data")
+        from System.Data import DataTable as SysDataTable
+        dt = SysDataTable()
+        dt.Columns.Add("Categorie")
+        dt.Columns.Add("Nombre")
+        dt.Columns.Add("IsTotal")
+        dt.Columns.Add("IsSep")
+
+        def add_row(label, count, is_total="0", is_sep="0"):
+            r = dt.NewRow()
+            r["Categorie"] = label
+            r["Nombre"]    = str(count)
+            r["IsTotal"]   = is_total
+            r["IsSep"]     = is_sep
+            dt.Rows.Add(r)
+
+        def add_sep(label):
+            add_row(label, u"", "0", "1")
+
+        has_var  = nb_niveaux > 0 or nb_demi > 0 or nb_fond > 0 or nb_toit > 0 or nb_orig > 0
+        has_mgmt = nb_mgmt_fond > 0 or nb_mgmt_toit > 0 or nb_mgmt_orig > 0
+
+        if has_var:
+            add_sep(u"Niveaux :")
+            if nb_niveaux > 0: add_row(u"Niveaux",            nb_niveaux)
+            if nb_demi    > 0: add_row(u"Demi-niveaux",       nb_demi)
+            if nb_fond    > 0: add_row(u"Niveaux Fondations", nb_fond)
+            if nb_toit    > 0: add_row(u"Niveaux Toitures",   nb_toit)
+            if nb_orig    > 0: add_row(u"Niveaux Origine",    nb_orig)
+
+        if has_mgmt:
+            add_sep(u"Niveaux de gestion des vues :")
+            if nb_mgmt_fond > 0: add_row(u"gestion vue Fondations", nb_mgmt_fond)
+            if nb_mgmt_toit > 0: add_row(u"gestion vue Toitures",   nb_mgmt_toit)
+            if nb_mgmt_orig > 0: add_row(u"gestion vue Origine",    nb_mgmt_orig)
+
+        add_row(u"Total", nb, "1")
+
+        if nb == 0:
+            res_win.txtTitle.Text = u"Aucun niveau créé."
+        else:
+            res_win.txtTitle.Text = u"Niveaux créés"
+
+        res_win.dataGrid.ItemsSource = dt.DefaultView
         res_win.btnClose.Click += lambda s, e: setattr(res_win, "DialogResult", True)
         # ✅ FIX pyRevit 6 : show_dialog() supprimé → ShowDialog() (WPF natif)
         res_win.ShowDialog()
         
 
     except Exception:
-        forms.alert(traceback.format_exc(), title="❌ Erreur inattendue")
+        show_alert(u"❌ Erreur inattendue", traceback.format_exc())
 
 
 if __name__ == '__main__':

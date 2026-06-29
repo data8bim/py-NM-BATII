@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Lier CAO &#x2192; Vues"
+    Width="960"
+    Height="680"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <Style TargetType="Window"   BasedOn="{StaticResource NMWindowStandard}" />
+        <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}" />
+        <Style TargetType="Button"   BasedOn="{StaticResource NMButtonStandard}" />
+        <Style x:Key="NMButtonValideOnly" TargetType="Button" BasedOn="{StaticResource NMButtonValide}" />
+        <Style TargetType="ComboBox" BasedOn="{StaticResource NMComboBoxStandard}" />
+        <Style TargetType="ListBox"  BasedOn="{StaticResource NMListBoxStandard}" />
+        <Style TargetType="CheckBox" BasedOn="{StaticResource NMCheckBoxStandard}" />
+    </Window.Resources>
+
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Colonne gauche : Fichiers + Options de liaisons + Vues -->
+        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
+
+            <!-- Groupe Fichiers -->
+            <GroupBox Header="Fichiers" Margin="0,0,0,8">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Dossier -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Dossier :" VerticalAlignment="Center"
+                                   Grid.Column="0" Margin="0,0,6,0"/>
+                        <TextBox x:Name="txtFolder"
+                                 Grid.Column="1" VerticalAlignment="Center"/>
+                        <Button x:Name="btnBrowse" Content="Parcourir..."
+                                Grid.Column="2" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Checkboxes -->
+                    <Grid Grid.Row="1" Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox x:Name="chkIncludeSub" Content="Inclure les sous-dossiers"
+                                  Grid.Column="0" VerticalAlignment="Center"/>
+                        <CheckBox x:Name="chkSiteOnly" Content="Fichiers du site uniquement"
+                                  Grid.Column="2" VerticalAlignment="Center"/>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+
+            <!-- Groupe Options de liaisons -->
+            <GroupBox x:Name="grpDwgOptions" Header="Options de liaisons" Margin="0,0,0,8">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Couleurs :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="0" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbColorMode" Grid.Row="0" Grid.Column="1">
+                        <ComboBoxItem>Conserver</ComboBoxItem>
+                        <ComboBoxItem>Inverser</ComboBoxItem>
+                        <ComboBoxItem>Noir et blanc</ComboBoxItem>
+                    </ComboBox>
+
+                    <TextBlock Text="Calques :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="1" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbLayers" Grid.Row="1" Grid.Column="1">
+                        <ComboBoxItem>Tous</ComboBoxItem>
+                        <ComboBoxItem>Visibles</ComboBoxItem>
+                    </ComboBox>
+
+                    <TextBlock Text="Unites :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="2" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbUnits" Grid.Row="2" Grid.Column="1">
+                        <ComboBoxItem>Metres</ComboBoxItem>
+                        <ComboBoxItem>Centimetres</ComboBoxItem>
+                        <ComboBoxItem>Millimetres</ComboBoxItem>
+                        <ComboBoxItem>Automatique</ComboBoxItem>
+                    </ComboBox>
+
+                    <TextBlock Text="Positionnement :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="3" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbPlacement" Grid.Row="3" Grid.Column="1">
+                        <ComboBoxItem>Automatique - Emplacement partage</ComboBoxItem>
+                        <ComboBoxItem>Automatique - Centre a centre</ComboBoxItem>
+                        <ComboBoxItem>Automatique - Origine vers origine interne</ComboBoxItem>
+                    </ComboBox>
+
+                    <CheckBox x:Name="chkCorrectLines"
+                              Content="Corriger les lignes legerement decalees"
+                              Margin="5" Grid.Row="4" Grid.Column="1"/>
+
+                    <CheckBox x:Name="chkViewOnly"
+                              Content="Vue active uniquement"
+                              Margin="5" Grid.Row="5" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Groupe Vues -->
+            <GroupBox Header="Vues" Margin="0,0,0,8">
+                <Grid Margin="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Famille de vue :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="0" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbViewFamily" Grid.Row="0" Grid.Column="1"/>
+
+                    <TextBlock Text="Type personnalise :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="1" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbVueTypePers" Grid.Row="1" Grid.Column="1"/>
+
+                    <CheckBox x:Name="chkVueNiveau"
+                              Content="Une vue par niveau"
+                              Margin="5" Grid.Row="2" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+
+            <!-- Groupe Profils -->
+            <GroupBox Header="Profils">
+                <Grid Margin="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Profil :" VerticalAlignment="Center"
+                               Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbProfil" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+
+        </StackPanel>
+
+        <!-- Colonne droite : Fichiers a lier -->
+        <GroupBox Header="Fichiers a lier" Grid.Row="0" Grid.Column="2">
+            <Grid Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="4"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Filtre texte + format -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Filtre :" VerticalAlignment="Center"
+                               Grid.Column="0" Margin="0,0,6,0"/>
+                    <TextBox x:Name="txtListFilter"
+                             Grid.Column="1" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cmbFileFilter"
+                              Grid.Column="3" VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Filtres types de niveaux -->
+                <WrapPanel x:Name="pnlFiltresTypes"
+                           Grid.Row="2"
+                           Orientation="Horizontal"/>
+
+                <!-- Liste -->
+                <ListBox x:Name="lstViews"
+                         SelectionMode="Extended"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         Grid.Row="4">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsSelected,
+                                              RelativeSource={RelativeSource AncestorType=ListBoxItem},
+                                              Mode=TwoWay}"
+                                          VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Boutons sélection -->
+                <Grid Grid.Row="5" Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnSelectAll"   Content="Selectionner tout"  Grid.Column="0"/>
+                    <Button x:Name="btnDeselectAll" Content="Deselectionner tout" Grid.Column="1"/>
+                    <Button x:Name="btnInvert"      Content="Inverser"            Grid.Column="2"/>
+                </Grid>
+
+            </Grid>
+        </GroupBox>
+
+        <!-- Boutons de validation -->
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnOk"
+                    Content="Lier CAO"
+                    Style="{StaticResource NMButtonValideOnly}"
+                    Grid.Column="2"/>
+            <Button x:Name="btnCancel"
+                    Content="Annuler"
+                    Style="{StaticResource NMButtonValideOnly}"
+                    IsCancel="True"
+                    Grid.Column="3"/>
+        </Grid>
+
+    </Grid>
+</Window>

@@ -3,63 +3,52 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Enregistrer sous"
-		SizeToContent="Height"
-		Width="500"
-		MinWidth="500"
+        SizeToContent="WidthAndHeight"
+        MinWidth="620"
         ResizeMode="NoResize"
-		WindowStartupLocation="CenterScreen">
-		
-	<Window.Resources>	
-		<Style TargetType="Window" BasedOn="{StaticResource NMWindowStandard}" />
-		<Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}" />
-		<Style TargetType="TextBox" BasedOn="{StaticResource NMTextBoxStandard}" />
-		<Style TargetType="CheckBox" BasedOn="{StaticResource NMCheckBoxStandard}" />
-		<Style TargetType="Button" BasedOn="{StaticResource NMButtonValide}" />
-		<!-- <Style x:Key="NMButtonValideOnly" TargetType="Button" BasedOn="{StaticResource NMButtonValide}" /> -->
-	</Window.Resources>
+        WindowStartupLocation="CenterScreen">
 
-    <Grid Margin="5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-		
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="*"/>
-		</Grid.ColumnDefinitions>
+    <Window.Resources>
+        <Style TargetType="Window"    BasedOn="{StaticResource NMWindowStandard}" />
+        <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}" />
+        <Style TargetType="TextBox"   BasedOn="{StaticResource NMTextBoxStandard}" />
+        <Style TargetType="CheckBox"  BasedOn="{StaticResource NMCheckBoxStandard}" />
+        <Style TargetType="Button"    BasedOn="{StaticResource NMButtonValide}" />
+        <Style TargetType="Separator" />
+    </Window.Resources>
 
-  
-		<TextBlock	Text="Nom du fichier Revit :"
-					Grid.Row="0"
-					Grid.Column="0" Grid.ColumnSpan="3" />
-	
-		<TextBox x:Name="txtName"
-				 Grid.Row="1"
-				 Grid.Column="0" Grid.ColumnSpan="3"
-				 IsReadOnly="False"
-				 TextWrapping="Wrap"
-				 VerticalScrollBarVisibility="Auto"
-				 MinWidth="400"/>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
 
-		<CheckBox x:Name="chkBIM2D"
-				  Content="BIM 2D"
-				  IsChecked="True"
-				  Grid.Row="2"
-				  Grid.Column="0" />
- 
-		<Button x:Name="btnOk"
-				Content="Enregistrer"
-				Grid.Row="2"
-				Grid.Column="1"
-				HorizontalContentAlignment="Stretch" />
-				
-		<Button x:Name="btnCancel"
-				Content="Annuler"
-				Grid.Row="2"
-				Grid.Column="2"
-				HorizontalAlignment="Stretch" />
-	</Grid>
+        <!-- mainPanel : la grille de groupes sera insérée à l'index 0 depuis Python -->
+        <StackPanel x:Name="mainPanel" Margin="10">
+
+            <Separator Margin="0,8,0,8"/>
+
+            <TextBlock x:Name="lblPreview"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,10"
+                       FontWeight="Bold"/>
+
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnOk"
+                        Content="Enregistrer"
+                        Grid.Column="1"
+                        MinWidth="120"
+                        Margin="0,0,6,0"/>
+
+                <Button x:Name="btnCancel"
+                        Content="Annuler"
+                        Grid.Column="2"
+                        MinWidth="80"/>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
 </Window>

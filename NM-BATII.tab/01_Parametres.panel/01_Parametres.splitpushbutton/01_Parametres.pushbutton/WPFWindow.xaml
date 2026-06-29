@@ -1,0 +1,981 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:sys="clr-namespace:System;assembly=mscorlib"
+  Title="Paramètres"
+  Width="780" Height="660"
+  MinWidth="600" MinHeight="500"
+  ResizeMode="CanResize"
+  WindowStartupLocation="CenterScreen">
+
+  <Window.Resources>
+    <Style TargetType="GroupBox">
+      <Setter Property="HeaderTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" FontWeight="Bold"/>
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TabControl Grid.Row="0">
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Emplacements                                           -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Emplacements">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Enregistrements des Rvt" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4"
+                           Text="Nb. rep. à remonter"
+                           ToolTip="Nombre de répertoires parents à remonter depuis le dossier du fichier Revit courant avant d'enregistrer."/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="el_nb_rep_parents" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Valeurs                                               -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Valeurs">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Valeurs par défaut" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Valeur si nul"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="nc_val_nul" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Nommages                                               -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Nommages">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+                <!-- GroupBox : Convention de Nommages -->
+                <GroupBox Header="Convention de Nommages" Margin="0,0,0,8">
+                  <StackPanel Margin="5">
+                    <TextBlock Text="Éléments du nom de fichier"
+                               FontWeight="Bold" Margin="0,0,0,2"/>
+                    <TextBlock Text="Groupes atomiques (lignes système : identifiant protégé, suppression impossible — Optionnel : groupe absent autorisé dans le nom)"
+                               FontStyle="Italic" Foreground="Gray" FontSize="11" Margin="0,0,0,2"/>
+                    <DataGrid x:Name="dgGroupes"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              CanUserDeleteRows="True"
+                              HeadersVisibility="Column"
+                              MinHeight="90"
+                              Margin="0,0,0,8">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label"       Binding="{Binding label}" Width="150"/>
+                        <DataGridTextColumn Header="Identifiant" Binding="{Binding id}"    Width="130">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="White"/>
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding systeme}" Value="True">
+                                  <Setter Property="Background" Value="#F0F0F0"/>
+                                  <Setter Property="Foreground" Value="#555555"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Regex"       Binding="{Binding regex}" Width="*">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="White"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="Optionnel" Width="70">
+                          <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                              <CheckBox IsChecked="{Binding optionnel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </DataTemplate>
+                          </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Text="Préfixes de niveaux  (Identifiant : pref-niv)" Margin="0,4,0,4" FontWeight="SemiBold"
+                               ToolTip="Lignes système : seul le Préfixe est modifiable, suppression impossible.&#x0a;La regex de pref-niv est calculée automatiquement depuis cette table."/>
+                    <DataGrid x:Name="dgPrefixes"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              CanUserDeleteRows="True"
+                              HeadersVisibility="Column"
+                              MinHeight="80"
+                              Margin="0,0,0,8">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Préfixe"    Binding="{Binding prefixe}"    Width="70"/>
+                        <DataGridTextColumn Header="Définition" Binding="{Binding definition}" Width="*">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding systeme}" Value="True">
+                                  <Setter Property="Background" Value="#F0F0F0"/>
+                                  <Setter Property="Foreground" Value="#555555"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="+" Width="40">
+                          <DataGridTemplateColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding systeme}" Value="True">
+                                  <Setter Property="Background" Value="#F0F0F0"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </DataGridTemplateColumn.CellStyle>
+                          <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                              <CheckBox IsChecked="{Binding positif, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <CheckBox.Style>
+                                  <Style TargetType="CheckBox">
+                                    <Style.Triggers>
+                                      <DataTrigger Binding="{Binding systeme}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                      </DataTrigger>
+                                    </Style.Triggers>
+                                  </Style>
+                                </CheckBox.Style>
+                              </CheckBox>
+                            </DataTemplate>
+                          </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="-" Width="40">
+                          <DataGridTemplateColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding systeme}" Value="True">
+                                  <Setter Property="Background" Value="#F0F0F0"/>
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </DataGridTemplateColumn.CellStyle>
+                          <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                              <CheckBox IsChecked="{Binding negatif, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <CheckBox.Style>
+                                  <Style TargetType="CheckBox">
+                                    <Style.Triggers>
+                                      <DataTrigger Binding="{Binding systeme}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                      </DataTrigger>
+                                    </Style.Triggers>
+                                  </Style>
+                                </CheckBox.Style>
+                              </CheckBox>
+                            </DataTemplate>
+                          </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Text="Sens niveaux  (Identifiant : sens-niv)" Margin="0,4,0,4" FontWeight="SemiBold"
+                               ToolTip="La regex de sens-niv est calculée automatiquement depuis cette table."/>
+                    <DataGrid x:Name="dgSensNiveaux"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              MinHeight="50"
+                              Margin="0,0,0,0">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Signe"      Binding="{Binding signe}"      Width="80"/>
+                        <DataGridTextColumn Header="Définition" Binding="{Binding definition}" Width="*"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+                  </StackPanel>
+                </GroupBox>
+
+                <!-- GroupBox : Templates de nommage -->
+                <GroupBox Header="Templates de nommage" Margin="0,0,0,0"
+                          ToolTip="Utilisez {id} pour les groupes atomiques et {tpl-*} pour les sous-templates.">
+                  <StackPanel Margin="5">
+
+                    <TextBlock Text="Nommage de fichiers"
+                               FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <DataGrid x:Name="dgTemplates"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              MinHeight="30"
+                              Margin="0,0,0,8">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label"       Binding="{Binding label}"    Width="160"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Identifiant" Binding="{Binding id}"       Width="150"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Template"    Binding="{Binding template}" Width="*"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Grid Margin="0,4,0,8">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Grid.Column="0" Margin="0,4" Text="Valeur si BIM 2D"/>
+                      <TextBox   Grid.Column="1" x:Name="nc_val_bim2d" Margin="2,2"/>
+                    </Grid>
+
+                    <TextBlock Text="Nommage des niveaux"
+                               FontWeight="SemiBold" Margin="0,4,0,4"/>
+                    <DataGrid x:Name="dgNommageNiveauxCode"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              MinHeight="30"
+                              Margin="0,0,0,8">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label"       Binding="{Binding label}"    Width="160"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Identifiant" Binding="{Binding id}"       Width="120"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Template"    Binding="{Binding template}" Width="*"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Text="Nommage des niveaux du modèle Revit"
+                               FontWeight="SemiBold" Margin="0,4,0,4"/>
+                    <DataGrid x:Name="dgNommageNiveaux"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              MinHeight="30"
+                              Margin="0,0,0,8">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label"       Binding="{Binding label}"    Width="160"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Identifiant" Binding="{Binding id}"       Width="120"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Template"    Binding="{Binding template}" Width="*"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Grid Margin="0,4,0,4">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                      </Grid.ColumnDefinitions>
+                      <TextBlock Text="Nommage des vues"
+                                 FontWeight="SemiBold"
+                                 VerticalAlignment="Center"
+                                 Grid.Column="0"/>
+                      <Button x:Name="btnNommageVuesDispo"
+                              Content="Disponibilite..."
+                              Grid.Column="1"
+                              Padding="6,2"
+                              Height="22"
+                              FontSize="11"
+                              VerticalAlignment="Center"/>
+                    </Grid>
+                    <DataGrid x:Name="dgNommageVues"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              HeadersVisibility="Column"
+                              MinHeight="80"
+                              Margin="0,0,0,8">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label" Binding="{Binding label}" Width="180"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Identifiant" Binding="{Binding id}" Width="130"
+                                            IsReadOnly="True">
+                          <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                              <Setter Property="Background" Value="#F0F0F0"/>
+                              <Setter Property="Foreground" Value="#555555"/>
+                            </Style>
+                          </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Template" Binding="{Binding template}" Width="*"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Text="Nommage des présentations"
+                               FontWeight="SemiBold" Margin="0,4,0,4"/>
+                    <DataGrid x:Name="dgNommagePresent"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              CanUserDeleteRows="True"
+                              HeadersVisibility="Column"
+                              MinHeight="40"
+                              Margin="0,0,0,8">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label"       Binding="{Binding label}"    Width="160"/>
+                        <DataGridTextColumn Header="Identifiant" Binding="{Binding id}"       Width="120"/>
+                        <DataGridTextColumn Header="Template"    Binding="{Binding template}" Width="*"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+
+
+                  </StackPanel>
+                </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Niveaux                                               -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Niveaux">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Niveaux (Élévations et Espacement)" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Elevation RDC (m)"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="cn_eleva_rdc" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Elevation Niveau Origine (m)"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="cn_eleva_origine" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Espacement par défaut (m)"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="cn_espacement" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Vues                                                   -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Vues">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <!-- Vues personnalisées -->
+            <Grid Margin="0,0,0,4">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Text="Vues personnalisées (Identifiant : vue-pers-*)"
+                         FontWeight="Bold"
+                         VerticalAlignment="Center"
+                         Grid.Column="0"/>
+              <Button x:Name="btnTypesPersDispo"
+                      Content="Disponibilite..."
+                      Grid.Column="1"
+                      Padding="6,2"
+                      Height="22"
+                      FontSize="11"
+                      VerticalAlignment="Center"/>
+            </Grid>
+            <DataGrid x:Name="dgTypesVues"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="True"
+                      CanUserDeleteRows="True"
+                      HeadersVisibility="Column"
+                      MinHeight="60"
+                      Margin="0,0,0,12">
+              <DataGrid.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Nouvelle"/>
+                  <MenuItem Header="Dupliquer"/>
+                  <Separator/>
+                  <MenuItem Header="Supprimer"/>
+                </ContextMenu>
+              </DataGrid.ContextMenu>
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Ord." Binding="{Binding ordre}" Width="45"/>
+                <DataGridTextColumn Header="Label" Binding="{Binding label}" Width="120">
+                  <DataGridTextColumn.CellStyle>
+                    <Style TargetType="DataGridCell">
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding label}" Value="Temporaire">
+                          <Setter Property="Background" Value="#F0F0F0"/>
+                          <Setter Property="Foreground" Value="#555555"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding label}" Value="FM">
+                          <Setter Property="Background" Value="#F0F0F0"/>
+                          <Setter Property="Foreground" Value="#555555"/>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </DataGridTextColumn.CellStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Titre"    Binding="{Binding titre}"    Width="100"/>
+                <DataGridTextColumn Header="Valeur-1" Binding="{Binding valeur_1}" Width="100"/>
+                <DataGridTextColumn Header="Valeur-2" Binding="{Binding valeur_2}" Width="100"/>
+                <DataGridComboBoxColumn Header="Usage"
+                                        SelectedItemBinding="{Binding usage, UpdateSourceTrigger=PropertyChanged}"
+                                        Width="100">
+                  <DataGridComboBoxColumn.ElementStyle>
+                    <Style TargetType="ComboBox">
+                      <Setter Property="ItemsSource">
+                        <Setter.Value>
+                          <x:Array Type="sys:String">
+                            <sys:String>Temporaire</sys:String>
+                            <sys:String>Livrable</sys:String>
+                          </x:Array>
+                        </Setter.Value>
+                      </Setter>
+                    </Style>
+                  </DataGridComboBoxColumn.ElementStyle>
+                  <DataGridComboBoxColumn.EditingElementStyle>
+                    <Style TargetType="ComboBox">
+                      <Setter Property="ItemsSource">
+                        <Setter.Value>
+                          <x:Array Type="sys:String">
+                            <sys:String>Temporaire</sys:String>
+                            <sys:String>Livrable</sys:String>
+                          </x:Array>
+                        </Setter.Value>
+                      </Setter>
+                    </Style>
+                  </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+                <DataGridTemplateColumn Header="Types de vues" Width="130">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Content="Configurer..." Tag="types" Padding="4,1" Margin="2"/>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Gabarits de vues" Width="130">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Content="Configurer..." Tag="gabarits" Padding="4,1" Margin="2"/>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+
+            <GroupBox Header="Cr&#233;er des vues" Margin="0,0,0,0">
+              <StackPanel Margin="5">
+
+                <GroupBox Header="Types de niveaux par d&#233;faut" Margin="0,0,0,0"
+                          ToolTip="D&#233;finit quels types de niveaux sont coch&#233;s par d&#233;faut dans le bouton &#171;&#160;Vues en masse&#160;&#187;.">
+                  <StackPanel Margin="5" Orientation="Vertical">
+
+                    <CheckBox x:Name="vm_batiment"
+                              Content="Batiment"
+                              Margin="0,3"/>
+                    <CheckBox x:Name="vm_toiture"
+                              Content="Toiture"
+                              Margin="0,3"/>
+                    <CheckBox x:Name="vm_fondations"
+                              Content="Fondations"
+                              Margin="0,3"/>
+                    <CheckBox x:Name="vm_origine"
+                              Content="Origine"
+                              Margin="0,3"/>
+                    <CheckBox x:Name="vm_autres"
+                              Content="Autres"
+                              Margin="0,3"/>
+
+                  </StackPanel>
+                </GroupBox>
+
+              </StackPanel>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Liaisons CAO                                          -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Liaisons CAO">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Liaisons CAO (réglages par défauts)" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Inclure sous-dossiers"/>
+                <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="dwg_include_sub" Margin="2,6"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Calques par défaut"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="dwg_layers" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Mode couleur par défaut"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="dwg_color_mode" Margin="2,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Unité par défaut"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="dwg_unit" Margin="2,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Placement par défaut"/>
+                <TextBox   Grid.Row="4" Grid.Column="1" x:Name="dwg_placement" Margin="2,2"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Corriger les lignes"/>
+                <CheckBox  Grid.Row="5" Grid.Column="1" x:Name="dwg_correct_lines" Margin="2,6"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,4" Text="Vue seulement"/>
+                <CheckBox  Grid.Row="6" Grid.Column="1" x:Name="dwg_view_only" Margin="2,6"/>
+              </Grid>
+            </GroupBox>
+
+            <!-- ── Profils ──────────────────────────────────────────────── -->
+            <GroupBox Header="Profils" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <DataGrid x:Name="dgProfilsLiaison"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          HeadersVisibility="Column"
+                          MinHeight="60"
+                          Margin="0,2,0,0">
+
+                  <DataGrid.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="Nouveau"/>
+                      <MenuItem Header="Dupliquer"/>
+                      <Separator/>
+                      <MenuItem Header="Supprimer"/>
+                    </ContextMenu>
+                  </DataGrid.ContextMenu>
+
+                  <DataGrid.Columns>
+
+                    <DataGridTextColumn Header="Ord." Binding="{Binding ordre}" Width="45"/>
+
+                    <!-- Label : fond grisé pour la ligne système -->
+                    <DataGridTextColumn Header="Label" Binding="{Binding label}" Width="155">
+                      <DataGridTextColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding systeme}" Value="True">
+                              <Setter Property="Background" Value="#FFD9D9D9"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+
+                    <!-- Bouton Options de liaisons -->
+                    <DataGridTemplateColumn Header="Options de liaisons" Width="160">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <Button Content="Configurer..." Tag="options" Margin="2,1"/>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Bouton Vues -->
+                    <DataGridTemplateColumn Header="Vues" Width="*">
+                      <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                          <Button Content="Configurer..." Tag="vues" Margin="2,1"/>
+                        </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                  </DataGrid.Columns>
+                </DataGrid>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Surfaces                                               -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Surfaces">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="SHON/SHOB" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Nomenclature SHON/SHOB"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_default_shon" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Colonne SHON"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="sf_col_shon" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Param. SHON"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="sf_param_shon" Margin="2,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Colonne SHOB"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="sf_col_shob" Margin="2,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Param. SHOB"/>
+                <TextBox   Grid.Row="4" Grid.Column="1" x:Name="sf_param_shob" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="SDP" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Nomenclature Surface Plancher"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_default_plancher" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Colonne Surface Plancher"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="sf_col_plancher" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Param. Surface Plancher"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="sf_param_s_plancher" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Autres" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Colonne filtre"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_col_filter" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Nettoyage                                              -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Nettoyage">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+            <GroupBox Header="Réglages par défauts" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Imports DWG"/>
+                <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="net_dwg_imports" Margin="2,6"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Liens DWG"/>
+                <CheckBox  Grid.Row="1" Grid.Column="1" x:Name="net_dwg_liens" Margin="2,6"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Lignes"/>
+                <CheckBox  Grid.Row="2" Grid.Column="1" x:Name="net_lignes" Margin="2,6"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Textes"/>
+                <CheckBox  Grid.Row="3" Grid.Column="1" x:Name="net_texts" Margin="2,6"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Pièces et espaces"/>
+                <CheckBox  Grid.Row="4" Grid.Column="1" x:Name="net_pieces" Margin="2,6"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Zones de pochage"/>
+                <CheckBox  Grid.Row="5" Grid.Column="1" x:Name="net_zones" Margin="2,6"/>
+              </Grid>
+            </GroupBox>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Nomenclatures (Couleurs Titres + Colonnes)             -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Nomenclatures">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Couleurs Titres" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Tables de styles"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Saisies types"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Saisies occurrences"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,6" Text="Nomenclatures présentations"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Couleurs Colonnes" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Colonnes lecture seule"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Colonnes types"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Colonnes occurrences"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- LOG                                                     -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="LOG">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <GroupBox Header="Logs" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4"
+                           Text="Activer les logs des scripts"/>
+                <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="log_activer" Margin="2,6"/>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Mises à jour" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,8"
+                           Text="Source"
+                           ToolTip="URL GitHub (ex : https://github.com/data8bim/py-NM-BATII) ou chemin réseau vers le dossier py-NM-BATII (ex : \\serveur\partage\py-NM-BATII)"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="maj_source_url" Margin="2,4"
+                           ToolTip="URL GitHub (ex : https://github.com/data8bim/py-NM-BATII) ou chemin réseau (ex : \\serveur\partage\py-NM-BATII)"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8" Text="Version installée"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="maj_version_installee" Margin="2,8"
+                           FontWeight="Bold" Foreground="#333333"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,8" Text="Version disponible"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="maj_version_dispo" Margin="2,8"
+                           Foreground="#888888"
+                           Text="(cliquez sur le bouton Mise à jour pour vérifier)"/>
+              </Grid>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+    </TabControl>
+
+    <!-- Boutons bas -->
+    <StackPanel Grid.Row="1" Orientation="Horizontal"
+                HorizontalAlignment="Right" Margin="0,8,0,0">
+      <Button x:Name="btnCancel"  Content="Annuler"      Width="90"
+              IsCancel="True" Margin="0,0,6,0"/>
+      <Button x:Name="btnSave"    Content="Enregistrer"  Width="90"
+              IsDefault="True"/>
+    </StackPanel>
+
+  </Grid>
+</Window>

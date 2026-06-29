@@ -10,10 +10,10 @@
     "website": "https://d8b.fr",
     "image": "",
     "templates": {
-        "version": "0.09.1",
+        "version": "0.09.2 beta",
 		"author": "data8bim (d8b)",
         "docpath": "https://d8b.fr/",
-		"date": "26-05-20"
+		"date": "26-06-26"
     },
     "dependencies": [],
 	
