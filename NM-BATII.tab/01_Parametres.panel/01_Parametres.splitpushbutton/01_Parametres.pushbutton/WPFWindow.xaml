@@ -915,13 +915,79 @@
       </TabItem>
 
       <!-- ═══════════════════════════════════════════════════════ -->
-      <!-- LOG                                                     -->
+      <!-- À PROPOS                                               -->
       <!-- ═══════════════════════════════════════════════════════ -->
-      <TabItem Header="LOG">
+      <TabItem Header="À propos">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
           <StackPanel Margin="5">
 
-            <GroupBox Header="Logs" Margin="0,0,0,8">
+            <!-- ─── Extension ─────────────────────────────────── -->
+            <GroupBox Header="Extension" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="160"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Nom"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Margin="2,6" Text="py-NM-BATII" FontWeight="Bold"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Auteur"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Margin="2,6" Text="data8bim (d8b)"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Licence"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" Margin="2,6" Text="GNU General Public License v3.0 ou ultérieure (GPL-3.0-or-later)"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,6" Text="Dépôt"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" Margin="2,6"
+                           Text="https://github.com/data8bim/py-NM-BATII"
+                           Foreground="#0066CC" Cursor="Hand"
+                           ToolTip="https://github.com/data8bim/py-NM-BATII"
+                           x:Name="lien_depot"/>
+              </Grid>
+            </GroupBox>
+
+            <!-- ─── Licences tierces ──────────────────────────── -->
+            <GroupBox Header="Licences tierces" Margin="0,0,0,8">
+              <StackPanel Margin="5">
+                <Grid Margin="0,0,0,4">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="pyRevit" FontWeight="Bold"/>
+                  <TextBlock Grid.Column="1" Text="GNU GPL v3.0" Margin="8,0"/>
+                  <TextBlock Grid.Column="2" Text="https://github.com/pyrevitlabs/pyRevit"
+                             Foreground="#0066CC" Cursor="Hand"
+                             ToolTip="https://github.com/pyrevitlabs/pyRevit"
+                             x:Name="lien_pyrevit"/>
+                </Grid>
+                <Grid Margin="0,4,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="Tabler Icons" FontWeight="Bold"/>
+                  <TextBlock Grid.Column="1" Text="MIT License" Margin="8,0"/>
+                  <TextBlock Grid.Column="2" Text="https://tabler.io/icons"
+                             Foreground="#0066CC" Cursor="Hand"
+                             ToolTip="https://tabler.io/icons"
+                             x:Name="lien_tabler"/>
+                </Grid>
+              </StackPanel>
+            </GroupBox>
+
+            <!-- ─── Avertissement (requis GPL-3.0 §5d) ──────── -->
+            <GroupBox Header="Avertissement" Margin="0,0,0,8">
+              <TextBlock Margin="5,8" TextWrapping="Wrap" Foreground="#555555"
+                         Text="Ce logiciel est distribué SANS AUCUNE GARANTIE, sans même la garantie implicite de COMMERCIALISATION ou d'ADÉQUATION À UN USAGE PARTICULIER. Voir la GNU General Public License pour plus de détails."/>
+            </GroupBox>
+
+            <GroupBox Header="Mises à jour" Margin="0,0,0,8">
               <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="220"/>
@@ -929,20 +995,6 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                   <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4"
-                           Text="Activer les logs des scripts"/>
-                <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="log_activer" Margin="2,6"/>
-              </Grid>
-            </GroupBox>
-
-            <GroupBox Header="Mises à jour" Margin="0,0,0,0">
-              <Grid Margin="5">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="220"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
                   <RowDefinition Height="Auto"/>
                   <RowDefinition Height="Auto"/>
                   <RowDefinition Height="Auto"/>
@@ -959,6 +1011,26 @@
                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="maj_version_dispo" Margin="2,8"
                            Foreground="#888888"
                            Text="(cliquez sur le bouton Mise à jour pour vérifier)"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,8"/>
+                <Button    Grid.Row="3" Grid.Column="1" x:Name="btnLancerMaj"
+                           Content="Vérifier / Installer une mise à jour"
+                           HorizontalAlignment="Left"
+                           Padding="10,5" Margin="2,6"/>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Logs" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4"
+                           Text="Activer les logs des scripts"/>
+                <CheckBox  Grid.Row="0" Grid.Column="1" x:Name="log_activer" Margin="2,6"/>
               </Grid>
             </GroupBox>
 

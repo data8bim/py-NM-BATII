@@ -1,18 +1,21 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
-# Copyright 2026 data8bim (d8b)
+# Copyright (C) 2026 data8bim (d8b)
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# This file is part of py-NM-BATII.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# py-NM-BATII is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# py-NM-BATII is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with py-NM-BATII. If not, see <https://www.gnu.org/licenses/>.
 
 
 
@@ -1082,6 +1085,84 @@ def main():
     set_txt(wpf, 'maj_source_url',
             _maj_cfg.get('source_url', 'https://github.com/data8bim/py-NM-BATII'))
     set_txt(wpf, 'maj_version_installee', _version_installee)
+    import System.Threading
+    set_txt(wpf, 'maj_version_dispo', u'Vérification en cours...')
+    wpf.maj_version_dispo.Foreground = System.Windows.Media.Brushes.Gray
+
+    # Vérification automatique de la version disponible (thread arrière-plan)
+    _src_url = _maj_cfg.get('source_url', 'https://github.com/data8bim/py-NM-BATII').strip()
+    _ver_inst = _version_installee
+
+    def _check_version_bg():
+        try:
+            _maj_script = os.path.normpath(os.path.join(
+                os.path.dirname(__file__),
+                '..', '..', '02_Mises_a_jour.pushbutton', 'script.py'
+            ))
+            _ns = {'__file__': _maj_script, '__name__': '__exec__'}
+            execfile(_maj_script, _ns)
+            if _src_url.lower().startswith('http'):
+                _v, _ = _ns['get_remote_version_github'](_src_url)
+            else:
+                _v, _ = _ns['get_remote_version_serveur'](_src_url)
+
+            def _update():
+                wpf.maj_version_dispo.Text = _v
+                if _v != _ver_inst:
+                    wpf.maj_version_dispo.Foreground = System.Windows.Media.SolidColorBrush(
+                        System.Windows.Media.Color.FromRgb(0, 140, 0))
+                else:
+                    wpf.maj_version_dispo.Foreground = System.Windows.Media.Brushes.DarkGray
+            wpf.Dispatcher.BeginInvoke(System.Action(_update))
+
+        except Exception as _ex:
+            def _update_err():
+                wpf.maj_version_dispo.Text = u'Erreur de connexion'
+                wpf.maj_version_dispo.Foreground = System.Windows.Media.Brushes.Crimson
+            wpf.Dispatcher.BeginInvoke(System.Action(_update_err))
+
+    _t = System.Threading.Thread(
+        System.Threading.ThreadStart(_check_version_bg))
+    _t.IsBackground = True
+    _t.Start()
+
+    # Bouton Vérifier / Installer une mise à jour
+    def _on_lancer_maj(s, e):
+        try:
+            maj_script = os.path.normpath(os.path.join(
+                os.path.dirname(__file__),
+                '..', '..', '02_Mises_a_jour.pushbutton', 'script.py'
+            ))
+            if not os.path.isfile(maj_script):
+                from pyrevit import forms as _f
+                _f.alert(
+                    u"Script de mise à jour introuvable :\n{0}".format(maj_script),
+                    title=u"Erreur"
+                )
+                return
+            _ns = {'__file__': maj_script, '__name__': '__exec__'}
+            execfile(maj_script, _ns)
+            _ns['main']()
+        except Exception as _ex:
+            import traceback
+            from pyrevit import forms as _f
+            _f.alert(
+                u"Erreur lors du lancement de la mise à jour :\n\n{0}\n\n{1}".format(
+                    str(_ex), traceback.format_exc()
+                ),
+                title=u"Erreur"
+            )
+    wpf.btnLancerMaj.Click += _on_lancer_maj
+
+    # Liens cliquables onglet À propos
+    import subprocess as _sp
+    def _open_url(url):
+        def _handler(s, e):
+            _sp.Popen(['cmd', '/c', 'start', '', url])
+        return _handler
+    wpf.lien_depot.MouseLeftButtonUp   += _open_url('https://github.com/data8bim/py-NM-BATII')
+    wpf.lien_pyrevit.MouseLeftButtonUp += _open_url('https://github.com/pyrevitlabs/pyRevit')
+    wpf.lien_tabler.MouseLeftButtonUp  += _open_url('https://tabler.io/icons')
 
     # Boutons
     wpf.btnCancel.Click += lambda s, e: setattr(wpf, 'DialogResult', False)

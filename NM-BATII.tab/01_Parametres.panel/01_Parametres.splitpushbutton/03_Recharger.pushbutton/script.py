@@ -1,9 +1,12 @@
 # -*- coding=utf-8 -*-
 
-# Script original pyRevit (GPL-3.0)
-# Auteur : Ehsan Iran-Nejad
-# Copié tel quel pour accès rapide dans un onglet personnalisé
-# Aucune modification n’a été apportée.
+# Script original pyRevit — copié sans modification
+# Auteur original : Ehsan Iran-Nejad — Copyright (C) pyRevit contributors
+# Source : https://github.com/pyrevitlabs/pyRevit
+# Licence : GNU General Public License v3.0
+#
+# Ce fichier est un travail dérivé de pyRevit, distribué sous GPL-3.0.
+# Voir : https://www.gnu.org/licenses/gpl-3.0.html
 
 """Reload pyRevit into new session."""
 
