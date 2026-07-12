@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Copyright (C) 2026 data8bim (d8b)
 #
@@ -18,12 +18,12 @@
 # along with py-NM-BATII. If not, see <https://www.gnu.org/licenses/>.
 
 
-#__title__ = "Infos Projet → Objets par sélections"
-#__doc__ = """Transfert des valeurs d'informations de projet par sélections.
-#Description : Transfert des valeurs d'informations de projet vers les objets (familles) sélectionnées dans la vue active.
-#Permet de mapper des paramètres d'informations de projet vers des objets (familles) sélectionnées a la souris, afin de répercuter automatiquement les valeurs des informations de projet sur tous les objets sélectionnés.
+#__title__ = "Objets → Objets par sélection"
+#__doc__ = """Recopie la valeur d'un paramètre source vers un paramètre cible du même objet, par sélection.
+#Description : Pour chaque objet sélectionné dans Revit (correspondant aux catégories choisies dans chaque mappage), copie la valeur d'un paramètre source vers un autre paramètre du même type de données (texte, longueur, entier...) sur l'objet lui-même.
+#Permet de mapper des paramètres entre eux sur des objets sélectionnés a la souris.
 
-#Version : 3.5 — 2026-04-26
+#Version : 1.0 — 2026-07-10
 #Auteur : data8bim (d8b)
 #"""
 
@@ -63,13 +63,17 @@ from System.Windows import (
     GridLength, GridUnitType, Thickness,
     HorizontalAlignment, VerticalAlignment, WindowState
 )
-from System.Windows.Input import Keyboard, Key as WpfKey
+from System.Windows.Input import Key as WpfKey, Keyboard
 from System.Windows.Media import Brushes
 
+# ─── Chargement des styles de l'extension (NMWindowStandard, NMButtonValide…) ─
 try:
-    import dialogs_styles_loader  # noqa: F401
+    import dialogs_styles_loader          # noqa: F401  (effets de bord à l'import)
+    from dialogs.dialogs_styles_loader import show_alert
 except ImportError:
-    pass
+    def show_alert(titre, message):
+        # Dernier recours : boîte de dialogue Windows native (pas pyRevit).
+        WinForms.MessageBox.Show(message, titre)
 
 
 # ─── Contexte Revit ──────────────────────────────────────────────────────────
@@ -81,12 +85,6 @@ _ACTIVE_WINDOW = [None]
 
 
 # ─── Logger via pyRevit 6.4.0 ────────────────────────────────────────────────
-#
-#  script.get_logger() → logger pyRevit natif (niveau DEBUG contrôlable
-#  depuis pyRevit Settings > Enable Verbose Logging).
-#  On conserve la compatibilité avec le flag «activer_logs_scripts» de
-#  config.json de l'extension : si l'un ou l'autre est actif, on loggue.
-#
 logger = script.get_logger()
 
 def _load_extension_logs_flag():
@@ -112,7 +110,7 @@ _LOGS_ENABLED = _load_extension_logs_flag()
 
 def _log(msg):
     if _LOGS_ENABLED:
-        logger.debug(u'[Infos Projet Sel] ' + msg)
+        logger.debug(u'[Objets Sel] ' + msg)
 
 
 # ─── Fichier de sauvegarde automatique (pyRevit appdata) ─────────────────────
@@ -121,7 +119,7 @@ def _log(msg):
 #  toujours accessible en écriture, même si le script est sur un partage réseau.
 #  Suffixe _sel pour ne pas écraser le fichier du script «par catégories».
 #
-_LAST_CFG = script.get_data_file('last_mapping_sel', 'NM-Map-Infos-Proj-Sel')
+_LAST_CFG = script.get_data_file('last_mapping_objets_sel', 'NM-Map-Objets-Sel')
 
 
 # ─── Modèle de données ───────────────────────────────────────────────────────
@@ -129,33 +127,16 @@ class MappingRow(object):
     def __init__(self, source=u'', target=u'', categories=None):
         self.source_param = source
         self.target_param = target
-        self.categories   = list(categories) if categories else []
+        self.categories    = list(categories) if categories else []
         self.border       = None
 
 
-# ─── Lecture Revit ───────────────────────────────────────────────────────────
-def get_project_info_params(doc):
-    return sorted(p.Definition.Name for p in doc.ProjectInformation.Parameters)
-
+# ─── Lecture Revit : paramètres des objets ───────────────────────────────────
 def _exact_type_key(param):
     try:
         return param.Definition.GetDataType().TypeId
     except Exception:
         return str(param.StorageType)
-
-def get_project_info_param_types(doc):
-    return {p.Definition.Name: _exact_type_key(p)
-            for p in doc.ProjectInformation.Parameters}
-
-def get_project_info_value(doc, param_name):
-    for p in doc.ProjectInformation.Parameters:
-        if p.Definition.Name == param_name:
-            st = p.StorageType
-            if   st == StorageType.String:  return p.AsString() or u''
-            elif st == StorageType.Integer: return str(p.AsInteger())
-            elif st == StorageType.Double:  return p.AsValueString() or str(p.AsDouble())
-            else:                           return p.AsValueString() or u''
-    return u''
 
 
 # ─── Cache IDs catégories CAO (ImportInstance) ───────────────────────────────
@@ -192,9 +173,10 @@ def _get_cad_import_category_ids(doc):
 def get_available_categories(doc):
     """
     Retourne les catégories Revit acceptant des paramètres, utilisées comme
-    filtre optionnel sur les éléments sélectionnés (voir apply_to_selection).
-    "Informations sur le projet" n'est PAS exclue de cette liste : elle est
-    traitée séparément (avec avertissement) dans show_categories_dialog().
+    filtre optionnel sur les objets sélectionnés (voir apply_to_selection).
+    Seule exclusion : catégories issues de fichiers CAO. Contrairement aux
+    scripts de mappage depuis les pièces, "Informations sur le projet" et
+    "Niveaux" restent des catégories valides ici (recopie sur le même objet).
     """
     cad_ids = _get_cad_import_category_ids(doc)
     cats = set()
@@ -222,22 +204,10 @@ def _elem_category_name(elem):
 
 def get_params_by_exact_type(doc):
     """
-    Découverte des paramètres disponibles par type de donnée.
-
-    OPTIMISATION (v3.4) — algorithme revu pour les grands modèles :
-    ────────────────────────────────────────────────────────────────
-    Ancienne approche : itérer TOUS les éléments du document avec Python,
-    vérifier .Category, et sauter via un set de cat IDs déjà vus.
-    → O(N_éléments) avec overhead IronPython sur chaque élément.
-    → Sur un modèle de 100 000 éléments : typiquement 5-15 secondes.
-
-    Nouvelle approche : itérer les catégories (100-300 entrées max), et
-    pour chacune appeler .FirstElement() — appel .NET pur qui exploite
-    l'index interne de Revit par catégorie et s'arrête immédiatement
-    après le premier résultat. Aucun élément n'est sérialisé vers Python
-    si la catégorie est vide.
-    → O(N_catégories) appels natifs, zéro overhead Python par élément.
-    → Gain mesuré : ×10 à ×50 selon la taille du modèle.
+    Découverte des paramètres source/cible disponibles par type de donnée.
+    Un seul élément par catégorie est inspecté (FirstElement()) — appel
+    .NET pur qui exploite l'index interne de Revit par catégorie et
+    s'arrête immédiatement après le premier résultat.
     """
     by_type = {}
     cad_ids = _get_cad_import_category_ids(doc)
@@ -249,8 +219,6 @@ def get_params_by_exact_type(doc):
             if cat.Id.IntegerValue in cad_ids:
                 continue
 
-            # FirstElement() : appel .NET pur — s'arrête au 1er match,
-            # exploite l'index Revit par catégorie.
             elem = (FilteredElementCollector(doc)
                     .OfCategoryId(cat.Id)
                     .WhereElementIsNotElementType()
@@ -280,22 +248,33 @@ def get_params_by_exact_type(doc):
     return {k: sorted(v) for k, v in by_type.items()}
 
 
-# ─── Boîtes de dialogue personnalisées ───────────────────────────────────────
-def _alert(title, msg):
-    """
-    Affiche un message dans AlertDialog.xaml (style de l'extension).
-    Remplace forms.alert() partout dans le script.
-    Fallback sur forms.alert() si le XAML ne se charge pas.
-    """
-    try:
-        xaml = script.get_bundle_file('AlertDialog.xaml')
-        w = forms.WPFWindow(xaml)
-        w.Title           = title
-        w.txtMessage.Text = msg
-        w.btnClose.Click += lambda s, e: setattr(w, 'DialogResult', True)
-        w.show_dialog()
-    except Exception:
-        forms.alert(msg, title=title)
+def get_all_param_names(params_by_type):
+    """Union de tous les noms de paramètres, toutes catégories confondues."""
+    names = set()
+    for names_list in params_by_type.values():
+        names.update(names_list)
+    return sorted(names)
+
+
+def get_param_type_map(params_by_type):
+    """{nom_parametre: cle_type} — premier type rencontré fait foi."""
+    type_map = {}
+    for type_key, names in params_by_type.items():
+        for name in names:
+            if name not in type_map:
+                type_map[name] = type_key
+    return type_map
+
+
+def get_element_value(elem, param_name):
+    p = elem.LookupParameter(param_name)
+    if p is None:
+        return u''
+    st = p.StorageType
+    if   st == StorageType.String:  return p.AsString() or u''
+    elif st == StorageType.Integer: return str(p.AsInteger())
+    elif st == StorageType.Double:  return p.AsValueString() or str(p.AsDouble())
+    else:                           return p.AsValueString() or u''
 
 
 # ─── Résultat ────────────────────────────────────────────────────────────────
@@ -303,25 +282,24 @@ def show_result_window(msg):
     xaml = script.get_bundle_file('ResultWindow.xaml')
     try:
         w = forms.WPFWindow(xaml)
-        w.Title           = u'Infos Projet -> Objets (selection)'
+        w.Title           = u'Objets -> Objets (selection)'
         w.txtMessage.Text = msg
         w.btnClose.Click += lambda s, e: setattr(w, 'DialogResult', True)
         w.show_dialog()
-    except Exception:
-        _alert(u'Infos Projet -> Objets (selection)', msg)
+    except Exception as ex:
+        show_alert(u'Objets -> Objets (selection)', msg)
+        _log(u'ResultWindow : ' + str(ex))
 
 
 # ─── JSON ────────────────────────────────────────────────────────────────────
 def _rows_to_list(rows):
-    return [{'source_param': r.source_param,
-             'target_param': r.target_param,
-             'categories':   r.categories}
+    return [{'source_param': r.source_param, 'target_param': r.target_param,
+             'categories': r.categories}
             for r in rows]
 
 def _list_to_rows(data):
-    return [MappingRow(d.get('source_param', u''),
-                       d.get('target_param', u''),
-                       d.get('categories',   []))
+    return [MappingRow(d.get('source_param', u''), d.get('target_param', u''),
+                        d.get('categories', []))
             for d in data]
 
 def _auto_save(rows):
@@ -348,9 +326,9 @@ def _auto_load():
 def save_config(rows):
     dlg = WinForms.SaveFileDialog()
     dlg.Title      = u'Enregistrer la configuration'
-    dlg.Filter     = u'Fichiers de mappage (*.NM-Map-Infos-Proj)|*.NM-Map-Infos-Proj'
-    dlg.DefaultExt = 'NM-Map-Infos-Proj'
-    dlg.FileName   = 'infos_projet_mappages.NM-Map-Infos-Proj'
+    dlg.Filter     = u'Fichiers de mappage (*.NM-Map-Objets)|*.NM-Map-Objets'
+    dlg.DefaultExt = 'NM-Map-Objets'
+    dlg.FileName   = 'objets_mappages.NM-Map-Objets'
     if dlg.ShowDialog() != WinForms.DialogResult.OK: return
     with codecs.open(dlg.FileName, 'w', 'utf-8') as f:
         json.dump({'mappings': _rows_to_list(rows)}, f,
@@ -368,75 +346,62 @@ def _show_save_dialog(filepath):
         w.txtMessage.Text = u'Configuration enregistree :\n\n' + filepath
         w.btnClose.Click += lambda s, e: setattr(w, 'DialogResult', True)
         w.show_dialog()
-    except Exception:
-        _alert(u'Sauvegarde', u'Configuration enregistree :\n' + filepath)
+    except Exception as ex:
+        show_alert(u'Sauvegarde', u'Configuration enregistree :\n' + filepath)
+        _log(u'SaveDialog : ' + str(ex))
 
 
 def load_config():
     """
     Charge un fichier de configuration de mappages.
 
-    Seuls les fichiers .NM-Map-Infos-Proj sont acceptés afin d'éviter de
-    charger par erreur un JSON quelconque non compatible avec ce script.
-    Le champ «categories» de chaque ligne (partagé avec le script «Infos
-    Projet → Objets par catégories») est chargé et utilisé ici comme un
-    FILTRE sur les objets sélectionnés (voir apply_to_selection).
+    Seuls les fichiers .NM-Map-Objets sont acceptés (même format que le
+    script «Objets → Objets par catégories»). Le champ «categories»
+    présent dans le fichier sert de filtre sur les objets sélectionnés
+    (voir apply_to_selection).
     """
     dlg = WinForms.OpenFileDialog()
     dlg.Title      = u'Charger la configuration'
-    dlg.Filter     = u'Fichiers de mappage (*.NM-Map-Infos-Proj)|*.NM-Map-Infos-Proj'
-    dlg.DefaultExt = 'NM-Map-Infos-Proj'
+    dlg.Filter     = u'Fichiers de mappage (*.NM-Map-Objets)|*.NM-Map-Objets'
+    dlg.DefaultExt = 'NM-Map-Objets'
     if dlg.ShowDialog() != WinForms.DialogResult.OK:
         return None
     # Garde-fou : si l'utilisateur tape manuellement un chemin qui contourne
     # le filtre du dialogue, on bloque quand même ici.
-    if not dlg.FileName.lower().endswith('.nm-map-infos-proj'):
-        _alert(u'Format incorrect',
-               u'Seuls les fichiers ".NM-Map-Infos-Proj" sont acceptés.')
+    if not dlg.FileName.lower().endswith('.nm-map-objets'):
+        show_alert(u'Format incorrect',
+                   u'Seuls les fichiers ".NM-Map-Objets" sont acceptés.')
         return None
     try:
         with codecs.open(dlg.FileName, 'r', 'utf-8') as f:
             data = json.load(f)
         return _list_to_rows(data.get('mappings', []))
     except Exception as ex:
-        _alert(u'Erreur de lecture', str(ex))
+        show_alert(u'Erreur de lecture', str(ex))
         return None
 
 
 # ─── Dialogue catégories ─────────────────────────────────────────────────────
-_PROJECT_INFO_CAT = u'Informations sur le projet'
-
-
 def show_categories_dialog(all_categories, current_selection):
     xaml = script.get_bundle_file('CategoriesDialog.xaml')
     dlg  = forms.WPFWindow(xaml)
     dlg.Title = u'Selectionner les categories'
 
-    # Séparer "Informations sur le projet" du reste de la liste
-    regular_cats = [c for c in all_categories if c != _PROJECT_INFO_CAT]
     selected_set = set(current_selection)
     visible_cbs  = []
     last_idx     = [-1]
-
-    # Case séparée "Informations sur le projet"
-    dlg.cbProjectInfo.IsChecked = (_PROJECT_INFO_CAT in selected_set)
 
     def _sync():
         for cb, cat in visible_cbs:
             if bool(cb.IsChecked): selected_set.add(cat)
             else:                  selected_set.discard(cat)
-        # Sync aussi la case ProjectInfo
-        if bool(dlg.cbProjectInfo.IsChecked):
-            selected_set.add(_PROJECT_INFO_CAT)
-        else:
-            selected_set.discard(_PROJECT_INFO_CAT)
 
     def populate(filter_text=u''):
         _sync()
         dlg.categoryListPanel.Children.Clear()
         del visible_cbs[:]
         last_idx[0] = -1
-        for cat in regular_cats:
+        for cat in all_categories:
             if filter_text and filter_text.lower() not in cat.lower():
                 continue
             cb = CheckBox()
@@ -505,45 +470,42 @@ def apply_to_selection(row_list, elements):
     Appelée depuis on_apply() — on est sur le thread principal Revit.
     Transaction via _pyrevit.Transaction : commit auto, rollback auto.
 
-    Le champ «categories» de chaque ligne agit comme un FILTRE sur la
-    sélection : seuls les éléments sélectionnés appartenant à l'une des
-    catégories choisies reçoivent CE mappage (les autres éléments
-    sélectionnés ne sont pas affectés par cette ligne). Une ligne sans
-    aucune catégorie choisie n'est appliquée à aucun élément.
+    Pour chaque élément sélectionné dont la catégorie correspond au filtre
+    du mappage, lit la valeur du paramètre source SUR CET ELEMENT, puis
+    l'écrit sur son propre paramètre cible (même élément).
     """
     active = [r for r in row_list
               if r.source_param and r.target_param and r.categories]
     if not active:
-        _alert(u'Aucun mappage',
-               u'Aucun mappage complet.\n\n'
-               u'Chaque ligne doit avoir :\n'
-               u'  \u2022 un paramètre source\n'
-               u'  \u2022 un paramètre cible\n'
-               u'  \u2022 au moins une catégorie (filtre).')
+        show_alert(u'Aucun mappage',
+                   u'Aucun mappage complet.\n\n'
+                   u'Chaque ligne doit avoir :\n'
+                   u'  \u2022 un paramètre source (objet)\n'
+                   u'  \u2022 un paramètre cible\n'
+                   u'  \u2022 au moins une catégorie (filtre).')
         return
 
     if not elements:
-        _alert(u'Aucun objet sélectionné',
-               u'Aucun objet sélectionné.\n\n'
-               u'Cliquez sur \u2295\u00a0Sélectionner pour choisir des objets\n'
-               u'dans Revit, puis cliquez sur \u25b6\u00a0Appliquer.')
+        show_alert(u'Aucun objet sélectionné',
+                   u'Aucun objet sélectionné.\n\n'
+                   u'Cliquez sur \u2295\u00a0Sélectionner pour choisir des objets\n'
+                   u'dans Revit, puis cliquez sur \u25b6\u00a0Appliquer.')
         return
 
-    values_by_row = dict((id(r), get_project_info_value(doc, r.source_param))
-                          for r in active)
-
-    n_set = n_skip = 0
+    n_set = n_skip = n_nomatch = 0
     errors = []
 
     # Context manager pyRevit 6.4.0 : commit auto, rollback auto sur exception
     try:
-        with _pyrevit.Transaction(u'Infos Projet -> Objets (selection)', doc=doc):
+        with _pyrevit.Transaction(u'Objets -> Objets (selection)', doc=doc):
             for elem in elements:
                 elem_cat = _elem_category_name(elem)
+
                 for row in active:
                     if elem_cat not in row.categories:
                         continue
-                    value = values_by_row[id(row)]
+
+                    value = get_element_value(elem, row.source_param)
                     try:
                         p = elem.LookupParameter(row.target_param)
                         if p is None or p.IsReadOnly:
@@ -561,7 +523,7 @@ def apply_to_selection(row_list, elements):
                     except Exception as ex:
                         errors.append(u'{}: {}'.format(row.target_param, ex))
     except Exception as ex:
-        _alert(u'Erreur de transaction', str(ex))
+        show_alert(u'Erreur de transaction', str(ex))
         return
 
     _log(u'{} renseigne(s), {} ignore(s)'.format(n_set, n_skip))
@@ -677,7 +639,7 @@ def make_row_border(row_data, source_params, source_param_types, params_by_type,
 
     cb_src, _ = _make_filterable_combo(
         source_params, row_data.source_param, on_src_select,
-        Thickness(0, 0, 4, 0), u'Parametre source — taper pour filtrer')
+        Thickness(0, 0, 4, 0), u'Parametre source (objet) — taper pour filtrer')
     Grid.SetColumn(cb_src, 0)
 
     arrow = TextBlock()
@@ -699,7 +661,7 @@ def make_row_border(row_data, source_params, source_param_types, params_by_type,
 
     cb_tgt, _reload_tgt = _make_filterable_combo(
         initial_avail, row_data.target_param, on_tgt_select,
-        Thickness(4, 0, 4, 0), u'Parametre cible — taper pour filtrer')
+        Thickness(4, 0, 4, 0), u'Parametre cible (meme objet) — taper pour filtrer')
     Grid.SetColumn(cb_tgt, 2)
     _reload_tgt_ref[0] = _reload_tgt
 
@@ -724,7 +686,7 @@ def make_row_border(row_data, source_params, source_param_types, params_by_type,
     btn_cat.Content           = cat_label()
     btn_cat.Margin            = Thickness(4, 0, 4, 0)
     btn_cat.VerticalAlignment = VerticalAlignment.Center
-    btn_cat.ToolTip           = u'Selectionner les categories d\'objets cibles'
+    btn_cat.ToolTip           = u'Selectionner les categories d\'objets cibles (filtre)'
     Grid.SetColumn(btn_cat, 3)
 
     def on_cats(s, e):
@@ -765,20 +727,20 @@ def main():
         except Exception:
             _ACTIVE_WINDOW[0] = None
 
-    source_params      = get_project_info_params(doc)
-    source_param_types = get_project_info_param_types(doc)
-    all_categories     = get_available_categories(doc)
-    params_by_type     = get_params_by_exact_type(doc)
+    params_by_type      = get_params_by_exact_type(doc)
+    source_params       = get_all_param_names(params_by_type)
+    source_param_types  = get_param_type_map(params_by_type)
+    all_categories       = get_available_categories(doc)
 
     if not source_params:
-        _alert(u'Informations Projet',
-               u'Aucun paramètre trouvé dans les Informations Projet.')
+        show_alert(u'Objets',
+                  u'Aucun paramètre trouvé sur les objets du projet.')
         return
 
     # script.get_bundle_file() remplace os.path.join(os.path.dirname(__file__), …)
     xaml_path = script.get_bundle_file('WPFWindow.xaml')
     wpf       = forms.WPFWindow(xaml_path)
-    wpf.Title = u'Informations Projet -> Objets (sélection)'
+    wpf.Title = u'Objets -> Objets (sélection)'
 
     row_list           = []
     used_targets       = set()
@@ -845,7 +807,7 @@ def main():
         rows = load_config()
         if rows is not None: load_rows(rows)
 
-    def on_save(s, e):     save_config(row_list)
+    def on_save(s, e): save_config(row_list)
 
     def on_add(s, e):      add_row()
 

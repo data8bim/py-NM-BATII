@@ -1,0 +1,13 @@
+title:
+  en_us: "Levels\n→ Objects by selection"
+  fr_fr: "Niveaux\n→ Objets par sélection"
+
+tooltip:
+  en_us: "Transfer level parameter values to objects (families) selected in the active view. Each selected object receives the value from its OWN level (found via its LevelId).
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+  fr_fr: "Transfert des valeurs de paramètres de niveaux vers les objets (familles) sélectionnés dans la vue active. Chaque objet sélectionné reçoit la valeur de SON PROPRE niveau (retrouvé via son LevelId).
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

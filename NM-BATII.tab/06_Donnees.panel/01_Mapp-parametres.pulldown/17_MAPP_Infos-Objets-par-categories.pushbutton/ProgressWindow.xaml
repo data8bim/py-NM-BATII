@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Copie Objets -> Objets en cours..."
+        Width="500" Height="150"
+        MinWidth="500"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="txtStatus"
+                   Grid.Row="0"
+                   Text="Préparation..."
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   Foreground="#333333"
+                   TextWrapping="Wrap"/>
+
+        <ProgressBar x:Name="progressBar"
+                     Grid.Row="2"
+                     Height="25"
+                     Minimum="0"
+                     Maximum="100"
+                     Value="0"
+                     Background="#E0E0E0"
+                     Foreground="#0078D4"
+                     BorderBrush="#AAAAAA"
+                     BorderThickness="1"/>
+
+        <TextBlock x:Name="txtCurrent"
+                   Grid.Row="4"
+                   Text="0 / 0"
+                   FontSize="12"
+                   Foreground="#666666"
+                   HorizontalAlignment="Center"/>
+
+    </Grid>
+</Window>

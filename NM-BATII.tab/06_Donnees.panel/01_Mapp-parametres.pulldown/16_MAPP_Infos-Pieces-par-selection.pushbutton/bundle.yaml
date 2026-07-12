@@ -1,0 +1,13 @@
+title:
+  en_us: "Rooms\n→ Objects by selection"
+  fr_fr: "Pièces\n→ Objets par sélection"
+
+tooltip:
+  en_us: "Transfer room parameter values to objects (families) selected in the active view. Each selected object receives the value from the ROOM CONTAINING IT (found via its Room property).
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+  fr_fr: "Transfert des valeurs de paramètres de pièces vers les objets (familles) sélectionnés dans la vue active. Chaque objet sélectionné reçoit la valeur de LA PIECE QUI LE CONTIENT (retrouvée via sa propriété Room).
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

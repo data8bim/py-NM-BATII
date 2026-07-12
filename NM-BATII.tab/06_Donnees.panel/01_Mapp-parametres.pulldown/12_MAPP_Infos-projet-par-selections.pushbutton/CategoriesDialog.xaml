@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Sélectionner les catégories"
+  Width="420" Height="600"
+  MinWidth="340" MinHeight="380"
+  ResizeMode="CanResize"
+  WindowStartupLocation="CenterOwner">
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>  <!-- 0 Recherche label -->
+      <RowDefinition Height="Auto"/>  <!-- 1 TextBox recherche -->
+      <RowDefinition Height="Auto"/>  <!-- 2 Boutons Tout / Rien / Inverser -->
+      <RowDefinition Height="*"/>     <!-- 3 Liste des catégories -->
+      <RowDefinition Height="Auto"/>  <!-- 4 Section Informations sur le projet -->
+      <RowDefinition Height="Auto"/>  <!-- 5 Boutons OK / Annuler -->
+    </Grid.RowDefinitions>
+
+    <!-- Recherche ─────────────────────────────────────────────────────────── -->
+    <TextBlock Grid.Row="0" Text="Rechercher :" Margin="0,0,0,3"/>
+    <TextBox   Grid.Row="1" x:Name="searchBox"
+               Height="26" Margin="0,0,0,8"
+               VerticalContentAlignment="Center"/>
+
+    <!-- Tout / Rien / Inverser ───────────────────────────────────────────── -->
+    <Grid Grid.Row="2" Margin="0,0,0,8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnSelectAll"
+              Content="Tout sélectionner"
+              ToolTip="Sélectionner tous les éléments visibles"/>
+      <Button Grid.Column="2" x:Name="btnDeselectAll"
+              Content="Tout désélectionner"
+              ToolTip="Désélectionner tous les éléments visibles"/>
+      <Button Grid.Column="4" x:Name="btnInvert"
+              Content="Inverser"
+              ToolTip="Inverser la sélection des éléments visibles"/>
+    </Grid>
+
+    <!-- Liste des catégories ─────────────────────────────────────────────── -->
+    <Border Grid.Row="3"
+            BorderThickness="1" BorderBrush="LightGray"
+            Margin="0,0,0,8">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel x:Name="categoryListPanel" Margin="6,4"/>
+      </ScrollViewer>
+    </Border>
+
+    <!-- Section Informations sur le projet ──────────────────────────────── -->
+    <Border Grid.Row="4"
+            BorderThickness="1" BorderBrush="#E8A000"
+            Background="#FFFBF0"
+            CornerRadius="3"
+            Margin="0,0,0,8" Padding="8,7">
+      <StackPanel>
+        <CheckBox x:Name="cbProjectInfo"
+                  Margin="0,0,0,6"
+                  FontWeight="SemiBold">
+          <TextBlock Text="Informations sur le projet"
+                     FontWeight="SemiBold"
+                     TextWrapping="Wrap"/>
+        </CheckBox>
+        <TextBlock TextWrapping="Wrap"
+                   FontSize="11"
+                   Foreground="#7A5000">
+          <Run FontWeight="SemiBold">⚠ Attention :</Run>
+          <Run>Si le paramètre source et le paramètre cible portent le même nom, le script réécrit la valeur sur elle‑même à chaque exécution.
+Cette opération est inutile et ralentit le traitement.</Run>
+        </TextBlock>
+      </StackPanel>
+    </Border>
+
+    <!-- OK / Annuler ─────────────────────────────────────────────────────── -->
+    <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+      <Button x:Name="btnCancel" Content="Annuler" Width="90"
+              IsCancel="True" Margin="0,0,8,0"/>
+      <Button x:Name="btnOk"     Content="OK"      Width="90"
+              IsDefault="True"/>
+    </StackPanel>
+
+  </Grid>
+</Window>

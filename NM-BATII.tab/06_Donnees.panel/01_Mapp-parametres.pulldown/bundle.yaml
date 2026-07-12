@@ -5,5 +5,15 @@ layout:
   - 11_MAPP_Infos-projet-par-categories
   - 12_MAPP_Infos-projet-par-selections
   - -----
+  - 13_MAPP_Infos-Niveaux-par-categories
+  - 14_MAPP_Infos-Niveaux-par-selection
+  - -----
+  - 15_MAPP_Infos-Pieces-par-categories
+  - 16_MAPP_Infos-Pieces-par-selection
+  - -----
+  - 17_MAPP_Infos-Objets-par-categories
+  - 18_MAPP_Infos-Objets-par-selection
+  - -----
+  - -----
   - 21_MAPP_SP-SHON-SHOB
 icon: icon.png

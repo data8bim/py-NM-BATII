@@ -1,0 +1,13 @@
+title:
+  en_us: "Objects\n→ Objects by selection"
+  fr_fr: "Objets\n→ Objets par sélection"
+
+tooltip:
+  en_us: "Copy the value of a source parameter to a target parameter of the same data type (text, length, integer...), on the object itself, for the selected objects (matching the chosen categories).
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+  fr_fr: "Recopie la valeur d'un paramètre source vers un paramètre cible du même type de données (texte, longueur, entier...), sur l'objet lui-même, pour les objets sélectionnés (correspondant aux catégories choisies).
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

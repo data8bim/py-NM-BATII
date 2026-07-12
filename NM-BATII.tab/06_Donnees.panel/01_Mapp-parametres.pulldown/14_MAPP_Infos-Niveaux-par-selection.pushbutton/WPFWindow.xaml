@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Informations Projet -> Objets (sélection)"
+        Title="Niveaux -> Objets (sélection)"
         Width="700" Height="560"
         MinWidth="520" MinHeight="420"
         ResizeMode="CanResize"
@@ -22,8 +22,8 @@
     </Grid.RowDefinitions>
 
     <!-- ═══ Bandeau informatif ════════════════════════════════════════════════
-         Explique comment utiliser ce script et pointer vers l'autre script
-         pour créer/enregistrer des configurations.
+         Explique comment utiliser ce script et pointe vers le script "par
+         catégories" pour créer/enregistrer des configurations.
     ═══════════════════════════════════════════════════════════════════════ -->
     <Border Grid.Row="0"
             Background="#EEF4FB" BorderBrush="#A8C8E8"
@@ -34,13 +34,15 @@
         <Run FontWeight="SemiBold">⊕ Sélectionner</Run>
         <Run>pour choisir des objets dans Revit, puis sur</Run>
         <Run FontWeight="SemiBold">▶ Appliquer</Run>
-        <Run>pour transférer les valeurs.</Run>
+        <Run>pour transférer les valeurs. Chaque objet reçoit la valeur de</Run>
+        <Run FontWeight="SemiBold">son propre niveau</Run>
+        <Run>(retrouvé via son LevelId).</Run>
         <LineBreak/>
         <Run>Les catégories choisies pour chaque mappage servent de</Run>
         <Run FontWeight="SemiBold">filtre</Run>
         <Run>sur les objets sélectionnés (aucune catégorie choisie = ce mappage n'est appliqué à aucun objet).</Run>
         <Run>Les fichiers de configuration sont compatibles avec le script</Run>
-        <Run FontWeight="SemiBold">« Infos Projet → Objets par catégories ».</Run>
+        <Run FontWeight="SemiBold">« Niveaux → Objets par niveau ».</Run>
       </TextBlock>
     </Border>
 
@@ -56,7 +58,7 @@
           <ColumnDefinition Width="150"/>
           <ColumnDefinition Width="32"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" Text="Paramètre source (Informations Projet)"
+        <TextBlock Grid.Column="0" Text="Paramètre source (Niveaux)"
                    FontWeight="SemiBold" VerticalAlignment="Center" Margin="2,0"/>
         <TextBlock Grid.Column="1" Text="→"
                    HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray"/>
@@ -174,7 +176,7 @@
                 Content="▶  Appliquer" Width="120" Height="32"
                 Style="{DynamicResource NMButtonValide}"
                 IsDefault="True" Margin="0,0,8,0"
-                ToolTip="Copier les valeurs des Informations Projet vers les paramètres des objets sélectionnés"/>
+                ToolTip="Copier, pour chaque objet sélectionné, la valeur de SON niveau vers son paramètre cible"/>
         <Button x:Name="btnClose"
                 Content="Fermer" Width="90" Height="32"
                 Style="{DynamicResource NMButtonValide}"

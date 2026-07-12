@@ -1,0 +1,13 @@
+title:
+  en_us: "Levels\n→ Objects by level"
+  fr_fr: "Niveaux\n→ Objets par niveau"
+
+tooltip:
+  en_us: "Transfer level parameter values to the objects referenced to that level (Rooms, Spaces, and any element whose LevelId matches). Each object receives the value from its own level.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+  fr_fr: "Transfert des valeurs de paramètres des niveaux vers les objets qui leur sont référencés (Pièces, Espaces, et tout élément dont le LevelId correspond). Chaque objet reçoit la valeur de son propre niveau.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

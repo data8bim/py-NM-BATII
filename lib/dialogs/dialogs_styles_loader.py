@@ -20,6 +20,7 @@ import os
 from System.IO import StreamReader
 from System.Windows.Markup import XamlReader
 from System.Windows import Application
+from System.Windows.Forms import MessageBox
 from pyrevit import forms
 
 _ALERT_XAML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "AlertWindow.xaml")
@@ -34,7 +35,8 @@ def show_alert(title, message):
         w.btnClose.Click += lambda s, e: setattr(w, 'DialogResult', True)
         w.ShowDialog()
     except Exception:
-        forms.alert(message, title=title)
+        # Dernier recours : boîte de dialogue Windows native (pas pyRevit).
+        MessageBox.Show(message, title)
 
 # ✅ FIX : chemin résolu depuis __file__ (robuste quel que soit l'emplacement
 # d'installation de l'extension sur le poste).
@@ -79,14 +81,14 @@ def load(file_name="dialogs_styles.xaml", subfolder="dialogs", lib_dir=None):
 
             return True
         except Exception as e:
-            forms.alert(
-                "💥 Erreur lors du chargement du style :\n{0}".format(str(e)),
-                title="⚠️ Chargement WPF"
+            MessageBox.Show(
+                "Erreur lors du chargement du style :\n{0}".format(str(e)),
+                "Chargement WPF"
             )
             return False
     else:
-        forms.alert(
-            "📄 Fichier introuvable :\n{0}".format(style_path),
-            title="⚠️ Fichier manquant"
+        MessageBox.Show(
+            "Fichier introuvable :\n{0}".format(style_path),
+            "Fichier manquant"
         )
         return False
