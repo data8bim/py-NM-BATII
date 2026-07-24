@@ -1,0 +1,13 @@
+title:
+  en_us: "MEP Spaces\n→ Objects by selection"
+  fr_fr: "Espaces\n→ Objets par sélection"
+
+tooltip:
+  en_us: "Transfer MEP space parameter values to objects selected in the active view. Each selected object receives the value from the SPACE CONTAINING IT (found via its Space property).
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+  fr_fr: "Transfert des valeurs de paramètres d'espaces MEP vers les objets sélectionnés dans la vue active. Chaque objet sélectionné reçoit la valeur de L'ESPACE QUI LE CONTIENT (retrouvée via sa propriété Space).
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

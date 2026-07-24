@@ -4,7 +4,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Termine"
         SizeToContent="WidthAndHeight"
-        MinWidth="400"
+        MinWidth="450"
+        MaxWidth="700"
+        MaxHeight="600"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
 
@@ -16,34 +18,77 @@
 
     <Grid Margin="5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="10"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
 
+        <!-- Resume chiffre -->
         <Border BorderBrush="DodgerBlue"
-                Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                Grid.Row="0"
                 BorderThickness="1"
                 CornerRadius="3"
                 Padding="10"
                 Margin="5">
             <TextBlock x:Name="txtMessage"
                        TextWrapping="Wrap"
-                       FontSize="20"
+                       FontSize="18"
                        FontWeight="Medium"
                        TextAlignment="Center"
                        VerticalAlignment="Center"/>
         </Border>
 
+        <!-- Tableau vues creees / fichiers CAO lies -->
+        <DataGrid x:Name="dataGrid"
+                  Grid.Row="2"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  HeadersVisibility="Column"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserResizeRows="False"
+                  SelectionUnit="CellOrRowHeader"
+                  SelectionMode="Extended"
+                  ClipboardCopyMode="IncludeHeader"
+                  RowHeaderWidth="0"
+                  GridLinesVisibility="Horizontal"
+                  BorderBrush="DodgerBlue"
+                  BorderThickness="1"
+                  Margin="5">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Vues creees"
+                                     Binding="{Binding [Vue]}"
+                                     Width="*"/>
+                <DataGridTextColumn Header="Fichiers CAO lies"
+                                     Binding="{Binding [Fichiers]}"
+                                     Width="2*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Bouton utilitaire (copie du tableau), volontairement discret :
+             style neutre explicite, sinon il heritait du style implicite
+             NMButtonValide de cette fenetre et prenait son MinWidth=120 /
+             MinHeight=40, au lieu des 45x22 voulus ici. -->
+        <Button x:Name="btnCopy"
+                Content="Copier"
+                Grid.Row="3"
+                HorizontalAlignment="Right"
+                FontSize="11"
+                Padding="4,2"
+                Width="45"
+                MinWidth="45"
+                MinHeight="22"
+                Margin="5,3,5,0"
+                Style="{DynamicResource NMButtonStandard}"/>
+
         <Button x:Name="btnClose"
                 Content="Fermer"
-                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                Grid.Row="5"
                 HorizontalAlignment="Stretch"
-                IsDefault="True"/>
+                IsDefault="True"
+                Style="{DynamicResource NMButtonAppliquer}"/>
     </Grid>
 </Window>

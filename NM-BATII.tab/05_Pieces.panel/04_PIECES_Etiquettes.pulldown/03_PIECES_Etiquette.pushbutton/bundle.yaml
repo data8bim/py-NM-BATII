@@ -1,0 +1,27 @@
+title:
+  en_us: "Tag Room"
+  fr_fr: "Étiqueter une pièce"
+tooltip:
+  en_us: "Native Revit tool: Tag Room (RT)
+         \nTags the selected room.
+         \nOpen a plan view.
+         \nUse this tool to add tags to selected rooms without a tag,
+         \nor use the Tag All tool.
+         \nSelect a tag family using the type selector.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+  fr_fr: "Outil natif Revit : Etiqueter une pièce (RT)
+         \nÉtiquette la pièce sélectionnée.
+         \nOuvrez une vue en plan.
+         \nUtilisez cet outil pour ajouter des étiquettes aux pièces
+         \nsélectionnées sans étiquette ou utilisez l'outil Tout étiqueter.
+         \nSélectionnez une famille d'étiquettes à l'aide du sélecteur de
+         \ntype.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context:
+  any:
+  - active-plan-view
+  - active-elevation-view
+  - active-section-view

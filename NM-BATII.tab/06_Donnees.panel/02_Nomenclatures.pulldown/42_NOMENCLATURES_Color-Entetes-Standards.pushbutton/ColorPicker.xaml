@@ -7,14 +7,6 @@
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <Style x:Key="BoutonAppliquer" TargetType="Button" BasedOn="{StaticResource NMButtonValide}">
-            <Setter Property="Width" Value="100"/>
-            <Setter Property="Height" Value="30"/>
-        </Style>
-        <Style x:Key="BoutonAnnuler" TargetType="Button" BasedOn="{StaticResource NMButtonValide}">
-            <Setter Property="Width" Value="100"/>
-            <Setter Property="Height" Value="30"/>
-        </Style>
     </Window.Resources>
 
     <!-- DISTRIBUTION DES GRIDS PRINCIPAUX -->
@@ -52,23 +44,23 @@
 
         <!-- Boutons -->
         <Grid Grid.Row="3" Margin="5,5,5,0">
+            <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="1"
+            <Button Grid.Column="0"
                     x:Name="ok_button"
-                    Content="Appliquer"
-                    Style="{StaticResource BoutonAppliquer}"
-                    Margin="0,0,10,0"
+                    Content="▶  Appliquer"
+                    Style="{DynamicResource NMButtonAppliquer}"
                     IsDefault="True"/>
 
             <Button Grid.Column="2"
                     x:Name="cancel_button"
                     Content="Annuler"
-                    Style="{StaticResource BoutonAnnuler}"
+                    Style="{DynamicResource NMButtonAnnuler}"
                     IsCancel="True"/>
         </Grid>
 

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Colorisation des volumes de pièces 3D"
+        Width="1100" Height="820"
+        MinWidth="760" MinHeight="560"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Window.Resources>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}"/>
+    <Style TargetType="Button"    BasedOn="{StaticResource NMButtonStandard}"/>
+    <Style TargetType="ComboBox"  BasedOn="{StaticResource NMComboBoxStandard}"/>
+    <Style TargetType="ListBox"   BasedOn="{StaticResource NMListBoxStandard}"/>
+  </Window.Resources>
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="230"/>
+      <RowDefinition Height="10"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="4"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="10"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Phase + Configuration ══════════════════════════════════════════ -->
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="320"/>
+        <ColumnDefinition Width="20"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Phase du projet à traiter" VerticalAlignment="Center" FontWeight="Bold"/>
+      <ComboBox Grid.Column="2" x:Name="cmbPhase" Height="26"/>
+      <GroupBox Grid.Column="4" Header="Configuration">
+        <Grid Margin="4,4,4,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button Grid.Column="0" x:Name="btnLoadConfig"
+                  Content="📂  Charger" Height="26"
+                  ToolTip="Charger une configuration de colorisation enregistrée"/>
+          <Button Grid.Column="2" x:Name="btnSaveConfig"
+                  Content="💾  Enregistrer" Height="26"
+                  ToolTip="Enregistrer la configuration actuelle (phase, paramètres, couleurs) dans un fichier"/>
+        </Grid>
+      </GroupBox>
+    </Grid>
+
+    <TextBlock Grid.Row="2" TextWrapping="Wrap"
+               Text="Sélectionnez un ou plusieurs paramètres de pièces (colonne de gauche) puis transférez-les vers la colonne de droite (bouton « &gt; ») pour construire la combinaison qui servira à regrouper et coloriser les volumes 3D. L'ordre de la colonne de droite définit l'ordre de la combinaison (boutons ▲/▼)."/>
+
+    <!-- ═══ Liste à double colonne (paramètres) ═══════════════════════════ -->
+    <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="90"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <Grid Grid.Column="0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="4"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Paramètres disponibles" FontWeight="Bold"/>
+        <ListBox Grid.Row="2" x:Name="lstAvailable" SelectionMode="Extended"/>
+      </Grid>
+
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Button x:Name="btnAdd"    Content="&gt;" Width="50" Margin="0,0,0,6"/>
+        <Button x:Name="btnRemove" Content="&lt;" Width="50" Margin="0,0,0,20"/>
+        <Button x:Name="btnUp"     Content="▲"    Width="50" Margin="0,0,0,6"/>
+        <Button x:Name="btnDown"   Content="▼"    Width="50"/>
+      </StackPanel>
+
+      <Grid Grid.Column="2">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="4"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Paramètres sélectionnés (ordre de la combinaison)" FontWeight="Bold"/>
+        <ListBox Grid.Row="2" x:Name="lstSelected" SelectionMode="Extended"/>
+      </Grid>
+    </Grid>
+
+    <!-- ═══ Génération des valeurs ═════════════════════════════════════════ -->
+    <Grid Grid.Row="6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnGenerer" Content="Générer les valeurs" Padding="8,2"/>
+      <TextBlock Grid.Column="2" x:Name="txtValuesCount" VerticalAlignment="Center" Text="(0 valeur générée)"/>
+    </Grid>
+
+    <!-- ═══ Tableau valeurs / couleurs ═════════════════════════════════════ -->
+    <Border Grid.Row="8" BorderThickness="1" BorderBrush="LightGray">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel x:Name="valuesPanel" Margin="4"/>
+      </ScrollViewer>
+    </Border>
+
+    <!-- ═══ Boutons d'action ═══════════════════════════════════════════════ -->
+    <Grid Grid.Row="10">
+      <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnApply"
+              Content="▶  Appliquer"
+              Style="{DynamicResource NMButtonAppliquer}"
+              IsDefault="True"/>
+      <Button Grid.Column="2" x:Name="btnCancel"
+              Content="Annuler"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"/>
+    </Grid>
+  </Grid>
+</Window>

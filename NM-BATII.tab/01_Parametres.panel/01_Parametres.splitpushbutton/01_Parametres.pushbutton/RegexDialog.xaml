@@ -17,9 +17,19 @@
                MinHeight="200"
                VerticalScrollBarVisibility="Auto"/>
     </GroupBox>
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-      <Button x:Name="btnCancel" Content="Annuler"  Width="75" IsCancel="True" Margin="0,0,5,0"/>
-      <Button x:Name="btnSave"   Content="Enregistrer" Width="75" IsDefault="True"/>
-    </StackPanel>
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
+         Le verbe reste "Enregistrer" : l'action ecrit reellement dans config.json. -->
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnSave" Content="▶  Enregistrer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
   </StackPanel>
 </Window>

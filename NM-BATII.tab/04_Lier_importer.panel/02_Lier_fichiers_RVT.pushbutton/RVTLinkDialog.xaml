@@ -44,12 +44,17 @@
 						VerticalAlignment="Center" />
 		</Border>
 
+		<!-- Fenetre a bouton unique : pleine largeur, style Appliquer.
+		     Pas de bouton Annuler ajoute ici : le handler se contente de
+		     Close() et le script poursuit ensuite, un Annuler serait trompeur
+		     tant que l'abandon n'est pas gere cote script.py. -->
 		<Button	x:Name="btnOk"
-				Content="Suivant"
+				Content="▶  Suivant"
 				Grid.Row="2"
 				Grid.Column="0" Grid.ColumnSpan="3"
 				HorizontalAlignment="Stretch"
-				IsDefault="True"/>
+				IsDefault="True"
+				Style="{DynamicResource NMButtonAppliquer}"/>
 
 	</Grid>
 </Window>

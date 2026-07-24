@@ -16,9 +16,6 @@
         <Style x:Key="BoutonAction" TargetType="Button" BasedOn="{StaticResource NMButtonStandard}">
             <Setter Property="Height" Value="30"/>
         </Style>
-        <Style x:Key="BoutonAppliquer" TargetType="Button" BasedOn="{StaticResource NMButtonValide}">
-            <Setter Property="Height" Value="40"/>
-        </Style>
     </Window.Resources>
 
     <Grid Margin="12" Background="{DynamicResource DialogBackgroundBrush}">
@@ -106,11 +103,21 @@
         </Grid>
 
         <!-- Bouton Appliquer -->
-        <Button x:Name="btnOk"
-                Grid.Row="5"
-                Content="Appliquer les regroupements"
-                Style="{StaticResource BoutonAppliquer}"
-                Margin="0,8,0,0"
-                IsDefault="True"/>
+        <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+        <Grid Grid.Row="5" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="btnOk"
+                    Content="▶  Appliquer"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True"/>
+            <Button Grid.Column="2" x:Name="btnCancel"
+                    Content="Annuler"
+                    Style="{DynamicResource NMButtonAnnuler}"
+                    IsCancel="True"/>
+        </Grid>
     </Grid>
 </Window>

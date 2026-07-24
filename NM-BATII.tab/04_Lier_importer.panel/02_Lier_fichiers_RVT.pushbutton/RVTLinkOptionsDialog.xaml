@@ -178,15 +178,18 @@
 
         <!-- Ligne 9 : Validation -->
         <Grid Grid.Row="9">
+            <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="btnOk" Content="Lier"
-                    Style="{StaticResource NMButtonValideOnly}" BorderBrush="LightBlue" Grid.Column="1"/>
+            <Button x:Name="btnOk" Content="▶  Lier"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True" Grid.Column="0"/>
             <Button x:Name="btnCancel" Content="Annuler"
-                    Style="{StaticResource NMButtonValideOnly}" Grid.Column="2"/>
+                    Style="{DynamicResource NMButtonAnnuler}"
+                    IsCancel="True" Grid.Column="2"/>
         </Grid>
     </Grid>
 </Window>

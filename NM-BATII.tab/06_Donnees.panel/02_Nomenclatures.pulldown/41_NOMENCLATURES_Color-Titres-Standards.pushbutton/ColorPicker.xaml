@@ -105,17 +105,23 @@
         </TabControl>
 
         <!-- Boutons fixes en bas, visibles pour tous les onglets -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button x:Name="ok_button" Content="Appliquer"
-                    Width="100" Height="35" Margin="0,0,10,0"
-                    Background="#0078D4" Foreground="White"
-                    BorderThickness="0" FontWeight="Bold"
+        <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
+             Les Background/Foreground locaux ont ete retires : poses sur le
+             bouton, ils ecrasaient les Setter des styles partages. -->
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="ok_button"
+                    Content="▶  Appliquer"
+                    Style="{DynamicResource NMButtonAppliquer}"
                     IsDefault="True"/>
-            <Button x:Name="cancel_button" Content="Annuler"
-                    Width="100" Height="35"
-                    Background="#E0E0E0" Foreground="Black"
-                    BorderThickness="1" BorderBrush="#AAA"
+            <Button Grid.Column="2" x:Name="cancel_button"
+                    Content="Annuler"
+                    Style="{DynamicResource NMButtonAnnuler}"
                     IsCancel="True"/>
-        </StackPanel>
+        </Grid>
     </Grid>
 </Window>

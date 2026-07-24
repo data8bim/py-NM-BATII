@@ -1,0 +1,27 @@
+title:
+  en_us: "Room Separator"
+  fr_fr: "Séparateur de pièces"
+tooltip:
+  en_us: "Native Revit tool: Room Separator
+         \nCreates a room separation line to bound rooms in places
+         \nwhere no wall or other room-bounding element exists.
+         \nOpen a floor plan view to place a separation line.
+         \nIf the space already contains a room, the room boundaries
+         \nadjust based on the new separation lines. If the space does
+         \nnot yet contain a room, you can create one.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+  fr_fr: "Outil natif Revit : Séparateur de pièces
+         \nCrée une ligne de séparation pour limiter des pièces aux
+         \nendroits où aucun mur ni aucun autre élément de délimitation
+         \nde pièce n'existe.
+         \nOuvrez une vue de plan d'étage pour placer une ligne de
+         \nséparation.
+         \nSi l'espace contient déjà une pièce, les limites de pièces
+         \ns'ajustent par rapport aux nouvelles lignes de séparation. Si
+         \nl'espace ne contient pas encore de pièce, vous pouvez en
+         \ncréer une.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-plan-view

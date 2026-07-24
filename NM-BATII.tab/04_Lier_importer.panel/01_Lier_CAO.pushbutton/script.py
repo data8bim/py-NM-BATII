@@ -44,6 +44,7 @@ def _pick_cao_folder():
     return None
 
 from Autodesk.Revit.DB import (
+    Element,
     ViewPlan,
     ViewDrafting,
     ViewFamily,
@@ -80,12 +81,17 @@ from utils.vues_creation import (
     resolve_view_name,
     prepare_view_creation,
     create_view_element,
+    verifier_template,
 )
+import utils.extrac_nom_fichier_convention as _extrac_conv_mod
+reload(_extrac_conv_mod)
 from utils.extrac_nom_fichier_convention import (
     extract_file_name_info,
     delimiter_from_template,
     resolve_template,
     get_convention_template,
+    build_regex,
+    diagnostiquer_nom_fichier,
 )
 from dialogs.dialogs_styles_loader import load as load_styles, show_alert
 load_styles(lib_dir=lib_dir)
@@ -136,6 +142,15 @@ def log(msg):
 # ---------- Utilitaires vues ----------
 def get_building_code(level_name, delim="_"):
     return level_name.split(delim)[0] if delim in level_name else level_name
+
+
+def _phase_name(phase):
+    """
+    Retourne le nom d'une phase de projet (DB.Phase).
+    Contournement IronPython : Element.Name est implemente en interface
+    explicite sur certains types, ce qui fait echouer l'acces direct phase.Name.
+    """
+    return Element.Name.__get__(phase)
 
 
 # ---------- Utilitaires DWG ----------
@@ -197,6 +212,10 @@ def get_existing_dwg_link_info(doc):
 from System.Windows.Threading import DispatcherPriority as _DP
 from System import Action as _Action
 from System.Windows.Controls import CheckBox as _WPFCheckBox
+from System.Windows.Controls import ListBoxItem as _ListBoxItem
+from System.Windows.Media import VisualTreeHelper as _VisualTreeHelper
+from System.Windows.Input import Keyboard as _Keyboard
+from System.Windows.Input import ModifierKeys as _ModifierKeys
 from System.Windows import Thickness as _Thickness
 from System.Windows import VerticalAlignment as _VerticalAlignment
 
@@ -291,31 +310,47 @@ def main():
 
         log(u"## Lier CAO \u2192 Vues")
         log(u"Delimiteur detecte : `{}`".format(delim))
+        log(u"[DEBUG] Regex fichiers : `{}`".format(build_regex(cfg)))
 
         _tpl_nom_niveau = get_convention_template(
-            cfg, 'niveaux-revit', '{construction}_{niveau}_{demi-niv}')
+            cfg, 'niveau-revit', '{construction}_{niveau-code}_{demi-niv}')
         log(u"Template nommage niveaux : `{}`".format(_tpl_nom_niveau))
 
-        # 2. Choix du dossier
-        folder = _pick_cao_folder()
-        if not folder:
-            return
-
-        # 3. Collecter les niveaux du projet
+        # 2. Collecter les niveaux du projet
+        # Controle fait AVANT de demander le dossier : sans niveau, aucune vue
+        # ne peut etre creee ni aucun DWG rattache. Inutile de faire choisir un
+        # dossier pour ne rien pouvoir en faire.
         levels = {
             lvl.Name: lvl
             for lvl in FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Levels)
                 .WhereElementIsNotElementType()
         }
-        buildings = {
-            get_building_code(name, delim)
-            for name in levels if delim in name
-        }
         log(u"Niveaux Revit ({}) : {}".format(
             len(levels),
             u", ".join(u"`{}`".format(n) for n in sorted(levels)[:10]) or u"(aucun)"
         ))
+        if not levels:
+            show_alert(u"Aucun niveau",
+                       u"Le projet Revit ne contient aucun niveau.",
+                       centrer=True)
+            return
+
+        buildings = {
+            get_building_code(name, delim)
+            for name in levels if delim in name
+        }
+
+        # 3. Choix du dossier
+        folder = _pick_cao_folder()
+        if not folder:
+            return
+
+        # 3bis. Collecter les phases du projet
+        phases_projet = list(doc.Phases)
+        if not phases_projet:
+            show_alert(u"Aucune phase", u"Aucune phase trouv\u00e9e dans le projet.")
+            return
 
         # 4. Fonction de scan (appelable depuis la fenetre via refresh)
         def scan_candidates(fld, include_sub):
@@ -346,7 +381,7 @@ def main():
                     bat       = info.get("building")
                     _level    = info.get("level", "")
                     _demi_str = info.get("half", "")
-                    _sous_tpl = {"niveau": _level}
+                    _sous_tpl = {"niveau-code": _level}
                     _vals     = {"construction": bat, "demi-niv": _demi_str}
                     lvl_name  = resolve_template(_tpl_nom_niveau, _vals, _sous_tpl)
                     if lvl_name not in levels:
@@ -383,6 +418,35 @@ def main():
         log(u"Scan : {} fichier(s) CAO trouves, {} conformes a la convention, "
             u"{} batiment(s) absent(s), {} niveau(x) absent(s)".format(
                 nb_dwg_pdf, nb_convention, nb_batiment_absent, nb_niveau_absent))
+
+        # Aucun fichier conforme alors que le dossier en contient : sans
+        # explication, l'utilisateur ne peut pas savoir quoi corriger. On
+        # diagnostique le premier fichier rencontre a titre d'exemple.
+        if nb_dwg_pdf > 0 and nb_convention == 0:
+            _exemple = u""
+            try:
+                for _f in sorted(os.listdir(folder)):
+                    if any(_f.lower().endswith(_e) for _e in ('.dwg', '.pdf')):
+                        _exemple = _f
+                        break
+            except Exception:
+                _exemple = u""
+            _detail = u""
+            if _exemple:
+                try:
+                    _ok_diag, _lignes = diagnostiquer_nom_fichier(_exemple, cfg)
+                    _detail = u"\n".join(_lignes)
+                except Exception:
+                    _detail = u""
+            _msg = (u"Aucun des {} fichier(s) CAO du dossier ne respecte la "
+                    u"convention de nommage.\n\n".format(nb_dwg_pdf))
+            if _exemple:
+                _msg += u"Exemple analysé :\n\n    {}\n\n".format(_exemple)
+            if _detail:
+                _msg += _detail + u"\n\n"
+            _msg += u"Convention attendue :\n    {}".format(
+                get_convention_template(cfg, "fichiers", u"(non configurée)"))
+            show_alert(u"Aucun fichier conforme à la convention", _msg)
 
         # 5. Ouvrir la fenetre combinee
         xaml = os.path.join(script_dir, "MainWindow.xaml")
@@ -455,7 +519,12 @@ def main():
         win.chkIncludeSub.Unchecked += refresh_candidates
 
         # -- Section Vues : remplissage des combos --
-        # Mapping id nommage_vues → ViewFamily Revit (couvre tous les IDs standards)
+        # Mapping id nommage_vues → ViewFamily Revit.
+        # Seules ces familles sont prises en charge par Lier CAO : ce sont
+        # celles que create_view_element() sait produire a partir d'un niveau
+        # (ViewPlan / ViewDrafting / Legend). Coupe, Elevation et Vue 3D en
+        # sont volontairement exclues — leur case "Lier CAO → Vues" est grisee
+        # dans 01_Parametres > Disponibilites familles de vues.
         # Certains membres de ViewFamily peuvent etre absents selon la version de Revit
         # → getattr(..., None) pour eviter AttributeError
         _VUE_ID_TO_FAMILY = {
@@ -464,23 +533,30 @@ def main():
             u'vue-structure': ViewFamily.StructuralPlan,
             u'vue-dessin':    ViewFamily.Drafting,
             u'vue-surface':   ViewFamily.FloorPlan,
-            u'vue-coupe':     ViewFamily.Section,
-            u'vue-elevation': ViewFamily.Elevation,
         }
         _vf_legend = getattr(ViewFamily, 'Legend', None)
         if _vf_legend is not None:
             _VUE_ID_TO_FAMILY[u'vue-legende'] = _vf_legend
-        _vf_threed = getattr(ViewFamily, 'ThreeD', None)
-        if _vf_threed is not None:
-            _VUE_ID_TO_FAMILY[u'vue-3d'] = _vf_threed
         # Construire view_options dynamiquement depuis config.json (nommage_vues avec vues_et_dwg=true)
         _nommage_vues_cfg = cfg.get(u'conventions_nommage', {}).get(u'nommage_vues', [])
         view_options = []
+        _fams_non_gerees = []
         for _nv in _nommage_vues_cfg:
             if _nv.get(u'vues_et_dwg', False):
                 _fam = _VUE_ID_TO_FAMILY.get(_nv.get(u'id', u''))
                 if _fam is not None:
                     view_options.append((_nv.get(u'label', u''), _fam))
+                else:
+                    # Famille cochee dans les parametres mais non prise en charge
+                    # ici : on le signale au lieu de l'ignorer silencieusement.
+                    _fams_non_gerees.append(_nv.get(u'label', _nv.get(u'id', u'?')))
+        if _fams_non_gerees:
+            show_alert(
+                u"Familles de vues non prises en charge",
+                u"Les familles suivantes sont cochées dans la colonne "
+                u"« Lier CAO → Vues » des paramètres mais ne sont pas gérées "
+                u"par cet outil, elles n'apparaîtront pas dans la liste :\n\n"
+                u"  • {}".format(u"\n  • ".join(_fams_non_gerees)))
         # Fallback si aucune entree configuree
         if not view_options:
             view_options = [
@@ -494,6 +570,12 @@ def main():
 
         win.cmbViewFamily.ItemsSource   = view_labels
         win.cmbViewFamily.SelectedIndex = 0
+
+        # Phase de projet : la derniere phase est selectionnee par defaut
+        # (reproduit le comportement par defaut de Revit a la creation d'une vue).
+        _phase_labels = [_phase_name(ph) for ph in phases_projet]
+        win.cmbPhase.ItemsSource   = _phase_labels
+        win.cmbPhase.SelectedIndex = len(_phase_labels) - 1
 
         # Type de vue personnalisé : trié par 'ordre'.
         # Fallback si 'ordre' absent : Temporaire=1, FM=2 (même logique que Parametres)
@@ -555,6 +637,29 @@ def main():
                 win.lstViews.SelectedItems.Add(item)
 
         win.btnInvert.Click += lambda s, e: invert_selection()
+
+        def _lst_views_preview_click(sender, e):
+            # Clic sur la case a cocher elle-meme : comportement standard inchange.
+            d = e.OriginalSource
+            while d is not None and not isinstance(d, _ListBoxItem):
+                if isinstance(d, _WPFCheckBox):
+                    return
+                d = _VisualTreeHelper.GetParent(d)
+            if d is None:
+                return
+            # Maj+clic (plage) et Ctrl+clic (ajout/retrait) : comportement standard
+            # du ListBox inchange.
+            mods = _Keyboard.Modifiers
+            if (mods & _ModifierKeys.Shift) == _ModifierKeys.Shift or \
+               (mods & _ModifierKeys.Control) == _ModifierKeys.Control:
+                return
+            # Clic simple ailleurs sur la ligne (nom du fichier, etc.) : basculer
+            # la selection de cette seule ligne, sans deselectionner les autres
+            # (meme comportement que la case a cocher).
+            d.IsSelected = not d.IsSelected
+            e.Handled = True
+
+        win.lstViews.PreviewMouseLeftButtonDown += _lst_views_preview_click
 
         # -- Section DWG : defaults depuis config --
         default_color = cfg_dwg.get("color_mode_default", "")
@@ -693,7 +798,22 @@ def main():
 
         win.cmbProfil.SelectionChanged += _on_profil_changed
 
-        win.btnOk.Click     += lambda s, e: setattr(win, "DialogResult", True)
+        def _on_lier_cao_click(s, e):
+            # Validation AVANT fermeture : ne pas affecter DialogResult laisse
+            # le dialogue ouvert, donc tous les reglages deja saisis intacts.
+            # (WPF interdit de rappeler ShowDialog() sur une fenetre fermee,
+            # il n'est donc pas possible de "revenir" apres coup.)
+            if win.lstViews.SelectedItems.Count == 0:
+                show_alert(
+                    u"Aucune selection",
+                    u"Aucun fichier CAO n'est coché.\n\n"
+                    u"Sélectionnez au moins un fichier à lier, puis relancez "
+                    u"« Lier CAO ».",
+                    close_label=u"Retour")
+                return
+            win.DialogResult = True
+
+        win.btnOk.Click     += _on_lier_cao_click
         win.btnCancel.Click += lambda s, e: setattr(win, "DialogResult", False)
 
         if not win.ShowDialog():
@@ -703,12 +823,72 @@ def main():
         selected_files = [item for item in win.lstViews.SelectedItems]
         chosen_lbl     = win.cmbViewFamily.SelectedItem
         fam_enum       = view_families[chosen_lbl]
+        # Phase de projet choisie pour les vues creees
+        _phase_map        = {_phase_name(ph): ph for ph in phases_projet}
+        _chosen_phase_lbl = win.cmbPhase.SelectedItem
+        _selected_phase   = _phase_map.get(_chosen_phase_lbl)
         # Retrouver le vue_id de l'entree nommage_vues selectionnee (ex. 'vue-surface')
         _chosen_vue_id = None
         for _nv in _nommage_vues_cfg:
             if _nv.get(u'label', u'') == chosen_lbl:
                 _chosen_vue_id = _nv.get(u'id')
                 break
+        # Garde-fou : un jeton inconnu dans le template de nommage serait
+        # recopie tel quel dans le nom des vues creees.
+        _tpl_ok, _tpl_msg = verifier_template(cfg, _chosen_vue_id)
+        if not _tpl_ok:
+            show_alert(u"Convention de nommage invalide", _tpl_msg)
+            return
+
+        # -- Positionnement incompatible avec la famille de vue --------------
+        # Une vue de dessin ou une legende n'a pas de systeme de coordonnees
+        # partage : "Automatique - Emplacement partage" n'y est pas applicable.
+        # On avertit ici (au clic sur "Lier CAO") sans avoir contraint le
+        # dialogue principal, et on laisse choisir le positionnement de
+        # remplacement.
+        _VUE_IDS_SANS_PARTAGE = (u'vue-dessin', u'vue-legende')
+        _PLACE_IDX_PARTAGE = 0   # index dans _place_items / cmbPlacement
+        _PLACE_IDX_CENTRE  = 1
+        _PLACE_IDX_ORIGINE = 2
+        if (_chosen_vue_id in _VUE_IDS_SANS_PARTAGE
+                and win.cmbPlacement.SelectedIndex == _PLACE_IDX_PARTAGE):
+            # Choix proposes, dans l'ordre : l'origine interne est la valeur
+            # par defaut (premier element, presélectionné).
+            _choix_idx = [_PLACE_IDX_ORIGINE, _PLACE_IDX_CENTRE]
+            _warn_xaml = os.path.join(os.path.dirname(__file__),
+                                      'PlacementWarningDialog.xaml')
+            _warn = forms.WPFWindow(_warn_xaml)
+            _warn.Title = u"Positionnement incompatible"
+            _warn.txtMessage.Text = (
+                u"La famille de vue « {} » ne prend pas en charge le "
+                u"positionnement « {} » : une vue de dessin ou une légende "
+                u"n'a pas de système de coordonnées partagé.\n\n"
+                u"Choisissez le positionnement à appliquer à la place, puis "
+                u"cliquez sur « Appliquer » pour lancer la liaison CAO.".format(
+                    chosen_lbl, _place_items[_PLACE_IDX_PARTAGE]))
+            _warn.cmbNouveauPlacement.ItemsSource   = [_place_items[_i]
+                                                       for _i in _choix_idx]
+            _warn.cmbNouveauPlacement.SelectedIndex = 0
+            _warn.btnAppliquer.Click += (
+                lambda s, e: setattr(_warn, 'DialogResult', True))
+            _warn.btnAnnuler.Click += (
+                lambda s, e: setattr(_warn, 'DialogResult', False))
+
+            if not _warn.ShowDialog():
+                # "Annuler" : sortie du script, aucune liaison effectuee.
+                log(u"Operation annulee : positionnement « {} » incompatible "
+                    u"avec la famille « {} ».".format(
+                        _place_items[_PLACE_IDX_PARTAGE], chosen_lbl))
+                return
+
+            _sel = _warn.cmbNouveauPlacement.SelectedIndex
+            _nouveau_idx = _choix_idx[_sel if _sel >= 0 else 0]
+            win.cmbPlacement.SelectedIndex = _nouveau_idx
+            log(u"Positionnement « {} » incompatible avec la famille « {} » : "
+                u"« {} » applique a la place.".format(
+                    _place_items[_PLACE_IDX_PARTAGE], chosen_lbl,
+                    _place_items[_nouveau_idx]))
+
         do_link_dwg    = True
         do_vue_niveau  = bool(win.chkVueNiveau.IsChecked)
         # Type de vue personnalisé sélectionné
@@ -718,6 +898,9 @@ def main():
         # Reconstruire candidates depuis win._candidates (dossier/sous-dossiers eventuels)
         candidates     = win._candidates  # [(fn, lvl_name, full_path, site_code)]
 
+        # Filet de securite : le cas est normalement intercepte dans
+        # _on_lier_cao_click, qui laisse le dialogue ouvert. Ici le dialogue est
+        # deja ferme, on ne peut que sortir.
         if not selected_files:
             show_alert(u"Aucune selection", u"Aucun fichier selectionne. Operation annulee.")
             return
@@ -725,6 +908,7 @@ def main():
         log(u"---")
         log(u"Fichiers selectionnes : {}".format(len(selected_files)))
         log(u"Famille de vue : `{}`".format(chosen_lbl))
+        log(u"Phase : `{}`".format(_chosen_phase_lbl))
         log(u"Type personnalise : `{}`  (label `{}`)".format(
             _vue_suffix, _tvp_label_sel))
         log(u"Mode : {}".format(
@@ -737,6 +921,10 @@ def main():
         # Quand do_link_dwg=True, la creation de vue est faite par fichier de facon
         # atomique avec la liaison (TransactionGroup) dans le bloc 9 ci-dessous.
         created_views = []
+        # Drapeau remonte depuis la fenetre de progression (bloc 9) : permet a
+        # la fenetre de resultat (bloc 10) de distinguer une operation terminee
+        # d'une operation interrompue par l'utilisateur.
+        _was_cancelled = False
         if not do_link_dwg:
             # Cas Legende : l'API Revit ne permet pas de creer une legende depuis zero.
             if _vf_legend is not None and fam_enum == _vf_legend:
@@ -785,6 +973,14 @@ def main():
         # 9. Lier les DWG si demande
         linked_dwgs        = []
         failed_create_link = []
+        _view_files_order  = []
+        _view_files_map    = {}
+
+        def _log_view_file(view_name, fname):
+            if view_name not in _view_files_map:
+                _view_files_map[view_name] = []
+                _view_files_order.append(view_name)
+            _view_files_map[view_name].append(fname)
         if do_link_dwg:
             # Construire les options DWG
             opts = DWGImportOptions()
@@ -836,8 +1032,8 @@ def main():
             }
             if _vf_legend is not None:
                 _VF_TO_VT[_vf_legend] = u"Legend"
-            if _vf_threed is not None:
-                _VF_TO_VT[_vf_threed] = u"ThreeD"
+            # Section / Elevation restent listees ci-dessus par securite, mais
+            # view_options ne peut plus les contenir (voir _VUE_ID_TO_FAMILY).
             for _, _vf in view_options:
                 _vt = _VF_TO_VT.get(_vf)
                 if _vt:
@@ -898,6 +1094,7 @@ def main():
 
                     # Resoudre le nom de vue et la cle de lookup
                     _lookup_vars = get_template_vars(_selected_tvp)
+                    _lookup_vars[u'phase'] = _chosen_phase_lbl or u''
                     if do_vue_niveau:
                         _lookup_vars[u'niveau'] = _lvl_name
                         _vue_name_new = resolve_view_name(
@@ -927,7 +1124,8 @@ def main():
                         _t_view.Start()
                         view = create_view_element(
                             doc, _vue_name_new, _lvl_name, fam_enum,
-                            _vft_for_creation, levels, _gabarit_for_creation)
+                            _vft_for_creation, levels, _gabarit_for_creation,
+                            phase=_selected_phase)
                         if view is None:
                             _t_view.Rollback()
                             log(u"Impossible de creer la vue pour `{}`, DWG non lie.".format(fname))
@@ -956,6 +1154,7 @@ def main():
                                 fname, view.Name))
                         else:
                             log(u"Vue deja existante pour lien global : `{}`".format(fname))
+                        _log_view_file(view.Name, fname)
                         dialog.progressBar.Value = idx
                         continue
 
@@ -1025,6 +1224,7 @@ def main():
                                 # Deja present en vue-only dans cette vue, rien a faire.
                                 _cleanup_double()
                                 log(u"Instance deja presente dans la vue, ignore : `{}`".format(fname))
+                                _log_view_file(view.Name, fname)
                                 continue
 
                     _t_cur = Transaction(doc, u"Lier DWG")
@@ -1089,6 +1289,7 @@ def main():
 
                     old_ids.update(new_ids)
                     linked_dwgs.append(fname)
+                    _log_view_file(view.Name, fname)
                     log(u"Lie : `{}` → vue `{}`".format(fname, view.Name))
                     dialog.progressBar.Value = idx
                     try:
@@ -1096,24 +1297,71 @@ def main():
                     except Exception:
                         pass
 
+                # Relever le drapeau AVANT Close() : la fenetre de resultat doit
+                # annoncer une interruption et non une operation terminee.
+                _was_cancelled = getattr(dialog, "_cancelled", False)
                 dialog.Close()
+                if _was_cancelled:
+                    log(u"Operation interrompue par l'utilisateur.")
                 log(u"DWG lies : {}".format(len(linked_dwgs)))
                 if failed_create_link:
                     log(u"Non traites (vue non creee / DWG non lie) : {}".format(
                         u', '.join(u'`{}`'.format(f) for f in failed_create_link)))
 
+                if _view_files_order:
+                    log(u"### Vues \u2192 fichiers CAO lies")
+                    for _vname in _view_files_order:
+                        _files = _view_files_map[_vname]
+                        log(u"{} : {}".format(
+                            _vname, u', '.join(u'`{}`'.format(f) for f in _files)))
+
         # 10. Fenetre de resultat
         lines = []
-        lines.append(u"{} vue(s) creee(s).".format(len(created_views)))
-        if do_link_dwg:
-            lines.append(u"{} fichier(s) lie(s).".format(len(linked_dwgs)))
+        if _was_cancelled:
+            lines.append(u"Opération interrompue par l'utilisateur.")
+        _nb_v = len(created_views)
+        _nb_f = len(linked_dwgs)
+        lines.append(u"{} {} {}, {} {} {}.".format(
+            _nb_v, u"vue" if _nb_v <= 1 else u"vues",
+            u"cr\u00e9\u00e9e" if _nb_v <= 1 else u"cr\u00e9\u00e9es",
+            _nb_f, u"fichier" if _nb_f <= 1 else u"fichiers",
+            u"li\u00e9" if _nb_f <= 1 else u"li\u00e9s"))
         if failed_create_link:
             lines.append(u"{} fichier(s) non traite(s) : vue non creee, DWG non lie.".format(
                 len(failed_create_link)))
 
+        # Tableau vues creees / fichiers CAO lies (DataTable -> DataGrid WPF)
+        clr.AddReference("System.Data")
+        clr.AddReference("PresentationCore")
+        from System.Data import DataTable as SysDataTable
+        from System.Windows import Clipboard
+
+        dt = SysDataTable()
+        dt.Columns.Add("Vue")
+        dt.Columns.Add("Fichiers")
+        for _vname in _view_files_order:
+            r = dt.NewRow()
+            r["Vue"]      = _vname
+            r["Fichiers"] = u", ".join(_view_files_map[_vname])
+            dt.Rows.Add(r)
+
         res_xaml = os.path.join(script_dir, "ResultWindow.xaml")
         res_win  = forms.WPFWindow(res_xaml)
-        res_win.txtMessage.Text = u"\n".join(lines)
+        # Le XAML porte Title="Termine" : le corriger quand l'utilisateur a
+        # interrompu, sinon la fenetre annonce une fin normale a tort.
+        if _was_cancelled:
+            res_win.Title = u"Interrompu"
+        res_win.txtMessage.Text  = u"\n".join(lines)
+        res_win.dataGrid.ItemsSource = dt.DefaultView
+
+        def _copy_table(sender, args):
+            _tsv = [u"Vue\tFichiers"]
+            for _vname in _view_files_order:
+                _tsv.append(u"{}\t{}".format(
+                    _vname, u", ".join(_view_files_map[_vname])))
+            Clipboard.SetText(u"\n".join(_tsv))
+
+        res_win.btnCopy.Click += _copy_table
         res_win.btnClose.Click += lambda s, e: setattr(res_win, "DialogResult", True)
         res_win.ShowDialog()
 

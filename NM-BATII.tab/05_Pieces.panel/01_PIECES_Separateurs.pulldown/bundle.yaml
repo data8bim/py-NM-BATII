@@ -1,0 +1,12 @@
+title:
+  en_us: "Room\nseparators"
+  fr_fr: "Séparateurs\nde pièces"
+layout:
+  - 01_PIECES_Convert_lignes_en_separateurs
+  - 02_PIECES_Detect
+  - ---
+  - 03_PIECES_Simpl_Separateurs
+  - ---
+  - 04_PIECES_Separateur
+  - 05_PIECES_Edit_Separations
+context: active-plan-view

@@ -200,6 +200,155 @@
 
 
 
+<!-- Bouton Appliquer (pied de dialogue) -->
+<!-- Aplat DodgerBlue, texte blanc, SANS bordure : reprend a l'identique le
+	 bouton de AlertWindow.xaml (design valide par les utilisateurs).
+	 Au survol le fond fonce (#1C86EE) : le bouton est mis en avant, il ne
+	 s'estompe pas comme l'ancien NMDialogButton qui jouait sur l'Opacity.
+	 Meme hauteur (40) que NMButtonAnnuler. -->
+	<Style x:Key="NMButtonAppliquer" TargetType="Button">
+		<Setter Property="FontFamily" Value="Segoe UI"/>
+		<Setter Property="FontSize" Value="14"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Background" Value="#1E90FF"/>      <!-- DodgerBlue plein -->
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Height" Value="40"/>
+		<Setter Property="Padding" Value="10,0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="SnapsToDevicePixels" Value="True"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Border x:Name="border"
+							Background="{TemplateBinding Background}"
+							CornerRadius="4">
+						<ContentPresenter
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center"
+							Margin="{TemplateBinding Padding}"
+							RecognizesAccessKey="True"/>
+					</Border>
+					<ControlTemplate.Triggers>
+						<!-- Survol : le fond fonce (mise en avant) -->
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter TargetName="border" Property="Background" Value="#1C86EE"/>
+						</Trigger>
+						<Trigger Property="IsPressed" Value="True">
+							<Setter TargetName="border" Property="Background" Value="#1565C0"/>
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="False">
+							<Setter TargetName="border" Property="Background" Value="#BBBBBB"/>
+							<Setter Property="Foreground" Value="#EEEEEE"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+
+
+
+<!-- Bouton Annuler / sortie (pied de dialogue) -->
+<!-- Aplat gris, texte blanc, SANS bordure : meme construction que
+	 NMButtonAppliquer, seule la teinte change. Meme hauteur (40) : le bouton
+	 de sortie se distingue par sa couleur, pas par sa taille. -->
+	<Style x:Key="NMButtonAnnuler" TargetType="Button">
+		<Setter Property="FontFamily" Value="Segoe UI"/>
+		<Setter Property="FontSize" Value="14"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Background" Value="#8A8A8A"/>      <!-- Gris plein -->
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Height" Value="40"/>
+		<Setter Property="Padding" Value="10,0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="SnapsToDevicePixels" Value="True"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Border x:Name="border"
+							Background="{TemplateBinding Background}"
+							CornerRadius="4">
+						<ContentPresenter
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center"
+							Margin="{TemplateBinding Padding}"
+							RecognizesAccessKey="True"/>
+					</Border>
+					<ControlTemplate.Triggers>
+						<!-- Survol : le fond fonce (mise en avant) -->
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter TargetName="border" Property="Background" Value="#6E6E6E"/>
+						</Trigger>
+						<Trigger Property="IsPressed" Value="True">
+							<Setter TargetName="border" Property="Background" Value="#565656"/>
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="False">
+							<Setter TargetName="border" Property="Background" Value="#BBBBBB"/>
+							<Setter Property="Foreground" Value="#EEEEEE"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+
+
+
+<!-- Bouton Secondaire / preparation (pied de dialogue) -->
+<!-- Pour les actions qui ne valident ni ne ferment le dialogue, mais qui
+	 preparent l'application : "⊕ Selectionner" des fenetres MAPP par
+	 selection, par exemple. Meme construction que les deux autres (aplat,
+	 texte blanc, sans bordure, hauteur 40) : seule la teinte change, un bleu
+	 plus clair qui reste dans la famille "action" sans concurrencer
+	 NMButtonAppliquer. -->
+	<Style x:Key="NMButtonSecondaire" TargetType="Button">
+		<Setter Property="FontFamily" Value="Segoe UI"/>
+		<Setter Property="FontSize" Value="14"/>
+		<Setter Property="FontWeight" Value="SemiBold"/>
+		<Setter Property="Foreground" Value="White"/>
+		<Setter Property="Background" Value="#6CB2EE"/>     <!-- Bleu plus clair que DodgerBlue -->
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="Height" Value="40"/>
+		<Setter Property="Padding" Value="10,0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="SnapsToDevicePixels" Value="True"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+					<Border x:Name="border"
+							Background="{TemplateBinding Background}"
+							CornerRadius="4">
+						<ContentPresenter
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center"
+							Margin="{TemplateBinding Padding}"
+							RecognizesAccessKey="True"/>
+					</Border>
+					<ControlTemplate.Triggers>
+						<!-- Survol : le fond fonce (mise en avant) -->
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter TargetName="border" Property="Background" Value="#4E9FE3"/>
+						</Trigger>
+						<Trigger Property="IsPressed" Value="True">
+							<Setter TargetName="border" Property="Background" Value="#3D87C4"/>
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="False">
+							<Setter TargetName="border" Property="Background" Value="#BBBBBB"/>
+							<Setter Property="Foreground" Value="#EEEEEE"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+
+
+
 <!-- CheckBox ************************************************************************************************************************* -->
 <!-- CheckBox Standard -->
 	<Style x:Key="NMCheckBoxStandard" TargetType="CheckBox">

@@ -53,7 +53,9 @@ if lib_dir not in sys.path:
 # Import des modules partagés
 from utils.config_loader import load_config
 from utils.selection_fichier import pick_file_info
-from utils.extrac_nom_fichier_convention import extract_file_name_info, resolve_template, get_convention_template
+from utils.extrac_nom_fichier_convention import (extract_file_name_info, resolve_template,
+                                                 get_convention_template,
+                                                 diagnostiquer_nom_fichier)
 
 # 🔥 Charger les styles personnalisés WPF
 from dialogs.dialogs_styles_loader import load, show_alert
@@ -148,7 +150,18 @@ def main():
 
         info = extract_file_name_info(basename, cfg)
         if not info:
-            show_alert(u'❌ Erreur Créer niveaux', u"Nom non conforme à la convention :\n{}".format(basename))
+            # Diagnostic element par element : indique OU la lecture echoue.
+            try:
+                _ok_diag, _lignes = diagnostiquer_nom_fichier(basename, cfg)
+                _detail = u"\n".join(_lignes)
+            except Exception:
+                _detail = u""
+            _msg = u"Nom non conforme à la convention :\n\n    {}\n\n".format(basename)
+            if _detail:
+                _msg += _detail + u"\n\n"
+            _msg += u"Convention attendue :\n    {}".format(
+                get_convention_template(cfg, 'fichiers', u"(non configurée)"))
+            show_alert(u'❌ Erreur Créer niveaux', _msg)
             return
         bat_code = info.get('building', '')
 
@@ -330,7 +343,7 @@ def main():
         created_codes = []
 
         _tpl_nom_niveau = get_convention_template(
-            cfg, 'niveaux-revit', '{construction}_{niveau}_{demi-niv}')
+            cfg, 'niveau-revit', '{construction}_{niveau-code}_{demi-niv}')
 
         _pat_code = r'^([A-Z])([+\-])(\d{' + str(_n_num) + r'})_(\d{' + str(_n_demi) + r'})$'
 
@@ -342,7 +355,7 @@ def main():
                 _pref, _sens, _num_str, _demi_str = _mc.groups()
             else:
                 _pref = _sens = _num_str = _demi_str = ''
-            _sous_tpl = {'niveau': _pref + _sens + _num_str}
+            _sous_tpl = {'niveau-code': _pref + _sens + _num_str}
             _vals     = {'construction': bat_code, 'demi-niv': _demi_str}
             name = resolve_template(_tpl_nom_niveau, _vals, _sous_tpl)
             if name not in existing:

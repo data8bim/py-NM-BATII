@@ -48,6 +48,7 @@
                 Grid.Row="2"
                 Grid.Column="0" Grid.ColumnSpan="3"
                 HorizontalAlignment="Stretch"
-                IsDefault="True"/>
+                IsDefault="True"
+                Style="{DynamicResource NMButtonAppliquer}"/>
     </Grid>
 </Window>

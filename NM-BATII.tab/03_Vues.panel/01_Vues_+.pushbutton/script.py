@@ -42,10 +42,25 @@ Structure attendue dans config.json :
   }
 
 Le template_nom accepte le placeholder {nom_niveau}
-(remplace par le nom du niveau Revit).
+(remplace par le nom du niveau Revit), ainsi que {phase} (remplace par le
+nom de la phase de projet selectionnee dans la fenetre de dialogue).
+
+Pour les familles de vue exposant un parametre Phase (Plan d'etage, Plan de
+faux plafond, Vue en plan Structure), une vue est creee par combinaison
+(niveau x phase) et le parametre Phase de la vue est renseigne en
+consequence. Pour les familles sans parametre Phase (Vue de dessin,
+Legende), une seule vue est creee par niveau.
+
+La famille Vue 3D n'est pas liee a un niveau : la liste des niveaux est
+grisee et une seule vue isometrique est creee par phase cochee.
+
+Les familles proposees dans le menu sont celles dont la case "Vues +" est
+cochee dans 01_Parametres > Nommage > Disponibilites familles de vues.
+Coupe et Elevation ne sont pas prises en charge par cet outil (cases
+desactivees dans ce dialogue).
 
 Auteur : d8b
-Version : 1.1
+Version : 1.3
 """
 
 import sys
@@ -59,9 +74,11 @@ from System.Windows.Controls import CheckBox as WPFCheckBox
 from System.Windows import Thickness
 
 from Autodesk.Revit.DB import (
+    Element,
     FilteredElementCollector,
     BuiltInCategory,
     BuiltInParameter,
+    View3D,
     ViewPlan,
     ViewDrafting,
     ViewFamily,
@@ -87,7 +104,8 @@ from dialogs.dialogs_styles_loader import load as charger_styles, show_alert
 from utils.types_vues_personnalises import get_types_vues, get_row_by_label, get_template_vars
 import utils.vues_creation as _vues_creation_mod
 reload(_vues_creation_mod)
-from utils.vues_creation import prepare_view_creation, create_view_element, resolve_view_name
+from utils.vues_creation import (prepare_view_creation, create_view_element,
+                                 resolve_view_name, verifier_template)
 
 # Chargement des styles WPF communs NM-BATII
 charger_styles(lib_dir=_lib_dir)
@@ -100,6 +118,33 @@ def get_vft_name(vft):
     """Retourne le nom du ViewFamilyType via le parametre SYMBOL_NAME_PARAM."""
     param = vft.get_Parameter(BuiltInParameter.SYMBOL_NAME_PARAM)
     return param.AsString() if param else None
+
+
+def _phase_name(phase):
+    """
+    Retourne le nom d'une phase de projet (DB.Phase).
+    Contournement IronPython : Element.Name est implemente en interface
+    explicite sur certains types, ce qui fait echouer l'acces direct phase.Name.
+    """
+    return Element.Name.__get__(phase)
+
+
+_VF_THREED = getattr(ViewFamily, u'ThreeDimensional', None)
+
+# Familles de vue exposant un parametre Phase (BuiltInParameter.VIEW_PHASE).
+# Les vues de dessin et legendes n'ont pas ce parametre.
+_FAM_SUPPORTS_PHASE = set([
+    ViewFamily.FloorPlan,
+    ViewFamily.CeilingPlan,
+    ViewFamily.StructuralPlan,
+])
+if _VF_THREED is not None:
+    _FAM_SUPPORTS_PHASE.add(_VF_THREED)
+
+# Identifiants nommage_vues dont les vues ne sont PAS liees a un niveau Revit.
+# Pour ceux-ci, la liste des niveaux est ignoree (et grisee dans le dialogue) :
+# une seule vue est creee par phase cochee.
+_VUE_IDS_SANS_NIVEAU = set([u'vue-3d'])
 
 
 def collecter_niveaux(doc):
@@ -166,6 +211,15 @@ def vue_existe_par_nom(doc, nom_vue, fam_enum):
         )
         return any(v.Name == nom_vue for v in vues)
 
+    if _VF_THREED is not None and fam_enum == _VF_THREED:
+        vues_3d = list(
+            FilteredElementCollector(doc)
+            .WhereElementIsNotElementType()
+            .OfClass(View3D)
+            .ToElements()
+        )
+        return any((not v.IsTemplate) and v.Name == nom_vue for v in vues_3d)
+
     vues_plan = list(
         FilteredElementCollector(doc)
         .WhereElementIsNotElementType()
@@ -198,7 +252,7 @@ def main():
         # -- 2. Prefixes depuis config --
         prefixes_config = cfg.get(u"creer_niveaux", {}).get(u"prefixes", [])
 
-        # -- Familles de vues disponibles (depuis nommage_vues avec vues_et_dwg=True) --
+        # -- Familles de vues disponibles (depuis nommage_vues avec vues_plus=True) --
         _VUE_ID_TO_FAMILY = {
             u'vue-plan':      ViewFamily.FloorPlan,
             u'vue-plaf':      ViewFamily.CeilingPlan,
@@ -209,14 +263,29 @@ def main():
         _vf_legend = getattr(ViewFamily, u'Legend', None)
         if _vf_legend is not None:
             _VUE_ID_TO_FAMILY[u'vue-legende'] = _vf_legend
+        if _VF_THREED is not None:
+            _VUE_ID_TO_FAMILY[u'vue-3d'] = _VF_THREED
 
         _nommage_vues_cfg = cfg.get(u'conventions_nommage', {}).get(u'nommage_vues', [])
         view_options = []
+        _fams_non_gerees = []
         for _nv in _nommage_vues_cfg:
             if _nv.get(u'vues_plus', False):
                 _fam = _VUE_ID_TO_FAMILY.get(_nv.get(u'id', u''))
                 if _fam is not None:
                     view_options.append((_nv.get(u'label', u''), _fam, _nv.get(u'id', u'')))
+                else:
+                    # Famille cochee dans les parametres mais non prise en charge
+                    # par Vues + (ex. Coupe, Elevation) : on le signale au lieu
+                    # de l'ignorer silencieusement.
+                    _fams_non_gerees.append(_nv.get(u'label', _nv.get(u'id', u'?')))
+        if _fams_non_gerees:
+            show_alert(
+                u"Familles de vues non prises en charge",
+                u"Les familles suivantes sont cochées dans la colonne "
+                u"« Vues + » des paramètres mais ne sont pas gérées "
+                u"par cet outil, elles n'apparaîtront pas dans la liste :\n\n"
+                u"  • {}".format(u"\n  • ".join(_fams_non_gerees)))
         if not view_options:
             view_options = [
                 (u"Plan d'\xe9tage",           ViewFamily.FloorPlan,      u'vue-plan'),
@@ -275,11 +344,19 @@ def main():
         # -- 4. Collecter tous les niveaux (tri decroissant = plus haut en premier) --
         niveaux = collecter_niveaux(doc)
         if not niveaux:
-            show_alert(u"Aucun niveau", u"Aucun niveau trouve dans le projet.")
+            show_alert(u"Aucun niveau",
+                       u"Le projet Revit ne contient aucun niveau.",
+                       centrer=True)
             return
 
         noms_niveaux = [lvl.Name for lvl in niveaux]
         map_niveaux  = {lvl.Name: lvl for lvl in niveaux}
+
+        # -- 4bis. Collecter les phases du projet --
+        phases_projet = list(doc.Phases)
+        if not phases_projet:
+            show_alert(u"Aucune phase", u"Aucune phase trouv\u00e9e dans le projet.")
+            return
 
         # -- 5. Construire les filtres --
         filtre_items = construire_filtres(prefixes_config, vm_defaults)
@@ -293,6 +370,21 @@ def main():
         win.cmbViewFamily.SelectedIndex = 0
         win.cmbVueTypePers.ItemsSource   = _tvp_labels
         win.cmbVueTypePers.SelectedIndex = 0
+
+        # -- 6bis. Creer les checkboxes de phases --
+        # Par defaut, seule la derniere phase du projet est cochee
+        # (reproduit le comportement par defaut de Revit a la creation d'une vue).
+        phase_checkboxes = []  # (phase_elem, checkbox_ctrl)
+        _default_phase = phases_projet[-1]
+        for ph in phases_projet:
+            cb = WPFCheckBox()
+            cb.Content   = _phase_name(ph)
+            cb.IsChecked = (ph.Id == _default_phase.Id)
+            cb.Margin    = Thickness(0, 0, 12, 2)
+            from System.Windows import VerticalAlignment
+            cb.VerticalContentAlignment = VerticalAlignment.Center
+            win.pnlPhases.Children.Add(cb)
+            phase_checkboxes.append((ph, cb))
 
         # -- 7. Creer les checkboxes de filtre dynamiquement --
         filter_checkboxes = []  # (key_or_None, [prefixes], checkbox_ctrl)
@@ -359,6 +451,25 @@ def main():
         win.btnDeselectAll.Click += deselectionner_tout
         win.btnInvert.Click      += inverser_selection
 
+        # -- 8bis. Griser la zone "niveaux" pour les familles sans niveau (3D) --
+        def _famille_sans_niveau():
+            _lbl = win.cmbViewFamily.SelectedItem or u''
+            return view_vue_ids.get(_lbl, u'') in _VUE_IDS_SANS_NIVEAU
+
+        def _maj_etat_niveaux(sender=None, args=None):
+            _actif = not _famille_sans_niveau()
+            for _ctrl in (win.txtLabelFiltres, win.pnlFiltresTypes,
+                          win.txtLabelNiveaux, win.lstNiveaux,
+                          win.btnSelectAll, win.btnDeselectAll, win.btnInvert):
+                _ctrl.IsEnabled = _actif
+            win.txtLabelNiveaux.Text = (
+                u"Cochez les niveaux b\xe2timent \xe0 traiter :" if _actif
+                else u"Niveaux sans objet : une vue 3D n'est pas li\xe9e "
+                     u"\xe0 un niveau (une vue par phase coch\xe9e).")
+
+        win.cmbViewFamily.SelectionChanged += _maj_etat_niveaux
+        _maj_etat_niveaux()
+
         win.btnOk.Click     += lambda s, e: setattr(win, "DialogResult", True)
         win.btnCancel.Click += lambda s, e: setattr(win, "DialogResult", False)
 
@@ -366,17 +477,42 @@ def main():
             return
 
         # -- 9. Lecture de la selection --
-        niveaux_choisis = [item for item in win.lstNiveaux.SelectedItems]
-
-        if not niveaux_choisis:
-            show_alert(u"Aucune selection", u"Aucun niveau selectionne. Operation annulee.")
-            return
-
         chosen_fam_lbl = win.cmbViewFamily.SelectedItem or u''
         chosen_tvp_lbl = win.cmbVueTypePers.SelectedItem or u''
         fam_enum       = view_families.get(chosen_fam_lbl, ViewFamily.FloorPlan)
         _chosen_vue_id = view_vue_ids.get(chosen_fam_lbl, u'')
         _selected_tvp  = get_row_by_label(cfg, chosen_tvp_lbl) or (_tvp_list[0] if _tvp_list else {})
+
+        # Garde-fou : un jeton inconnu dans le template serait recopie tel quel
+        # dans le nom des vues creees. On arrete avant toute transaction.
+        _tpl_ok, _tpl_msg = verifier_template(cfg, _chosen_vue_id)
+        if not _tpl_ok:
+            show_alert(u"Convention de nommage invalide", _tpl_msg)
+            return
+
+        # Les familles sans niveau (3D) ignorent la liste des niveaux : on
+        # boucle sur un unique pseudo-niveau vide pour n'obtenir qu'une vue
+        # par phase cochee.
+        _sans_niveau = _chosen_vue_id in _VUE_IDS_SANS_NIVEAU
+        if _sans_niveau:
+            niveaux_choisis = [u'']
+        else:
+            niveaux_choisis = [item for item in win.lstNiveaux.SelectedItems]
+            if not niveaux_choisis:
+                show_alert(u"Aucune selection",
+                           u"Aucun niveau selectionne. Operation annulee.")
+                return
+
+        phases_choisies = [ph for ph, cb in phase_checkboxes if cb.IsChecked]
+        if not phases_choisies:
+            show_alert(u"Aucune phase", u"Aucune phase selectionnee. Operation annulee.")
+            return
+
+        # Les familles sans parametre Phase (Drafting, Legende) ne creent
+        # qu'une seule fois par niveau, en utilisant la premiere phase cochee
+        # uniquement pour la resolution du template de nommage.
+        _fam_supporte_phase  = fam_enum in _FAM_SUPPORTS_PHASE
+        _phases_pour_creation = phases_choisies if _fam_supporte_phase else phases_choisies[:1]
 
         # -- 10. Resoudre le ViewFamilyType et le gabarit (avant la transaction) --
         try:
@@ -395,27 +531,32 @@ def main():
         t.Start()
         try:
             for nom_niveau in niveaux_choisis:
-                _lookup_vars = get_template_vars(_selected_tvp)
-                _lookup_vars[u'niveau'] = nom_niveau
-                nom_vue = resolve_view_name(
-                    fam_enum, _lookup_vars, cfg, vue_id=_chosen_vue_id).strip()
-                if not nom_vue:
-                    nom_vue = nom_niveau
+                for _phase in _phases_pour_creation:
+                    _lookup_vars = get_template_vars(_selected_tvp)
+                    _lookup_vars[u'niveau'] = nom_niveau
+                    _lookup_vars[u'phase']  = _phase_name(_phase)
+                    nom_vue = resolve_view_name(
+                        fam_enum, _lookup_vars, cfg, vue_id=_chosen_vue_id).strip()
+                    if not nom_vue:
+                        # Repli : nom du niveau, ou nom de la phase pour les
+                        # familles sans niveau (3D).
+                        nom_vue = nom_niveau or _phase_name(_phase)
 
-                if vue_existe_par_nom(doc, nom_vue, fam_enum):
-                    vues_ignorees.append(nom_vue)
-                    continue
+                    if vue_existe_par_nom(doc, nom_vue, fam_enum):
+                        vues_ignorees.append(nom_vue)
+                        continue
 
-                try:
-                    vue = create_view_element(
-                        doc, nom_vue, nom_niveau, fam_enum,
-                        vft_id, map_niveaux, gabarit_name)
-                    if vue is None:
-                        vues_erreurs.append(u"{} (creation impossible)".format(nom_vue))
-                    else:
-                        vues_creees.append(vue.Name)
-                except Exception as e_vue:
-                    vues_erreurs.append(u"{} ({})".format(nom_vue, str(e_vue)))
+                    try:
+                        vue = create_view_element(
+                            doc, nom_vue, nom_niveau, fam_enum,
+                            vft_id, map_niveaux, gabarit_name,
+                            phase=(_phase if _fam_supporte_phase else None))
+                        if vue is None:
+                            vues_erreurs.append(u"{} (creation impossible)".format(nom_vue))
+                        else:
+                            vues_creees.append(vue.Name)
+                    except Exception as e_vue:
+                        vues_erreurs.append(u"{} ({})".format(nom_vue, str(e_vue)))
 
             t.Commit()
 

@@ -35,7 +35,11 @@
 #     → la sélection souris dans les vues Revit fonctionne normalement
 #   - Quand l'utilisateur clique Appliquer, on lit uidoc.Selection et on
 #     exécute la Transaction directement (on est sur le thread principal Revit)
-#     → pas besoin d'ExternalEvent (qui ne fonctionne pas dans les scripts pyRevit)
+#     → la Transaction peut donc s'exécuter directement.
+#   - NOTE : l'affirmation « l'ExternalEvent ne fonctionne pas dans les scripts
+#     pyRevit » était FAUSSE. main() est désormais planifié dans un ExternalEvent
+#     (voir bas de fichier) : c'est ce contexte qui fait afficher par Revit le
+#     panneau ruban « Autoriser sélection multiple » au lieu de la barre d'options.
 
 import os, json, codecs, clr
 
@@ -54,6 +58,7 @@ from Autodesk.Revit.DB import (
 )
 from Autodesk.Revit.DB.Architecture import Room as _RoomClass
 from Autodesk.Revit.UI.Selection import ObjectType as _PickObjectType
+from Autodesk.Revit.UI import IExternalEventHandler, ExternalEvent
 import System
 import System.Windows.Forms as WinForms
 import System.Windows.Threading as Threading
@@ -70,13 +75,24 @@ from System.Windows.Input import Key as WpfKey, Keyboard
 from System.Windows.Media import Brushes
 
 # ─── Chargement des styles de l'extension (NMWindowStandard, NMButtonValide…) ─
+# _charger_styles() DOIT etre appele : il place les cles NMButton*/NMWindow* dans
+# Application.Resources, sans quoi les fenetres locales (ResultWindow, SaveDialog,
+# CategoriesDialog, WPFWindow) et show_alert s'affichent au style WPF par defaut.
+#
+# L'ancien bloc importait « dialogs_styles_loader » sans le prefixe « dialogs. » :
+# ce module n'existe pas (il est dans le package dialogs), l'import echouait donc
+# TOUJOURS et show_alert retombait sur la MessageBox Windows native, hors charte.
+import sys as _sys
 try:
-    import dialogs_styles_loader          # noqa: F401  (effets de bord à l'import)
-    from dialogs.dialogs_styles_loader import show_alert
-except ImportError:
+    _lib = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'lib')
+    if _lib not in _sys.path:
+        _sys.path.insert(0, _lib)
+    from dialogs.dialogs_styles_loader import load as _charger_styles, show_alert
+    _charger_styles()
+except Exception:
     def show_alert(titre, message):
-        # Dernier recours : boîte de dialogue Windows native (pas pyRevit).
-        WinForms.MessageBox.Show(message, titre)
+        # Ultime secours si la feuille de styles NM est introuvable.
+        forms.alert(message, title=titre)
 
 
 # ─── Contexte Revit ──────────────────────────────────────────────────────────
@@ -1108,6 +1124,12 @@ def main():
     except Exception as ex:
         _log(u'Auto-load echoue : ' + str(ex))
 
+    # Toujours au moins une ligne de mappage, meme vierge : sans elle la zone de
+    # mappage reste vide et se confond visuellement avec les champs de filtre
+    # situes juste au-dessus (confusion constatee a l'usage).
+    if not row_list:
+        add_row()
+
     # ── Non-modal via DispatcherFrame ─────────────────────────────────────────
     _frame = Threading.DispatcherFrame()
 
@@ -1124,5 +1146,55 @@ def main():
     _log(u'Fenetre fermee')
 
 
+# ── ExternalEvent : main() s'execute sur le thread Revit ──────────────────────
+#
+# Pourquoi : appeler PickObjects depuis un ExternalEvent fait afficher par Revit
+# le panneau ruban « Autoriser selection multiple » (gros boutons Terminer /
+# Annuler / Multiple) au lieu de la discrete barre d'options obtenue en appel
+# direct. UI de selection uniformisee pour toute l'extension.
+#
+# Difficulte : apres le retour de Execute(), IronPython/pyRevit vide les globals
+# du module, ce qui casserait tout le code de ce fichier. On en sauvegarde une
+# COPIE au demarrage et on la restaure en tete de Execute() : le code existant
+# reste utilisable tel quel, sans etre reecrit.
+
+class _ActionHandler(IExternalEventHandler):
+
+    def __init__(self):
+        self._fn      = [None]           # mutable — pas de nonlocal en IPy 2.7
+        self._globals = dict(globals())  # snapshot ICI : globals encore vivants
+
+    def planifier(self, fn):
+        self._fn[0] = fn
+
+    def Execute(self, uiapp):
+        try:
+            globals().update(self._globals)
+        except Exception:
+            pass
+        fn = self._fn[0]
+        self._fn[0] = None
+        if fn:
+            try:
+                fn()
+            except Exception:
+                # Ne jamais avaler en silence : remonter la cause.
+                import traceback
+                try:
+                    import System.Windows as _SW
+                    _SW.MessageBox.Show(traceback.format_exc(),
+                                        u'NM-BATII — Erreur')
+                except Exception:
+                    pass
+
+    def GetName(self):
+        return u"NM-BATII — Infos pieces par selection"
+
+
 if __name__ == '__main__':
-    main()
+    # Le handler est instancie APRES toutes les definitions : c'est a cet
+    # instant qu'est pris le snapshot des globals restaure par Execute().
+    _action_handler = _ActionHandler()
+    _ext_event      = ExternalEvent.Create(_action_handler)
+    _action_handler.planifier(main)
+    _ext_event.Raise()

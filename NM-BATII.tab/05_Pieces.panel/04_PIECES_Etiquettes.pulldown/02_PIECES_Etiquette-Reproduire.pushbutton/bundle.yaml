@@ -1,0 +1,14 @@
+title:
+  en_us: "Replicate room tags"
+  fr_fr: "Reproduire les étiquettes"
+tooltip:
+  en_us: "Replicates room tags from selected source views into other views of
+         the same type, same associated level and (optionally) same scale.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+  fr_fr: "Reproduit les étiquettes de pièces de vues sources sélectionnées
+         vers d'autres vues de même type, même niveau associé et (en option)
+         même échelle.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

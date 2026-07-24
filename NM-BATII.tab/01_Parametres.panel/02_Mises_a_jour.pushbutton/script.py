@@ -22,10 +22,21 @@
 #__author__ = 'data8bim (d8b)'
 
 import os
+import sys
 import json
 import codecs
 import shutil
 import tempfile
+
+# Feuille de styles WPF partagee (lib/dialogs/dialogs_styles.xaml) : rend
+# disponibles les cles NMButtonAppliquer / NMButtonAnnuler utilisees par les
+# pieds de dialogue. Tous les styles y sont nommes (x:Key), le chargement
+# n'applique donc rien de lui-meme aux controles existants.
+_lib = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')
+if _lib not in sys.path:
+    sys.path.insert(0, _lib)
+from dialogs.dialogs_styles_loader import load as _charger_styles
+_charger_styles()
 
 import clr
 clr.AddReference('System')

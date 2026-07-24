@@ -94,13 +94,13 @@
 		
 		<Grid Grid.Row="2">
         <!-- Validation -->
+			<!-- Fenetre a bouton unique : pleine largeur, style Appliquer. -->
 			<Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-			<Button x:Name="btnSettingsOk" Content="Valider"
-                    Style="{StaticResource NMButtonValideOnly}" BorderBrush="LightBlue" Grid.Column="0" Grid.ColumnSpan="3"/>
+			<Button x:Name="btnSettingsOk" Content="▶  Appliquer"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True" Grid.Column="0"/>
 		</Grid>
     </Grid>
 </Window>

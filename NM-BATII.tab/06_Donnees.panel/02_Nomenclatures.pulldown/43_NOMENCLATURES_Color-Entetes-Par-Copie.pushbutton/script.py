@@ -70,6 +70,24 @@ except Exception:
 doc    = revit.doc
 output = script.get_output()
 
+# --- Controle de l'affichage des logs (config.json > activer_logs_scripts) ----
+# Sans ce garde-fou, output.print_md ouvrait le panneau pyRevit a chaque
+# execution, meme « Activer les logs des scripts » decoche. Convention
+# identique aux autres scripts (voir 02_PIECES_Detect).
+_LOG_ACTIF = bool(_cfg.get('activer_logs_scripts', False))
+
+if not _LOG_ACTIF:
+    try:
+        output.close()
+    except Exception:
+        pass
+
+
+def _log(msg):
+    """Ecrit dans le panneau pyRevit uniquement si les logs sont actives."""
+    if _LOG_ACTIF:
+        output.print_md(msg)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  RÉSULTAT (ResultWindow)
@@ -446,7 +464,7 @@ def get_column_info(body_section, col_index, doc):
                 info['category_name'] = 'Cat_{}'.format(category_id.IntegerValue)
     
     except Exception as e:
-        output.print_md('  Erreur info colonne {}: {}'.format(col_index, str(e)))
+        _log('  Erreur info colonne {}: {}'.format(col_index, str(e)))
     
     return info
 
@@ -476,7 +494,7 @@ def analyze_source_schedule(schedule, doc):
         'num_header_rows': int
     }
     """
-    output.print_md('## Analyse de la nomenclature source: {}'.format(schedule.Name))
+    _log('## Analyse de la nomenclature source: {}'.format(schedule.Name))
     
     result = {
         'column_colors': {},
@@ -504,10 +522,10 @@ def analyze_source_schedule(schedule, doc):
             header_rows.append(row)
         
         result['num_header_rows'] = len(header_rows)
-        output.print_md('  {} ligne(s) d\'entetes detectees'.format(len(header_rows)))
+        _log('  {} ligne(s) d\'entetes detectees'.format(len(header_rows)))
         
         if len(header_rows) == 0:
-            output.print_md('  ATTENTION: Aucune ligne d\'entete trouvee !')
+            _log('  ATTENTION: Aucune ligne d\'entete trouvee !')
             return result
         
         # Derniere ligne d'entetes = noms des colonnes
@@ -525,7 +543,7 @@ def analyze_source_schedule(schedule, doc):
                 key = (col_info['param_id'], col_info['category_id'])
                 result['column_colors'][key] = color
                 
-                output.print_md('  Col {}: {} ({}) - R:{} G:{} B:{}'.format(
+                _log('  Col {}: {} ({}) - R:{} G:{} B:{}'.format(
                     col,
                     col_info['param_name'],
                     col_info['category_name'] if col_info['category_name'] else 'Projet',
@@ -534,7 +552,7 @@ def analyze_source_schedule(schedule, doc):
         
         # Recuperer les couleurs des regroupements (lignes precedentes)
         if len(header_rows) > 1:
-            output.print_md('  Analyse des regroupements:')
+            _log('  Analyse des regroupements:')
             
             for row in header_rows[:-1]:  # Toutes sauf la derniere
                 for col in range(num_cols):
@@ -546,19 +564,19 @@ def analyze_source_schedule(schedule, doc):
                             color = get_cell_color(body_section, row, col)
                             if color:
                                 result['header_text_colors'][text.strip()] = color
-                                output.print_md('    "{}" - R:{} G:{} B:{}'.format(
+                                _log('    "{}" - R:{} G:{} B:{}'.format(
                                     text.strip(), color.Red, color.Green, color.Blue
                                 ))
                     except:
                         pass
         
-        output.print_md('  Total: {} couleurs par parametre, {} couleurs de regroupements'.format(
+        _log('  Total: {} couleurs par parametre, {} couleurs de regroupements'.format(
             len(result['column_colors']),
             len(result['header_text_colors'])
         ))
     
     except Exception as e:
-        output.print_md('  ERREUR analyse: {}'.format(str(e)))
+        _log('  ERREUR analyse: {}'.format(str(e)))
     
     return result
 
@@ -566,7 +584,7 @@ def apply_colors_to_schedule(schedule, source_colors, doc):
     """
     Appliquer les couleurs a une nomenclature cible
     """
-    output.print_md('## Application sur: {}'.format(schedule.Name))
+    _log('## Application sur: {}'.format(schedule.Name))
     
     try:
         table_data = schedule.GetTableData()
@@ -586,10 +604,10 @@ def apply_colors_to_schedule(schedule, source_colors, doc):
             header_rows.append(row)
         
         if len(header_rows) == 0:
-            output.print_md('  ATTENTION: Aucune ligne d\'entete trouvee')
+            _log('  ATTENTION: Aucune ligne d\'entete trouvee')
             return 0
         
-        output.print_md('  {} ligne(s) d\'entetes detectees'.format(len(header_rows)))
+        _log('  {} ligne(s) d\'entetes detectees'.format(len(header_rows)))
         
         last_header_row = header_rows[-1]
         cells_colored = 0
@@ -612,7 +630,7 @@ def apply_colors_to_schedule(schedule, source_colors, doc):
                     body_section.SetCellStyle(last_header_row, col, cell_style)
                     cells_colored += 1
                     
-                    output.print_md('  Col {}: {} ({}) - Colore'.format(
+                    _log('  Col {}: {} ({}) - Colore'.format(
                         col,
                         col_info['param_name'],
                         col_info['category_name'] if col_info['category_name'] else 'Projet'
@@ -620,7 +638,7 @@ def apply_colors_to_schedule(schedule, source_colors, doc):
         
         # Appliquer couleurs des regroupements (lignes precedentes)
         if len(header_rows) > 1 and source_colors['header_text_colors']:
-            output.print_md('  Application regroupements:')
+            _log('  Application regroupements:')
             
             for row in header_rows[:-1]:
                 for col in range(num_cols):
@@ -639,15 +657,15 @@ def apply_colors_to_schedule(schedule, source_colors, doc):
                                 body_section.SetCellStyle(row, col, cell_style)
                                 cells_colored += 1
                                 
-                                output.print_md('    "{}" - Colore'.format(text.strip()))
+                                _log('    "{}" - Colore'.format(text.strip()))
                     except:
                         pass
         
-        output.print_md('  Total: {} cellules colorees'.format(cells_colored))
+        _log('  Total: {} cellules colorees'.format(cells_colored))
         return cells_colored
     
     except Exception as e:
-        output.print_md('  ERREUR: {}'.format(str(e)))
+        _log('  ERREUR: {}'.format(str(e)))
         return 0
 
 def get_all_schedules():
@@ -663,8 +681,8 @@ def get_all_schedules():
     return sorted(result, key=lambda x: x.Name)
 
 def main():
-    output.print_md('# Copier couleurs d\'entetes par parametre')
-    output.print_md('---')
+    _log('# Copier couleurs d\'entetes par parametre')
+    _log('---')
 
     # ── 1. Toutes les nomenclatures ───────────────────────────────────────
     all_schedules = get_all_schedules()
@@ -672,8 +690,8 @@ def main():
         show_xaml_message('Aucune nomenclature trouvée', title='Erreur')
         return
 
-    output.print_md('OK {} nomenclatures trouvees'.format(len(all_schedules)))
-    output.print_md('---')
+    _log('OK {} nomenclatures trouvees'.format(len(all_schedules)))
+    _log('---')
 
     # ── 2. Construire la liste d'affichage ────────────────────────────────
     display_list = []
@@ -697,8 +715,8 @@ def main():
         return
 
     source_schedule = all_schedules[display_list.index(source_selection)]
-    output.print_md('SOURCE: {}'.format(source_schedule.Name))
-    output.print_md('---')
+    _log('SOURCE: {}'.format(source_schedule.Name))
+    _log('---')
 
     # ── 4. Analyser la source ─────────────────────────────────────────────
     source_colors = analyze_source_schedule(source_schedule, doc)
@@ -709,7 +727,7 @@ def main():
             title='Erreur')
         return
 
-    output.print_md('---')
+    _log('---')
 
     # ── 5. Sélection CIBLES ───────────────────────────────────────────────
     target_display_list  = []
@@ -736,12 +754,12 @@ def main():
         show_xaml_message('Aucune nomenclature cible sélectionnée.', title='Erreur')
         return
 
-    output.print_md('OK {} nomenclatures cibles'.format(len(target_schedules)))
-    output.print_md('---')
+    _log('OK {} nomenclatures cibles'.format(len(target_schedules)))
+    _log('---')
 
     # ── 6. Appliquer les couleurs ─────────────────────────────────────────
-    output.print_md('# Application des couleurs...')
-    output.print_md('---')
+    _log('# Application des couleurs...')
+    _log('---')
 
     # Barre de progression
     progress = ProgressWindow(len(target_schedules))
@@ -759,20 +777,20 @@ def main():
             cells = apply_colors_to_schedule(target, source_colors, doc)
             if cells > 0:
                 success += 1
-            output.print_md('---')
+            _log('---')
         except Exception as e:
-            output.print_md('ERREUR {}: {}'.format(target.Name, str(e)))
-            output.print_md('---')
+            _log('ERREUR {}: {}'.format(target.Name, str(e)))
+            _log('---')
             errors += 1
 
     t.Commit()
     progress.close()
 
     # ── 7. Résumé ─────────────────────────────────────────────────────────
-    output.print_md('# Resume')
-    output.print_md('Succes: {}'.format(success))
+    _log('# Resume')
+    _log('Succes: {}'.format(success))
     if errors > 0:
-        output.print_md('Erreurs: {}'.format(errors))
+        _log('Erreurs: {}'.format(errors))
 
     msg = '{} nomenclature(s) mise(s) a jour !'.format(success)
     if errors > 0:

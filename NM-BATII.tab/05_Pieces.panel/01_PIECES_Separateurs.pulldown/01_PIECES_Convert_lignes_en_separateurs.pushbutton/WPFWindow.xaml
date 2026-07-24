@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Palette compacte, ouverte en permanence par-dessus la vue pendant que
+     l'utilisateur compose sa selection : elle ne doit pas manger la zone de
+     dessin. L'explication du fonctionnement passe par le bouton « ? ».
+
+     DIMENSIONS FIXES : rien ne doit changer de taille quand le libelle du
+     bouton passe du singulier au pluriel.
+
+     ResizeMode="NoResize" : seule valeur qui retire A LA FOIS les boutons
+     Reduire et Agrandir de la barre de titre. -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Lignes → Séparateurs"
+        Width="262" Height="214"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        ShowInTaskbar="False">
+
+  <Grid Margin="6">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 selection + aide -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>   <!-- 2 bouton convertir -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>   <!-- 4 dernier resultat -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>   <!-- 6 pied -->
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Bouton Convertir ══════════════════════════════════════════════════ -->
+    <!-- Libelle pilote par _rafraichir_selection() : il s'accorde au nombre de
+         lignes selectionnees. Marges et contraintes du style neutralisees en
+         local, sinon la mise en page varie selon l'etat du bouton. -->
+    <Button Grid.Row="2"
+            x:Name="btn_convertir"
+            Content="Convertir en séparateur"
+            Height="38"
+            Margin="0"
+            MinWidth="0"
+            MinHeight="0"
+            Padding="14,0"
+            FontFamily="Segoe UI"
+            FontSize="14"
+            FontWeight="SemiBold"
+            HorizontalAlignment="Stretch"
+            Style="{DynamicResource NMButtonAppliquer}"
+            ToolTip="Recopie les lignes sélectionnées dans la vue en séparateurs de pièce"/>
+
+    <!-- ═══ Sélection courante + aide ═════════════════════════════════════════ -->
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>     <!-- selection -->
+        <ColumnDefinition Width="Auto"/>  <!-- aide, calee au bord droit -->
+      </Grid.ColumnDefinitions>
+
+      <Border Grid.Column="0"
+              BorderBrush="#E6E6E6" BorderThickness="1" CornerRadius="3"
+              Padding="8,6">
+        <!-- TextTrimming : la palette est etroite et le libelle s'allonge avec
+             le nombre d'elements. Sans lui, un decompte a trois chiffres serait
+             coupe net ; les points de suspension rendent la troncature lisible. -->
+        <TextBlock x:Name="txtSelection"
+                   TextWrapping="NoWrap"
+                   TextTrimming="CharacterEllipsis"
+                   FontSize="12"
+                   Foreground="#555555"
+                   TextAlignment="Center"
+                   VerticalAlignment="Center"
+                   Text="Sélection : —"/>
+      </Border>
+
+      <!-- Bouton discret : NMButtonStandard (fond gris clair, bordure gris
+           plus soutenu) plutot que le bleu des actions.
+           PAS de Height : Stretch le cale sur la hauteur du cadre voisin, et
+           la largeur SUIT cette hauteur via un binding sur ActualHeight —
+           seul moyen de garder un carre, la hauteur n'etant connue qu'a
+           l'execution. Margin explicite, le style en impose 4. -->
+      <Button Grid.Column="1"
+              x:Name="btn_aide"
+              Content="?"
+              Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+              Margin="6,0,0,0"
+              VerticalAlignment="Stretch"
+              FontSize="13"
+              Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Comment utiliser cet outil ?"/>
+    </Grid>
+
+    <!-- ═══ Dernier résultat ══════════════════════════════════════════════════ -->
+    <!-- Hauteur FIXE, calee sur exactement deux lignes de 12 px (2 x 16 px de
+         interligne + 12 de padding + 2 de bordure). Le message en fait une ou
+         deux selon qu'il y ait des elements ignores : une hauteur automatique
+         ferait varier la palette entre deux conversions. Le ScrollViewer
+         absorbe un eventuel message d'erreur plus long. -->
+    <Border Grid.Row="4"
+            Height="46"
+            BorderBrush="#E6E6E6" BorderThickness="1" CornerRadius="3"
+            Padding="8,6">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <TextBlock x:Name="txtStatut"
+                   TextWrapping="Wrap"
+                   FontSize="12"
+                   LineHeight="16"
+                   Foreground="#555555"
+                   Text=""/>
+      </ScrollViewer>
+    </Border>
+
+    <!-- ═══ Bouton Fermer ═════════════════════════════════════════════════════ -->
+    <!-- Conserve : son handler existe dans le script, le retirer serait une
+         modification de fonctionnement. Pas de IsCancel — fenetre non modale,
+         Echap ne doit pas la fermer pendant qu'on travaille dans la vue. -->
+    <Button Grid.Row="6"
+            x:Name="btn_fermer"
+            Content="Fermer"
+            Height="32"
+            Margin="0"
+            MinWidth="0"
+            MinHeight="0"
+            Style="{DynamicResource NMButtonAnnuler}"
+            HorizontalAlignment="Right"
+            Width="110"/>
+  </Grid>
+</Window>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PlacementWarningDialog.xaml — Avertissement "positionnement incompatible".
+
+  Affiche au clic sur "Lier CAO" lorsque la famille de vue selectionnee
+  (Vue de dessin / Legende) est incompatible avec le positionnement
+  "Automatique - Emplacement partage", et propose un positionnement de
+  remplacement.
+
+  Styles inline (comme AlertWindow.xaml) pour rester autonome si la feuille
+  de styles partagee n'a pas ete chargee.
+-->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Positionnement incompatible"
+        SizeToContent="Height"
+        Width="560"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI"
+        FontSize="13">
+
+  <Window.Resources>
+    <Style x:Key="NMDialogButton" TargetType="Button">
+      <Setter Property="Height" Value="30"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd"
+                    Background="{TemplateBinding Background}"
+                    CornerRadius="4">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="bd" Property="Opacity" Value="0.70"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/><!-- 0 : message -->
+      <RowDefinition Height="10"/>
+      <RowDefinition Height="Auto"/><!-- 2 : label choix -->
+      <RowDefinition Height="4"/>
+      <RowDefinition Height="Auto"/><!-- 4 : combo positionnement -->
+      <RowDefinition Height="14"/>
+      <RowDefinition Height="Auto"/><!-- 6 : boutons -->
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0"
+            BorderBrush="#E8A33D"
+            BorderThickness="1"
+            CornerRadius="4"
+            Padding="14,12">
+      <TextBlock x:Name="txtMessage"
+                 TextWrapping="Wrap"
+                 FontSize="13"
+                 Foreground="#333333"
+                 TextAlignment="Left"/>
+    </Border>
+
+    <TextBlock Grid.Row="2"
+               Text="Positionnement a appliquer :"
+               Foreground="#333333"/>
+
+    <ComboBox x:Name="cmbNouveauPlacement"
+              Grid.Row="4"
+              Height="26"/>
+
+    <Grid Grid.Row="6">
+      <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
+           Les Background locaux ont ete retires : poses sur le bouton, ils
+           ecrasaient les Setter des styles partages. -->
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+
+      <Button x:Name="btnAppliquer"
+              Grid.Column="0"
+              Content="▶  Appliquer"
+              IsDefault="True"
+              Style="{DynamicResource NMButtonAppliquer}"/>
+
+      <Button x:Name="btnAnnuler"
+              Grid.Column="2"
+              Content="Annuler"
+              IsCancel="True"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
+
+  </Grid>
+</Window>

@@ -29,14 +29,17 @@
             <RowDefinition Height="Auto"/><!-- 3 : label type personnalise -->
             <RowDefinition Height="Auto"/><!-- 4 : cmbVueTypePers -->
             <RowDefinition Height="10"/> <!-- 5 : spacer -->
-            <RowDefinition Height="Auto"/><!-- 6 : label filtres -->
-            <RowDefinition Height="Auto"/><!-- 7 : WrapPanel filtres checkboxes -->
+            <RowDefinition Height="Auto"/><!-- 6 : label phases -->
+            <RowDefinition Height="Auto"/><!-- 7 : WrapPanel phases checkboxes -->
             <RowDefinition Height="10"/> <!-- 8 : spacer -->
-            <RowDefinition Height="Auto"/><!-- 9 : label niveaux -->
-            <RowDefinition Height="*"/>  <!-- 10: ListBox niveaux -->
-            <RowDefinition Height="Auto"/><!-- 11: boutons sélection -->
-            <RowDefinition Height="20"/> <!-- 12: spacer -->
-            <RowDefinition Height="Auto"/><!-- 13: boutons Valider/Annuler -->
+            <RowDefinition Height="Auto"/><!-- 9 : label filtres -->
+            <RowDefinition Height="Auto"/><!-- 10 : WrapPanel filtres checkboxes -->
+            <RowDefinition Height="10"/> <!-- 11 : spacer -->
+            <RowDefinition Height="Auto"/><!-- 12 : label niveaux -->
+            <RowDefinition Height="*"/>  <!-- 13: ListBox niveaux -->
+            <RowDefinition Height="Auto"/><!-- 14: boutons sélection -->
+            <RowDefinition Height="20"/> <!-- 15: spacer -->
+            <RowDefinition Height="Auto"/><!-- 16: boutons Valider/Annuler -->
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -63,12 +66,29 @@
                   Grid.Row="4"
                   Grid.Column="0" Grid.ColumnSpan="3"/>
 
-        <!-- Filtres par type de niveau -->
-        <TextBlock Text="Filtrer par type de niveau :"
+        <!-- Phases -->
+        <TextBlock Text="Cochez au moins une phase de vue &#224; cr&#233;er :"
                    Grid.Row="6"
                    Grid.Column="0" Grid.ColumnSpan="3"/>
 
         <Border Grid.Row="7"
+                Grid.Column="0" Grid.ColumnSpan="3"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                CornerRadius="2"
+                Padding="6,4"
+                Margin="0,0,0,0">
+            <WrapPanel x:Name="pnlPhases"
+                       Orientation="Horizontal"/>
+        </Border>
+
+        <!-- Filtres par type de niveau -->
+        <TextBlock x:Name="txtLabelFiltres"
+                   Text="Filtrer par type de niveau :"
+                   Grid.Row="9"
+                   Grid.Column="0" Grid.ColumnSpan="3"/>
+
+        <Border Grid.Row="10"
                 Grid.Column="0" Grid.ColumnSpan="3"
                 BorderBrush="Gray"
                 BorderThickness="1"
@@ -80,15 +100,16 @@
         </Border>
 
         <!-- Liste des niveaux -->
-        <TextBlock Text="Cochez les niveaux b&#226;timent &#224; traiter :"
-                   Grid.Row="9"
+        <TextBlock x:Name="txtLabelNiveaux"
+                   Text="Cochez les niveaux b&#226;timent &#224; traiter :"
+                   Grid.Row="12"
                    Grid.Column="0" Grid.ColumnSpan="3"/>
 
         <ListBox
             x:Name="lstNiveaux"
             SelectionMode="Multiple"
             HorizontalContentAlignment="Stretch"
-            Grid.Row="10"
+            Grid.Row="13"
             Grid.Column="0" Grid.ColumnSpan="3">
 
             <ListBox.ItemTemplate>
@@ -105,31 +126,34 @@
         <!-- Boutons sélection -->
         <Button x:Name="btnSelectAll"
                 Content="S&#233;lectionner tout"
-                Grid.Row="11"
+                Grid.Row="14"
                 Grid.Column="0"/>
 
         <Button x:Name="btnDeselectAll"
                 Content="D&#233;s&#233;lectionner tout"
-                Grid.Row="11"
+                Grid.Row="14"
                 Grid.Column="1"/>
 
         <Button x:Name="btnInvert"
                 Content="Inverser"
-                Grid.Row="11"
+                Grid.Row="14"
                 Grid.Column="2"/>
 
-        <!-- Valider / Annuler -->
-        <Button x:Name="btnOk"
-                Content="Valider"
-                Style="{StaticResource NMButtonValideOnly}"
-                Grid.Row="13"
-                Grid.Column="1"/>
-
-        <Button x:Name="btnCancel"
-                Content="Annuler"
-                Style="{StaticResource NMButtonValideOnly}"
-                IsCancel="True"
-                Grid.Row="13"
-                Grid.Column="2"/>
+        <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+        <Grid Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="btnOk"
+                    Content="▶  Appliquer"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True"/>
+            <Button Grid.Column="2" x:Name="btnCancel"
+                    Content="Annuler"
+                    Style="{DynamicResource NMButtonAnnuler}"
+                    IsCancel="True"/>
+        </Grid>
     </Grid>
 </Window>

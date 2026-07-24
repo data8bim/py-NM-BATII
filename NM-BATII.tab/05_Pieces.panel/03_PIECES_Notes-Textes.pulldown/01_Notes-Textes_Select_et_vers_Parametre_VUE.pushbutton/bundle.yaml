@@ -1,0 +1,12 @@
+title:
+  en_us: "Text → Rooms (bulk)"
+  fr_fr: "Texte → Pièces (masse)"
+tooltip:
+  en_us: "Bulk transfer of text note values ​​from a view to a target parameter of each part.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+         
+  fr_fr: "Transfère en masse les valeurs des notes textuelles d’une vue vers un paramètre cible de chaque pièce.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

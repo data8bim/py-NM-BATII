@@ -30,23 +30,24 @@
                        Margin="0,0,0,10"
                        FontWeight="Bold"/>
 
+            <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
+                 Le verbe reste "Enregistrer" : l'action ecrit un fichier. -->
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="130"/>
                 </Grid.ColumnDefinitions>
 
-                <Button x:Name="btnOk"
-                        Content="Enregistrer"
-                        Grid.Column="1"
-                        MinWidth="120"
-                        Margin="0,0,6,0"/>
+                <Button Grid.Column="0" x:Name="btnOk"
+                        Content="▶  Enregistrer"
+                        Style="{DynamicResource NMButtonAppliquer}"
+                        IsDefault="True"/>
 
-                <Button x:Name="btnCancel"
+                <Button Grid.Column="2" x:Name="btnCancel"
                         Content="Annuler"
-                        Grid.Column="2"
-                        MinWidth="80"/>
+                        Style="{DynamicResource NMButtonAnnuler}"
+                        IsCancel="True"/>
             </Grid>
 
         </StackPanel>

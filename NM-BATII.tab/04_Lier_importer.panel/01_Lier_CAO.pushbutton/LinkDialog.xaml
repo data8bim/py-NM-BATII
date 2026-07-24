@@ -44,13 +44,18 @@
                      Value="0"
                      Margin="0,8,0,0"/>
 
+        <!-- Fenetre de progression : le bouton interrompt le traitement en
+             cours, il garde donc le style de sortie (et non le style
+             Appliquer reserve aux fenetres de resultat a bouton unique).
+             PAS de IsCancel ici : cette fenetre est affichee par Show() et non
+             ShowDialog(), et son handler on_cancel (script.py) leve deja le
+             drapeau _cancelled puis appelle Close(). -->
         <Button x:Name="btnCancel"
                 Content="Annuler"
                 Grid.Row="3"
-                Width="120" Height="30"
-				FontSize="18"
-				VerticalContentAlignment="Center"
+                Width="130"
                 HorizontalAlignment="Right"
-                Margin="0,8,0,0"/>
+                Margin="0,8,0,0"
+                Style="{DynamicResource NMButtonAnnuler}"/>
     </Grid>
 </Window>

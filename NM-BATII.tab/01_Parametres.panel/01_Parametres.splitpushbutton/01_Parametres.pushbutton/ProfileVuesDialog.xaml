@@ -45,13 +45,18 @@
               Content="Une vue par niveau"
               Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4"/>
 
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
     <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
       </Grid.ColumnDefinitions>
-      <Button x:Name="btnOK"     Content="OK"      Grid.Column="0" Margin="0,0,4,0"/>
-      <Button x:Name="btnCancel" Content="Annuler" Grid.Column="1" Margin="4,0,0,0" IsCancel="True"/>
+      <Button Grid.Column="0" x:Name="btnOK" Content="▶  Appliquer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
     </Grid>
   </Grid>
 </Window>

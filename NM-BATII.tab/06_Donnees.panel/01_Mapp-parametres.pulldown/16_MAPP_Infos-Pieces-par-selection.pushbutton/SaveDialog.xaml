@@ -27,10 +27,10 @@
 
     <Button x:Name="btnClose"
             Grid.Row="2"
-            Content="OK"
+            Content="Fermer"
             HorizontalAlignment="Stretch"
-            Height="30"
             Margin="5,0"
-            IsDefault="True"/>
+            IsDefault="True"
+            Style="{DynamicResource NMButtonAppliquer}"/>
   </Grid>
 </Window>

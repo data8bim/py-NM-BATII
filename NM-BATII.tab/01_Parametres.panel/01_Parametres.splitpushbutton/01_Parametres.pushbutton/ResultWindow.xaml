@@ -58,15 +58,15 @@
                        TextWrapping="Wrap"/>
         </Border>
 
-        <!-- Bouton Fermer -->
+        <!-- Fenetre a bouton unique : "Fermer" prend le style Appliquer sur
+             toute la largeur, puisqu'il est la seule action possible. -->
         <Button x:Name="btnClose"
                 Content="Fermer"
                 Grid.Row="5"
                 HorizontalAlignment="Stretch"
                 Margin="12,0,12,12"
-                Padding="10,6"
-                FontSize="14"
-                IsDefault="True"/>
+                IsDefault="True"
+                Style="{DynamicResource NMButtonAppliquer}"/>
     </Grid>
 
 </Window>

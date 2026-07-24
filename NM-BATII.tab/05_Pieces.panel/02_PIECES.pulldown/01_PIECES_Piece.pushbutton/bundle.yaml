@@ -1,0 +1,26 @@
+title:
+  en_us: "Room"
+  fr_fr: "Pièce"
+tooltip:
+  en_us: "Native Revit tool: Room (RM)
+         \nCreates a room bounded by model elements (such as walls,
+         \nfloors, and ceilings) and separation lines.
+         \nOpen a plan view.
+         \nRoom boundaries are automatically defined by many types of
+         \nmodel elements. You can add separation lines to add and
+         \nadjust room boundaries.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+  fr_fr: "Outil natif Revit : Pièce (RM)
+         \nCrée une pièce limitée par des éléments de modèle (tels que
+         \ndes murs, des sols et des plafonds) et des lignes de
+         \nséparation.
+         \nOuvrez une vue en plan.
+         \nLes limites de pièces sont automatiquement définies par de
+         \nnombreux types d'éléments de modèle. Vous pouvez ajouter
+         \ndes lignes de séparation pour l'ajout et le réglage des limites
+         \nde pièces.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-plan-view

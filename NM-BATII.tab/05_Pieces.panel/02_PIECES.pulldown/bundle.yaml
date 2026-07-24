@@ -1,0 +1,8 @@
+title:
+  en_us: Room
+  fr_fr: Pièces
+layout:
+  - 01_PIECES_Piece
+  - 02_PIECES_Contraintes-hauteur
+  - ---
+  - 03_PIECES_Pieces-3D

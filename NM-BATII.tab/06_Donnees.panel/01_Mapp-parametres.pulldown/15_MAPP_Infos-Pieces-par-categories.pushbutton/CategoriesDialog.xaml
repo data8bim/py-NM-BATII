@@ -53,12 +53,19 @@
     </Border>
 
     <!-- OK / Annuler ─────────────────────────────────────────────────────── -->
-    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
-      <Button x:Name="btnCancel" Content="Annuler" Width="90"
-              IsCancel="True" Margin="0,0,8,0"/>
-      <Button x:Name="btnOk"     Content="OK"      Width="90"
-              IsDefault="True"/>
-    </StackPanel>
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+    <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnOk" Content="▶  Appliquer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
 
   </Grid>
 </Window>

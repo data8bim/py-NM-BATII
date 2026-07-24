@@ -37,6 +37,7 @@ clr.AddReference("System.Xaml")
 import System
 from System.Windows.Markup import XamlReader
 from System.Windows import Thickness
+from System.Windows.Threading import DispatcherPriority
 from System.IO import File
 
 import os, sys, codecs, traceback, tempfile
@@ -70,12 +71,90 @@ except Exception:
     def load_config():
         return {}
 
+# Nommage des vues (helper partage avec 03_Vues/01_Vues_+, 04_Lier_importer/
+# 01_Lier_CAO et 05_Pieces/Pieces-3D) + table des types de nomenclatures.
+#
+# Les nomenclatures ne passent PAS par types_vues_personnalises : leur axe de
+# declinaison est (categorie x phase x type de nomenclature), pas
+# (niveau x type de vue personnalise). Le type de vue Revit a appliquer est
+# porte par la table "Types de nomenclatures" de 01_Parametres.
+#
+# Import defensif : en cas d'echec le script retombe sur l'ancien nommage code
+# en dur (voir _NOMMAGE_DISPONIBLE plus bas).
+try:
+    from utils.vues_creation import resolve_view_name, verifier_template
+    _NOMMAGE_DISPONIBLE = True
+except Exception:
+    _NOMMAGE_DISPONIBLE = False
+
+try:
+    from utils.nomenclatures_types import (
+        get_types_nomenclatures, get_or_create_schedule_vft, appliquer_type_vue,
+    )
+    _TYPES_NOM_DISPONIBLE = True
+except Exception:
+    _TYPES_NOM_DISPONIBLE = False
+
 # -------------------------
 # Revit / logs safe
 # -------------------------
 doc = revit.doc
 
 _cfg = load_config() or {}
+
+# Identifiant de la ligne "Nomenclature" dans conventions_nommage.nommage_vues
+VUE_ID_NOMENCLATURE = u'vue-nomenclature'
+# 1re entree du combo "Nomenclature modele". Le prefixe "--" sert de marqueur
+# a _on_ok() pour distinguer l'absence de source d'un nom de nomenclature.
+SOURCE_AUCUNE = u"-- Aucune (créer sans configuration) --"
+# Template applique tant que la ligne n'a pas ete enregistree depuis
+# 01_Parametres (doit rester identique au defaut de _defaut_nommage_vues).
+# {CATEGORIE} : la valeur est fournie brute par Revit (ex. "Portes"), c'est la
+# casse ecrite du jeton qui la met en MAJUSCULES.
+# Les autres jetons portent ':val' pour rester tels quels ("Existant",
+# "2a - Saisie...") — un jeton tout en minuscules forcerait les minuscules.
+TEMPLATE_NOMENCLATURE_DEFAUT = (
+    u'{CATEGORIE} - {phase:val} - {type-nomenclature:val}')
+
+
+def _assurer_template_nomenclature(cfg):
+    """
+    Garantit la presence de l'entree 'vue-nomenclature' dans
+    cfg['conventions_nommage']['nommage_vues'] (en memoire uniquement,
+    config.json n'est pas modifie).
+
+    Sans cette entree, resolve_view_name() retombe sur son repli generique
+    prevu pour les vues ({vue-pers-titre} - {niveau}) : comme {niveau}
+    n'existe pas pour une nomenclature, toutes les nomenclatures seraient
+    nommees avec le seul titre du type personnalise ("FM", "FM (1)", ...).
+    """
+    if not isinstance(cfg, dict):
+        return
+    _cnv = cfg.setdefault(u'conventions_nommage', {})
+    if not isinstance(_cnv, dict):
+        return
+    _rows = _cnv.setdefault(u'nommage_vues', [])
+    if not isinstance(_rows, list):
+        return
+    for _r in _rows:
+        if isinstance(_r, dict) and _r.get(u'id') == VUE_ID_NOMENCLATURE:
+            # Entree presente mais template vide : meme probleme de repli.
+            if not (_r.get(u'template') or u'').strip():
+                _r[u'template'] = TEMPLATE_NOMENCLATURE_DEFAUT
+            return
+    _rows.append({
+        u'label':       u'Nomenclature',
+        u'id':          VUE_ID_NOMENCLATURE,
+        u'template':    TEMPLATE_NOMENCLATURE_DEFAUT,
+        u'vues_et_dwg': False,
+        u'vues_plus':   False,
+        u'pieces_3d':   False,
+    })
+
+
+_assurer_template_nomenclature(_cfg)
+
+
 def _parse_bool_like(v):
     if isinstance(v, bool): return v
     if isinstance(v, (int, float)): return bool(v)
@@ -203,15 +282,37 @@ def show_warning():
         return True   # En cas d'erreur sur le XAML, on continue quand même
 
 # -------------------------
-# Standard types
+# Types de nomenclatures
 # -------------------------
-STANDARD_TYPES = [
-    (u"2a - Saisie des caractéristiques du TYPE", "2a_type_saisie"),
-    (u"2b - Saisie des caractéristiques d'OCCURRENCES", "2b_occ_saisie"),
-    (u"3a - Présentation des caractéristiques du TYPE", "3a_type_presentation"),
-    (u"3b - Présentation des caractéristiques d'OCCURRENCES", "3b_occ_presentation"),
-    (u"3c - Présentation des caractéristiques AUTRES", "3c_autres_presentation"),
+# Alimente la liste a cocher, depuis la table "Types de nomenclatures" de
+# 01_Parametres > onglet "Nomenclatures". Chaque entree est un dict :
+#   {'label': ..., 'type_vue': ...}
+# 'label' sert de libelle de case a cocher ET de valeur a la variable
+# {type-nomenclature} du template de nommage (valeur verbatim).
+# 'type_vue' est le nom du ViewFamilyType Revit a appliquer (cree si absent).
+# Repli code en dur si le module partage est indisponible.
+_STANDARD_TYPES_REPLI = [
+    {u'label': u"2a - Saisie des caractéristiques du TYPE",
+     u'type_vue': u''},
+    {u'label': u"2b - Saisie des caractéristiques d'OCCURRENCES",
+     u'type_vue': u''},
+    {u'label': u"3a - Présentation des caractéristiques du TYPE",
+     u'type_vue': u''},
+    {u'label': u"3b - Présentation des caractéristiques d'OCCURRENCES",
+     u'type_vue': u''},
+    {u'label': u"3c - Présentation des caractéristiques AUTRES",
+     u'type_vue': u''},
 ]
+
+
+def get_types_a_creer():
+    """Liste des types de nomenclatures configures, ou le repli code en dur."""
+    if not _TYPES_NOM_DISPONIBLE:
+        return [dict(t) for t in _STANDARD_TYPES_REPLI]
+    try:
+        return get_types_nomenclatures(_cfg)
+    except Exception:
+        return [dict(t) for t in _STANDARD_TYPES_REPLI]
 
 # -------------------------
 # Utilitaires Revit - CREATION
@@ -229,12 +330,25 @@ def get_schedulable_categories():
     return result
 
 def get_project_phases():
-    phases = list(FilteredElementCollector(doc).OfClass(Phase))
+    """
+    Retourne les phases du projet dans l'ordre affiche par la boite de
+    dialogue Revit "Phase de construction" (Gerer > Phases).
+
+    doc.Phases (Document.Phases) reflete cet ordre y compris apres
+    reorganisation manuelle (Inserer avant/apres), contrairement a
+    FilteredElementCollector(doc).OfClass(Phase) qui renvoie les phases dans
+    leur ordre de creation et dont le tri par SequenceNumber peut ne pas
+    correspondre a l'ordre reellement affiche.
+    """
     try:
-        phases.sort(key=lambda p: p.SequenceNumber)
-    except:
-        pass
-    return phases
+        return list(doc.Phases)
+    except Exception:
+        phases = list(FilteredElementCollector(doc).OfClass(Phase))
+        try:
+            phases.sort(key=lambda p: p.SequenceNumber)
+        except:
+            pass
+        return phases
 
 def get_existing_schedules():
     """Retourne toutes les nomenclatures (pas les gabarits)."""
@@ -255,21 +369,53 @@ def make_unique_name(base_name, existing_names):
             return candidate
         idx += 1
 
-def build_schedule_base_name(category, phase, std_key, std_label):
+def _build_schedule_name_legacy(category, phase, std_label):
+    """Nommage code en dur, utilise si les helpers partages sont indisponibles."""
     cat_upper = category.Name.upper()
     phase_name = phase.Name if phase is not None else "Phase inconnue"
-    if std_key in ("2a_type_saisie", "2b_occ_saisie"):
-        return u"{} - {} - {}".format(cat_upper, phase_name, std_label)
-    if std_key == "3a_type_presentation":
-        return u"{} - {} - caractéristiques du TYPE".format(cat_upper, phase_name)
-    if std_key == "3b_occ_presentation":
-        return u"{} - {} - caractéristiques d'OCCURENCES".format(cat_upper, phase_name)
-    if std_key == "3c_autres_presentation":
-        return u"{} - {} - caractéristiques AUTRES".format(cat_upper, phase_name)
     return u"{} - {} - {}".format(cat_upper, phase_name, std_label)
 
-def create_schedule_for(category, phase, std_label, std_key, existing_names):
-    base_name = build_schedule_base_name(category, phase, std_key, std_label)
+
+def build_schedule_base_name(category, phase, std_label):
+    """
+    Construit le nom de la nomenclature depuis le template 'vue-nomenclature'
+    de conventions_nommage.nommage_vues.
+
+    Variables disponibles :
+        {categorie}          nom de la categorie Revit, valeur brute
+        {phase}              nom de la phase de projet
+        {type-nomenclature}  colonne "Label" de la table "Types de
+                             nomenclatures", reprise verbatim
+
+    La casse ecrite du jeton pilote la casse produite : {CATEGORIE} en
+    MAJUSCULES, {Categorie} avec la 1re lettre en majuscule, {categorie} brut.
+    """
+    if not _NOMMAGE_DISPONIBLE:
+        return _build_schedule_name_legacy(category, phase, std_label)
+
+    # Valeurs brutes : c'est le template qui decide de la casse.
+    _vars = {
+        u'categorie':         category.Name,
+        u'phase':             phase.Name if phase is not None else u"Phase inconnue",
+        u'type-nomenclature': std_label,
+    }
+
+    try:
+        _nom = resolve_view_name(None, _vars, _cfg,
+                                 vue_id=VUE_ID_NOMENCLATURE).strip()
+    except Exception:
+        _nom = u''
+    # Template introuvable : resolve_view_name() retombe sur son repli
+    # generique ({vue-pers-titre} - {niveau}), tous deux absents ici, et
+    # renvoie donc une chaine vide.
+    if not _nom:
+        return _build_schedule_name_legacy(category, phase, std_label)
+    return _nom
+
+
+def create_schedule_for(category, phase, std_label, existing_names,
+                         vft_id=None):
+    base_name = build_schedule_base_name(category, phase, std_label)
     unique_name = make_unique_name(base_name, existing_names)
     try:
         sched = ViewSchedule.CreateSchedule(doc, category.Id, phase.Id)
@@ -290,6 +436,12 @@ def create_schedule_for(category, phase, std_label, std_key, existing_names):
         defn.AddField(ScheduleFieldType.Instance, ElementId(BuiltInParameter.SYMBOL_FAMILY_AND_TYPE_NAMES_PARAM))
     except:
         pass
+    # Type de vue Revit issu de la colonne "Type de nomenclature".
+    # ViewSchedule.CreateSchedule() n'accepte pas de ViewFamilyType : il ne
+    # peut etre pose qu'apres coup, et en dernier — changer le type peut
+    # reinitialiser certains parametres de la nomenclature.
+    if vft_id is not None and _TYPES_NOM_DISPONIBLE:
+        appliquer_type_vue(doc, sched, vft_id)
     return sched
 
 # -------------------------
@@ -977,7 +1129,12 @@ class CreateSchedulesWindow(WPFWindow):
             self.categories_panel = self.UI.FindName("categories_panel")
             self.types_panel = self.UI.FindName("types_panel")
             self.phases_panel = self.UI.FindName("phases_panel")
-            self.combo_source = self.UI.FindName("combo_source")
+            self.btn_source = self.UI.FindName("btn_source")
+            self.popup_source = self.UI.FindName("popup_source")
+            self.txt_source_value = self.UI.FindName("txt_source_value")
+            self.list_source = self.UI.FindName("list_source")
+            self.txtSearchSource = self.UI.FindName("txtSearchSource")
+            self.txtSourceCount = self.UI.FindName("txtSourceCount")
             self.txtSearchCategories = self.UI.FindName("txtSearchCategories")
 
             self.btn_check_cat = self.UI.FindName("btn_check_cat")
@@ -1015,6 +1172,13 @@ class CreateSchedulesWindow(WPFWindow):
         self.type_checkboxes = []
         self.phase_checkboxes = []
         self.all_categories = []
+        # Noms des nomenclatures existantes, source du filtre de recherche.
+        self.all_source_names = []
+        # Valeur retenue dans le champ "Nomenclature modele".
+        self.source_selected = SOURCE_AUCUNE
+        # Vrai pendant une selection programmee de la liste : empeche
+        # _on_source_item_click de refermer le Popup a l'ouverture.
+        self._source_syncing = False
 
         self.result = None
 
@@ -1065,6 +1229,17 @@ class CreateSchedulesWindow(WPFWindow):
         # Recherche categories
         if self.txtSearchCategories:
             self.txtSearchCategories.TextChanged += self._on_search_categories
+
+        # Champ deroulant "Nomenclature modele" avec recherche integree
+        if self.txtSearchSource:
+            self.txtSearchSource.TextChanged += self._on_search_source
+            self.txtSearchSource.PreviewKeyDown += self._on_search_source_keydown
+        if self.popup_source:
+            self.popup_source.Opened += self._on_source_popup_opened
+        if self.list_source:
+            # SelectionChanged plutot que MouseUp : couvre aussi la navigation
+            # au clavier depuis la liste.
+            self.list_source.SelectionChanged += self._on_source_item_click
 
     def _on_mouse_down(self, sender, args, listbox, panel_type):
         """Gérer CTRL+clic et MAJ+clic pour sélection multiple des checkboxes."""
@@ -1175,14 +1350,23 @@ class CreateSchedulesWindow(WPFWindow):
                     pass
 
     def _populate_types(self):
-        for lbl, key in STANDARD_TYPES:
+        """
+        Une case a cocher par ligne de la table "Types de nomenclatures"
+        (01_Parametres > onglet Nomenclatures). La ligne complete est
+        conservee : le label alimente {type-nomenclature}, le type_vue sera
+        resolu en ViewFamilyType au moment de la creation.
+        """
+        for row in get_types_a_creer():
+            lbl = row.get(u'label', u'')
+            if not lbl:
+                continue
             cb = System.Windows.Controls.CheckBox()
             cb.Content = lbl
             cb.Margin = Thickness(0,2,0,2)
             cb.IsChecked = False
             cb.Checked += (lambda chk, lb: (lambda s,e: self._on_checkbox_checked(chk, lb, True)))(cb, self.types_panel)
             cb.Unchecked += (lambda chk, lb: (lambda s,e: self._on_checkbox_checked(chk, lb, False)))(cb, self.types_panel)
-            self.type_checkboxes.append((cb, (lbl, key)))
+            self.type_checkboxes.append((cb, row))
             try:
                 self.types_panel.Items.Add(cb)
             except Exception:
@@ -1210,17 +1394,119 @@ class CreateSchedulesWindow(WPFWindow):
                     pass
     
     def _populate_source_combo(self):
-        """Populate le ComboBox avec les nomenclatures existantes."""
-        if self.combo_source:
-            # Option vide
-            self.combo_source.Items.Add("-- Aucune (créer sans configuration) --")
-            self.combo_source.SelectedIndex = 0
-            
-            # Nomenclatures existantes
-            schedules = get_existing_schedules()
-            for sched in sorted(schedules, key=lambda s: s.Name):
-                self.combo_source.Items.Add(sched.Name)
-    
+        """
+        Prepare le champ deroulant "Nomenclature modele".
+
+        La valeur retenue vit dans self.source_selected (et non dans un
+        SelectedItem) : la ListBox du Popup est reconstruite a chaque frappe,
+        sa selection ne survit donc pas au filtrage.
+        """
+        if not self.list_source:
+            return
+        # Noms memorises une fois : le filtrage ne reinterroge pas le document.
+        self.all_source_names = sorted(
+            (s.Name for s in get_existing_schedules()),
+            key=lambda n: n.lower())
+        self.source_selected = SOURCE_AUCUNE
+        self._refresh_source_list(u'')
+
+    def _refresh_source_list(self, filtre):
+        """
+        Reconstruit la liste du Popup en ne gardant que les nomenclatures dont
+        le nom contient 'filtre' (insensible a la casse).
+
+        "Aucune" reste toujours en tete, quel que soit le filtre : c'est le
+        seul moyen de revenir a "pas de source" sans vider la recherche.
+        """
+        _f = (filtre or u'').strip().lower()
+        self.list_source.Items.Clear()
+        self.list_source.Items.Add(SOURCE_AUCUNE)
+        _n_vis = 0
+        for _nom in self.all_source_names:
+            if not _f or _f in _nom.lower():
+                self.list_source.Items.Add(_nom)
+                _n_vis += 1
+
+        if self.txtSourceCount is not None:
+            _total = len(self.all_source_names)
+            if _f:
+                self.txtSourceCount.Text = u"{} nomenclature(s) sur {}".format(
+                    _n_vis, _total)
+            else:
+                self.txtSourceCount.Text = u"{} nomenclature(s)".format(_total)
+
+        # Mettre en evidence la valeur courante si elle survit au filtre.
+        # Le drapeau evite que le SelectionChanged declenche par cette
+        # affectation ne soit pris pour un clic utilisateur — sans lui, le
+        # Popup se refermerait aussitot apres s'etre ouvert.
+        self._source_syncing = True
+        try:
+            if self.list_source.Items.Contains(self.source_selected):
+                self.list_source.SelectedItem = self.source_selected
+        finally:
+            self._source_syncing = False
+
+    def _set_source_selected(self, valeur):
+        """Ecrit la valeur dans le champ ferme et referme le Popup."""
+        self.source_selected = valeur or SOURCE_AUCUNE
+        if self.txt_source_value is not None:
+            self.txt_source_value.Text = self.source_selected
+        # Decocher le ToggleButton referme le Popup (binding TwoWay sur IsOpen).
+        if self.btn_source is not None:
+            self.btn_source.IsChecked = False
+
+    def _on_source_popup_opened(self, sender, args):
+        """
+        Vide la recherche et donne le focus a la zone de saisie a l'ouverture.
+
+        Le focus est repousse via le Dispatcher : appele directement dans
+        Opened, le Popup n'est pas encore rendu et Focus() reste sans effet.
+        """
+        try:
+            self.txtSearchSource.Text = u''
+            self._refresh_source_list(u'')
+            self.UI.Dispatcher.BeginInvoke(
+                DispatcherPriority.Input,
+                System.Action(lambda: self.txtSearchSource.Focus()))
+        except Exception:
+            pass
+
+    def _on_search_source(self, sender, args):
+        """Filtrer la liste selon le texte de recherche."""
+        try:
+            self._refresh_source_list(self.txtSearchSource.Text)
+        except Exception:
+            pass
+
+    def _on_source_item_click(self, sender, args):
+        """Selection utilisateur dans la liste (souris ou clavier)."""
+        if self._source_syncing:
+            return
+        try:
+            _item = self.list_source.SelectedItem
+            if _item is not None:
+                self._set_source_selected(str(_item))
+        except Exception:
+            pass
+
+    def _on_search_source_keydown(self, sender, args):
+        """Entree = 1er resultat, Echap = fermer sans changer la selection."""
+        from System.Windows.Input import Key
+        try:
+            if args.Key == Key.Escape:
+                if self.btn_source is not None:
+                    self.btn_source.IsChecked = False
+                args.Handled = True
+            elif args.Key == Key.Enter:
+                # Item[0] est toujours "Aucune" : on vise le 1er resultat reel
+                # s'il existe, sinon on retombe sur "Aucune".
+                _idx = 1 if self.list_source.Items.Count > 1 else 0
+                self._set_source_selected(str(self.list_source.Items[_idx]))
+                args.Handled = True
+        except Exception:
+            pass
+
+
     def _on_search_categories(self, sender, args):
         """Filtrer les categories selon le texte de recherche."""
         try:
@@ -1296,16 +1582,15 @@ class CreateSchedulesWindow(WPFWindow):
         
         # Source selectionnee (si any)
         source_name = None
-        if self.combo_source and self.combo_source.SelectedItem:
-            source_text = str(self.combo_source.SelectedItem)
-            if not source_text.startswith("--"):
-                source_name = source_text
+        source_text = getattr(self, 'source_selected', SOURCE_AUCUNE)
+        if source_text and source_text != SOURCE_AUCUNE:
+            source_name = source_text
         
         self.result = {
             "categories": selected_cats,
             "types": selected_types,
             "phases": selected_phases,
-            "source_name": source_name
+            "source_name": source_name,
         }
         
         try:
@@ -1366,21 +1651,55 @@ def main():
         selected_phases = res["phases"]
         source_name = res.get("source_name")
 
+        # Garde-fou : un jeton inconnu serait recopie tel quel dans le nom des
+        # nomenclatures creees.
+        if _NOMMAGE_DISPONIBLE:
+            _tpl_ok, _tpl_msg = verifier_template(_cfg, VUE_ID_NOMENCLATURE)
+            if not _tpl_ok:
+                show_alert(u"Convention de nommage invalide", _tpl_msg)
+                return
+
         existing_names = get_existing_schedule_names()
 
         # CREATION
         t = Transaction(doc, "Créer nomenclatures standard")
         t.Start()
-        
+
+        # Types de vue Revit resolus une seule fois pour toute la session : la
+        # duplication d'un ViewFamilyType absent ne doit se produire qu'une
+        # fois, pas a chaque combinaison categorie x phase.
+        # Cle : nom du type -> ElementId (ou None si non resoluble).
+        vft_par_type = {}
+        for _row_t in selected_types:
+            _nom_vft = (_row_t.get(u'type_vue') or u'').strip()
+            if not _nom_vft or _nom_vft in vft_par_type:
+                continue
+            _vid = None
+            if _TYPES_NOM_DISPONIBLE:
+                try:
+                    _vid = get_or_create_schedule_vft(doc, _nom_vft)
+                except Exception:
+                    _vid = None
+            vft_par_type[_nom_vft] = _vid
+            if _vid is None:
+                log(u"⚠ Type de nomenclature `{}` introuvable et non créable "
+                    u"— type par défaut conservé.".format(_nom_vft))
+            else:
+                log(u"Type de nomenclature : `{}`".format(_nom_vft))
+
         created_schedules = []
         created = 0
         errors = 0
-        
+
         for cat in selected_cats:
             for ph in selected_phases:
-                for lbl, key in selected_types:
+                for row_t in selected_types:
+                    lbl = row_t.get(u'label', u'')
                     try:
-                        sched = create_schedule_for(cat, ph, lbl, key, existing_names)
+                        sched = create_schedule_for(
+                            cat, ph, lbl, existing_names,
+                            vft_id=vft_par_type.get(
+                                (row_t.get(u'type_vue') or u'').strip()))
                         log(u"✔ Créé : **{}**".format(sched.Name))
                         created_schedules.append(sched)
                         created += 1
@@ -1390,7 +1709,7 @@ def main():
                         if ACTIVER_LOGS:
                             log("Erreur création : {}".format(path or "n/a"))
                         errors += 1
-        
+
         t.Commit()
         
         log("---")

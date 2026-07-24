@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TemplateBuilderDialog.xaml — Composition assistee d'une convention de nommage.
+
+  S'ouvre au clic sur une cellule de la colonne "Template" des tables de
+  nommage. Les boutons de variables sont crees par le code (script.py) : seules
+  les variables applicables a la ligne editee sont proposees.
+
+  Styles inline (comme AlertWindow.xaml) pour rester autonome si la feuille de
+  styles partagee n'a pas ete chargee.
+-->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Composer la convention de nommage"
+        SizeToContent="Height"
+        Width="700"
+        MinHeight="320"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="Segoe UI"
+        FontSize="13">
+
+  <Window.Resources>
+    <!-- NMDialogButton supprime : le pied de dialogue utilise desormais les
+         styles partages NMButtonAppliquer / NMButtonAnnuler definis dans
+         lib/dialogs/dialogs_styles.xaml (charge par script.py). -->
+
+    <!-- Reprend a l'identique le style partage "NMButtonStandard" (utilise
+         notamment par 05_PIECES_Pieces-3D via show_confirm) : fond gris clair,
+         bordure fine, surbrillance bleue au survol. Duplique ici (plutot que
+         reference partagee) pour que ce dialogue reste autonome si la feuille
+         de styles commune n'a pas ete chargee — meme logique que AlertWindow.xaml. -->
+    <Style x:Key="NMButtonStandardLocal" TargetType="Button">
+      <Setter Property="FontFamily" Value="Segoe UI"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="Black"/>
+      <Setter Property="Padding" Value="10,5"/>
+      <Setter Property="Background" Value="#FFF0F0F0"/>
+      <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="bd"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="4">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="{TemplateBinding Padding}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FFE0F0FF"/>
+                <Setter Property="BorderBrush" Value="DodgerBlue"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#a4c0f4"/>
+                <Setter Property="BorderBrush" Value="#489cdc"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Bouton "pilule" pour les variables : UNIQUEMENT la forme (bords
+         totalement arrondis) est empruntee a la capture d'ecran fournie, pas
+         sa palette (fond fonce/texte blanc) — on garde ici les couleurs
+         neutres deja utilisees dans l'application (gris clair / bordure
+         grise / survol bleu, identiques a NMButtonStandardLocal ci-dessus). -->
+    <Style x:Key="NMPillVarButton" TargetType="Button">
+      <Setter Property="FontFamily" Value="Segoe UI"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="Black"/>
+      <Setter Property="Height" Value="28"/>
+      <Setter Property="Padding" Value="14,0"/>
+      <Setter Property="Background" Value="#FFF0F0F0"/>
+      <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <!-- CornerRadius = moitie de la hauteur du bouton (28/2 = 14) :
+                 les bords deviennent des demi-cercles, d'ou la forme "pilule". -->
+            <Border x:Name="bd"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="14">
+              <ContentPresenter HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Margin="{TemplateBinding Padding}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FFE0F0FF"/>
+                <Setter Property="BorderBrush" Value="DodgerBlue"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#a4c0f4"/>
+                <Setter Property="BorderBrush" Value="#489cdc"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/><!-- 0 : ligne editee -->
+      <RowDefinition Height="10"/>
+      <RowDefinition Height="Auto"/><!-- 2 : label champ -->
+      <RowDefinition Height="Auto"/><!-- 3 : champ de composition -->
+      <RowDefinition Height="Auto"/><!-- 4 : aide -->
+      <RowDefinition Height="12"/>
+      <RowDefinition Height="Auto"/><!-- 6 : label variables -->
+      <RowDefinition Height="*"/>   <!-- 7 : boutons variables -->
+      <RowDefinition Height="14"/>
+      <RowDefinition Height="Auto"/><!-- 9 : Appliquer / Annuler -->
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Background="#F3F6FA" BorderBrush="#C9D6E4"
+            BorderThickness="1" CornerRadius="4" Padding="10,8">
+      <TextBlock x:Name="txtContexte" TextWrapping="Wrap" Foreground="#33475B"/>
+    </Border>
+
+    <Grid Grid.Row="2" Margin="0,0,0,4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Convention de nommage :"
+                 FontWeight="SemiBold" VerticalAlignment="Center"/>
+      <Button x:Name="btnEffacer"
+              Grid.Column="1"
+              Content="Effacer"
+              Style="{StaticResource NMButtonStandardLocal}"/>
+    </Grid>
+
+    <TextBox x:Name="txtTemplate"
+             Grid.Row="3"
+             Height="30"
+             VerticalContentAlignment="Center"
+             Padding="6,0"
+             FontFamily="Consolas"
+             FontSize="14"/>
+
+    <TextBlock x:Name="txtApercu"
+               Grid.Row="4"
+               Margin="0,6,0,0"
+               TextWrapping="Wrap"
+               FontStyle="Italic"
+               Foreground="#5A6B7B"/>
+
+    <TextBlock Grid.Row="6"
+               Text="Variables disponibles pour cette ligne — cliquez pour choisir la casse et insérer :"
+               FontWeight="SemiBold" Margin="0,0,0,4"/>
+
+    <Border Grid.Row="7" BorderBrush="#C9D6E4" BorderThickness="1"
+            CornerRadius="4" Padding="6" MinHeight="90">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="220">
+        <WrapPanel x:Name="pnlVariables" Orientation="Horizontal"/>
+      </ScrollViewer>
+    </Border>
+
+    <Grid Grid.Row="9">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
+           Les couleurs viennent des styles partages (lib/dialogs/dialogs_styles.xaml) :
+           ne pas reposer d'attribut Background ici, une valeur locale ecraserait
+           le Setter du style et le fond resterait plein. -->
+      <Button x:Name="btnAppliquer"
+              Grid.Column="0"
+              Content="▶  Appliquer"
+              IsDefault="True"
+              Style="{DynamicResource NMButtonAppliquer}"/>
+
+      <Button x:Name="btnAnnuler"
+              Grid.Column="2"
+              Content="Annuler"
+              IsCancel="True"
+              VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
+
+  </Grid>
+</Window>

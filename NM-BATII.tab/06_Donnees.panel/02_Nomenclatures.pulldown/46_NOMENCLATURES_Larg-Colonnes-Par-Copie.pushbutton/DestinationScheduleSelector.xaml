@@ -100,9 +100,21 @@
         </Border>
 
         <!-- Bouton Appliquer -->
-        <Button x:Name="btnOk" Grid.Row="6"
-                Content="Appliquer"
-                Style="{DynamicResource NMButtonValide}"
-                Height="40" Margin="0,8,0,0" IsDefault="True"/>
+        <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+        <Grid Grid.Row="6" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="btnOk"
+                    Content="▶  Appliquer"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True"/>
+            <Button Grid.Column="2" x:Name="btnCancel"
+                    Content="Annuler"
+                    Style="{DynamicResource NMButtonAnnuler}"
+                    IsCancel="True"/>
+        </Grid>
     </Grid>
 </Window>

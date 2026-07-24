@@ -35,6 +35,7 @@ toujours par label, jamais par valeur de type.
 
 from Autodesk.Revit.DB import (
     View,
+    View3D,
     ViewPlan,
     ViewDrafting,
     ViewFamily,
@@ -44,7 +45,211 @@ from Autodesk.Revit.DB import (
     Transaction,
     BuiltInParameter,
 )
+import re
+
 from utils.types_vues_personnalises import get_type_for_vue_id, get_template_vars
+
+# ---------------------------------------------------------------------------
+# Casse des variables de template
+# ---------------------------------------------------------------------------
+# La casse ECRITE du jeton pilote la casse de la valeur produite :
+#     {phase}   -> tout en minuscules
+#     {PHASE}   -> TOUT EN MAJUSCULES
+#     {Phase}   -> 1re lettre en majuscule, le reste en minuscules
+#
+# Deux suffixes couvrent ce que la casse du jeton ne peut pas exprimer :
+#     {phase:val}  -> valeur brute, inchangee (telle que fournie par Revit)
+#     {phase:cap}  -> Chaque Mot De La Valeur Capitalise
+#
+# NB : ce bloc est volontairement duplique a l'identique dans
+# utils/extrac_nom_fichier_convention.py. Les deux modules sont charges
+# independamment par des scripts differents ; les coupler creerait une
+# dependance d'import supplementaire sans benefice.
+
+# Variables dont la valeur n'est JAMAIS transformee, quelle que soit la casse
+# ecrite : le nom de niveau provient de Revit et sert aussi de cle de
+# correspondance (recherche du Level, detection des vues existantes). Le
+# modifier casserait ces rapprochements. Equivaut a un ':val' implicite.
+_CASSE_EXEMPT = frozenset([u'niveau', u'niveau-code'])
+
+# Variables du domaine "nommage de vues". Une variable de cette liste absente
+# du dict fourni par le script appelant est traitee comme VIDE : le segment
+# correspondant disparait proprement, au lieu de laisser un jeton litteral
+# (ex. "FM - {niveau} - 3D") dans le nom de la vue Revit.
+#
+# Cas concrets couverts : Pieces 3D ne fournit pas {niveau}, et le mode
+# "creation par fichier" de Lier CAO ne fournit pas {phase}.
+#
+# Les jetons HORS de cette liste (faute de frappe, ex. "{nivo}") restent
+# litteraux : c'est le signal qui permet de reperer l'erreur de saisie.
+_VARIABLES_CANONIQUES = (
+    u'vue-pers-titre', u'vue-pers-label', u'vue-pers-valeur-1',
+    u'vue-pers-valeur-2', u'vue-pers-usage',
+    u'niveau', u'phase', u'categorie', u'type-nomenclature',
+)
+
+_TOKEN_RE = re.compile(u'\\{([^{}]*)\\}')
+
+# Separateurs de mots pour ':cap'. L'apostrophe en est volontairement absente
+# pour ne pas produire "L'Etage" a partir de "l'etage".
+_SEPARATEURS_MOTS = u" \t\r\n-_/."
+
+
+def _capitaliser(valeur):
+    """1re lettre en majuscule, reste en minuscules (sans decouper les mots)."""
+    if not valeur:
+        return valeur
+    return valeur[0].upper() + valeur[1:].lower()
+
+
+def _capitaliser_mots(valeur):
+    """Capitalise chaque mot : 'plan de sol' -> 'Plan De Sol'."""
+    if not valeur:
+        return valeur
+    _res = []
+    _nouveau_mot = True
+    for _c in valeur.lower():
+        if _nouveau_mot and _c not in _SEPARATEURS_MOTS:
+            _res.append(_c.upper())
+            _nouveau_mot = False
+        else:
+            _res.append(_c)
+            if _c in _SEPARATEURS_MOTS:
+                _nouveau_mot = True
+    return u''.join(_res)
+
+
+def _appliquer_casse(jeton, var_id, valeur, suffixe):
+    """
+    Applique la casse demandee a 'valeur'.
+
+    jeton   : nom tel qu'ecrit dans le template (ex. 'PHASE', 'Vue-pers-titre')
+    var_id  : identifiant reel, en minuscules (ex. 'vue-pers-titre')
+    valeur  : valeur brute a transformer
+    suffixe : suffixe explicite eventuel ('val' ou 'cap'), sinon ''
+    """
+    if valeur is None:
+        valeur = u''
+    if var_id in _CASSE_EXEMPT:
+        return valeur
+
+    _sfx = (suffixe or u'').strip().lower()
+    if _sfx:
+        if _sfx == u'val':
+            return valeur
+        if _sfx == u'cap':
+            return _capitaliser_mots(valeur)
+        return valeur           # suffixe inconnu -> valeur brute (securite)
+
+    if jeton == var_id:                 # tout en minuscules
+        return valeur.lower()
+    if jeton == var_id.upper():         # TOUT EN MAJUSCULES
+        return valeur.upper()
+    if jeton == _capitaliser(var_id):   # 1re lettre seulement
+        return _capitaliser(valeur)
+    return valeur               # casse mixte non reconnue -> valeur brute
+
+
+def variables_inconnues(template, variables_admises=None):
+    """
+    Retourne la liste ordonnee et dedoublonnee des jetons {xxx} du template qui
+    ne correspondent a aucune variable connue.
+
+    Un jeton inconnu (faute de frappe, ex. "{nivo}") serait recopie tel quel
+    dans le nom de l'element Revit : la vue s'appellerait "FM - {nivo}". On le
+    detecte donc AVANT toute creation, plutot que de polluer le modele.
+
+    template          : chaine du template (ex. "{vue-pers-titre:val} - {nivo}")
+    variables_admises : iterable d'identifiants autorises. Par defaut,
+                        _VARIABLES_CANONIQUES (domaine du nommage de vues).
+
+    Retourne [] si tout est reconnu.
+    """
+    if not template:
+        return []
+    _admises = set(
+        (variables_admises if variables_admises is not None
+         else _VARIABLES_CANONIQUES))
+    _admises = set(_a.lower() for _a in _admises)
+
+    _inconnues = []
+    for _brut in _TOKEN_RE.findall(template):
+        _jeton = _brut.split(u':')[0] if u':' in _brut else _brut
+        if not _jeton.strip():
+            continue
+        if _jeton.lower() not in _admises and _jeton not in _inconnues:
+            _inconnues.append(_jeton)
+    return _inconnues
+
+
+def verifier_template(cfg, vue_id, variables_admises=None):
+    """
+    Controle le template de nommage d'une entree de nommage_vues AVANT toute
+    creation d'element Revit.
+
+    Retourne (ok, message) :
+      ok      : True si aucune variable inconnue
+      message : texte pret a afficher a l'utilisateur si ok vaut False
+
+    A appeler en debut de script, avant d'ouvrir la Transaction : un jeton
+    inconnu produirait des elements nommes "FM - {nivo}".
+    """
+    _nommage = (cfg.get(u'conventions_nommage') or {}).get(u'nommage_vues', [])
+    _tpl = u''
+    _label = vue_id
+    for _entry in _nommage:
+        if _entry.get(u'id') == vue_id:
+            _tpl = _entry.get(u'template', u'') or u''
+            _label = _entry.get(u'label', vue_id) or vue_id
+            break
+
+    _inconnues = variables_inconnues(_tpl, variables_admises)
+    if not _inconnues:
+        return True, u''
+
+    _msg = (
+        u"La convention de nommage de la ligne « {} » contient "
+        u"{} inconnue{} :\n\n    {}\n\n"
+        u"Template actuel :\n    {}\n\n"
+        u"Ces variables seraient recopiées telles quelles dans le nom des "
+        u"éléments créés. Corrigez la ligne dans "
+        u"01_Parametres > Nommage > Nommage des vues, puis relancez."
+    ).format(
+        _label,
+        u"une variable" if len(_inconnues) == 1 else u"des variables",
+        u"" if len(_inconnues) == 1 else u"s",
+        u", ".join(u"{%s}" % _i for _i in _inconnues),
+        _tpl,
+    )
+    return False, _msg
+
+
+def substituer_variables(texte, vars_dict):
+    """
+    Remplace les jetons {variable} de 'texte' par leur valeur dans vars_dict,
+    en appliquant la casse demandee.
+
+    La correspondance des noms est insensible a la casse. Un jeton inconnu est
+    laisse tel quel dans le texte (comportement historique).
+    """
+    if not texte:
+        return texte
+    _vars_low = {}
+    for _k, _v in vars_dict.items():
+        _vars_low[_k.lower()] = _v
+
+    def _remplacer(_m):
+        _brut = _m.group(1)
+        if u':' in _brut:
+            _jeton, _, _sfx = _brut.partition(u':')
+        else:
+            _jeton, _sfx = _brut, u''
+        _var_id = _jeton.lower()
+        if _var_id not in _vars_low:
+            return _m.group(0)          # jeton inconnu : inchange
+        return _appliquer_casse(_jeton, _var_id, _vars_low[_var_id], _sfx)
+
+    return _TOKEN_RE.sub(_remplacer, texte)
 
 # Mapping ViewFamily → identifiant de template dans conventions_nommage.nommage_vues
 # Utilisé uniquement comme fallback quand vue_id n'est pas fourni explicitement.
@@ -59,7 +264,7 @@ _FAMILY_TEMPLATE_ID = {
 _vf_legend = getattr(ViewFamily, u'Legend', None)
 if _vf_legend is not None:
     _FAMILY_TEMPLATE_ID[_vf_legend] = u'vue-legende'
-_vf_threed = getattr(ViewFamily, u'ThreeD', None)
+_vf_threed = getattr(ViewFamily, u'ThreeDimensional', None)
 if _vf_threed is not None:
     _FAMILY_TEMPLATE_ID[_vf_threed] = u'vue-3d'
 
@@ -98,13 +303,19 @@ def resolve_view_name(fam_enum, vars_dict, cfg, vue_id=None):
 
     # Résolution par segments : on découpe sur ' - ', on substitue chaque segment,
     # on filtre les segments vides, on recolle — évite les séparateurs orphelins.
+    # La substitution honore la casse ecrite du jeton ({NIVEAU}, {Niveau}...).
+    # Complete les variables du domaine non fournies par l'appelant, pour
+    # qu'un jeton valide mais sans valeur disparaisse au lieu de rester
+    # litteral dans le nom (voir _VARIABLES_CANONIQUES).
+    _vars = dict(vars_dict)
+    for _cle in _VARIABLES_CANONIQUES:
+        _vars.setdefault(_cle, u'')
+
     _SEP = u' - '
     _segments = tpl.split(_SEP)
     _resolved = []
     for _seg in _segments:
-        _val = _seg
-        for _k, _v in vars_dict.items():
-            _val = _val.replace(u'{' + _k + u'}', _v or u'')
+        _val = substituer_variables(_seg, _vars)
         if _val.strip():
             _resolved.append(_val)
     return _SEP.join(_resolved).strip()
@@ -145,6 +356,23 @@ def _apply_view_template(doc, view, template_name):
         return
     try:
         view.ViewTemplateId = templates[0].Id
+    except Exception:
+        pass
+
+
+def _apply_view_phase(view, phase):
+    """
+    Affecte la phase de projet 'phase' (DB.Phase) au parametre Phase de 'view',
+    si ce parametre existe et n'est pas en lecture seule (absent sur les vues
+    de dessin et les legendes). Ne fait rien si phase est None.
+    Doit etre appele a l'interieur d'une Transaction ouverte.
+    """
+    if phase is None:
+        return
+    try:
+        p = view.get_Parameter(BuiltInParameter.VIEW_PHASE)
+        if p is not None and not p.IsReadOnly:
+            p.Set(phase.Id)
     except Exception:
         pass
 
@@ -226,14 +454,21 @@ def prepare_view_creation(doc, fam_enum, tvp_row, cfg, vue_id=None):
 
 
 def create_view_element(doc, vue_name, lvl_nm, fam_enum, vft_id, levels,
-                         gabarit_name, warnings=None):
+                         gabarit_name, phase=None, warnings=None):
     """
     Cree UNE vue Revit et retourne l'objet View.
     DOIT etre appelee a l'interieur d'une Transaction ouverte.
     Retourne None si impossible (niveau introuvable, legende sans source, etc.).
+
+    phase : DB.Phase optionnel. Si fourni, affecte au parametre Phase de la
+            vue creee (BuiltInParameter.VIEW_PHASE). Sans effet sur les
+            familles de vue qui n'exposent pas ce parametre (Drafting, Legend).
     """
     if fam_enum == ViewFamily.Drafting:
         view = ViewDrafting.Create(doc, vft_id)
+    elif _vf_threed is not None and fam_enum == _vf_threed:
+        # Une vue 3D n'est pas liee a un niveau : lvl_nm est ignore.
+        view = View3D.CreateIsometric(doc, vft_id)
     elif _vf_legend is not None and fam_enum == _vf_legend:
         _src_legends = [
             v for v in FilteredElementCollector(doc).OfClass(View)
@@ -266,6 +501,7 @@ def create_view_element(doc, vue_name, lvl_nm, fam_enum, vft_id, levels,
         except Exception:
             pass
         return None
+    _apply_view_phase(view, phase)
     _apply_view_template(doc, view, gabarit_name)
     return view
 

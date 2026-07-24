@@ -2,5 +2,7 @@ title:
   en_us: "Rooms"
   fr_fr: "Pièces"
 layout:
-  - 01_PIECES_Limites
-  - 02_PIECES_Notes-Textes
+  - 01_PIECES_Separateurs
+  - 02_PIECES
+  - 03_PIECES_Notes-Textes
+  - 04_PIECES_Etiquettes

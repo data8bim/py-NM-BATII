@@ -36,37 +36,19 @@
                  VerticalAlignment="Center"/>
     </Border>
 
+    <!-- Fenetre a bouton unique : "Fermer" prend le style Appliquer sur toute
+         la largeur. Le template inline a ete retire au profit du style
+         partage NMButtonAppliquer (meme aplat DodgerBlue, meme survol) : une
+         retouche de teinte dans dialogs_styles.xaml s'appliquera aussi ici.
+         DynamicResource : si la feuille n'est pas chargee, le bouton retombe
+         sur le rendu WPF par defaut au lieu de faire echouer le parse. -->
     <Button x:Name="btnClose"
             Grid.Row="2"
             Content="Fermer"
-            Height="30"
             HorizontalAlignment="Stretch"
             IsDefault="True"
             IsCancel="True"
-            Background="DodgerBlue"
-            Foreground="White"
-            BorderThickness="0"
-            FontWeight="SemiBold"
-            Cursor="Hand">
-      <Button.Template>
-        <ControlTemplate TargetType="Button">
-          <Border x:Name="bd"
-                  Background="{TemplateBinding Background}"
-                  CornerRadius="4">
-            <ContentPresenter HorizontalAlignment="Center"
-                              VerticalAlignment="Center"/>
-          </Border>
-          <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="bd" Property="Background" Value="#1C86EE"/>
-            </Trigger>
-            <Trigger Property="IsPressed" Value="True">
-              <Setter TargetName="bd" Property="Background" Value="#1565C0"/>
-            </Trigger>
-          </ControlTemplate.Triggers>
-        </ControlTemplate>
-      </Button.Template>
-    </Button>
+            Style="{DynamicResource NMButtonAppliquer}"/>
 
   </Grid>
 </Window>

@@ -1,0 +1,13 @@
+title:
+  en_us: "MEP Spaces\n→ Objects by category"
+  fr_fr: "Espaces\n→ Objets par catégories"
+
+tooltip:
+  en_us: "Transfer MEP space parameter values to the objects referenced to that space (i.e. whose 'Space' property points to it, such as equipment, fixtures...). Each object receives the value from its own containing space.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+  fr_fr: "Transfert des valeurs de paramètres des espaces MEP vers les objets qui leur sont référencés (c'est-à-dire dont la propriété « Space » pointe vers eux : équipements, appareils...). Chaque objet reçoit la valeur de l'espace qui le contient.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

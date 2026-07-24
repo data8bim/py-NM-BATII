@@ -1,341 +1,108 @@
 {
-  "fichiers_lies_dwg": {
-    "layers_default": "Visibles", 
-    "color_mode_default": "conserver", 
-    "unit_default": "Mètres", 
-    "view_only": false, 
-    "correct_lines": true, 
-    "include_sub": false, 
-    "placement_default": "shared"
-  }, 
-  "nm_convention_noms_fichiers": {
-    "valeur_si_nul": "X", 
-    "groupes": [
-      {
-        "regex": "s\\d{7}", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Site", 
-        "id": "site"
-      }, 
-      {
-        "regex": "\\d{3}", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Construction (bâtiment)", 
-        "id": "construction"
-      }, 
-      {
-        "regex": "[RTFO]", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Préfixe niveau", 
-        "id": "pref-niv"
-      }, 
-      {
-        "regex": "[+\\-]", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Sens niveau", 
-        "id": "sens-niv"
-      }, 
-      {
-        "regex": "\\d{2}", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Numéro niveau", 
-        "id": "num-niv"
-      }, 
-      {
-        "regex": "\\d{1}", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Demi-niveau", 
-        "id": "demi-niv"
-      }, 
-      {
-        "regex": "p\\d{3}", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Producteur", 
-        "id": "producteur"
-      }, 
-      {
-        "regex": "\\d{3}", 
-        "systeme": true, 
-        "optionnel": false, 
-        "label": "Spécialité", 
-        "id": "specialite"
-      }, 
-      {
-        "regex": "[A-Z0-9-]{5,30}", 
-        "systeme": false, 
-        "optionnel": false, 
-        "label": "Nom site court", 
-        "id": "nom-site-court"
-      }, 
-      {
-        "regex": "[A-Za-z0-9()_-]+", 
-        "systeme": false, 
-        "optionnel": true, 
-        "label": "Reste du nom", 
-        "id": "rest-nom"
-      }
-    ], 
-    "valeur_si_bim_2d": "BIM-2D"
-  }, 
-  "creer_niveaux": {
-    "Eleva_Niv_Rdc": 0.0, 
-    "espacement_default": 5.0, 
-    "prefixes": [
-      {
-        "systeme": true, 
-        "definition": "Batiment", 
-        "prefixe": "R", 
-        "negatif": true, 
-        "positif": true
-      }, 
-      {
-        "systeme": true, 
-        "definition": "Toiture", 
-        "prefixe": "T", 
-        "negatif": false, 
-        "positif": true
-      }, 
-      {
-        "systeme": true, 
-        "definition": "Fondations", 
-        "prefixe": "F", 
-        "negatif": true, 
-        "positif": false
-      }, 
-      {
-        "systeme": true, 
-        "definition": "Origine", 
-        "prefixe": "O", 
-        "negatif": true, 
-        "positif": true
-      }
-    ], 
-    "sens": [
-      {
-        "definition": "Positif", 
-        "signe": "+"
-      }, 
-      {
-        "definition": "Négatif", 
-        "signe": "-"
-      }
-    ], 
-    "Eleva_Niv_Origine": -1.0
-  }, 
-  "nettoyage": {
-    "zones_pochages": true, 
-    "texts": true, 
-    "lignes": true, 
-    "dwg_imports": true, 
-    "pieces_espaces": true, 
-    "dwg_liens": false
-  }, 
-  "profils_liaison_cao": [
+  "gabarits_vues": [
     {
-      "systeme": true, 
-      "vues": {
-        "famille": "Plan d'etage", 
-        "vue_par_niveau": false, 
-        "type_personnalise": "Temporaire"
+      "gabarits": {
+        "vue-surface": "", 
+        "vue-dessin": "", 
+        "vue-plan": "S4R_200000.02 - ARCHITECTURE - PLAN BATIMENT", 
+        "vue-legende": "", 
+        "vue-3d": "000000.00 - MODELISATIONS", 
+        "vue-elevation": "000000.00 - MODELISATIONS", 
+        "vue-structure": "", 
+        "vue-coupe": "000000.00 - MODELISATIONS", 
+        "vue-plaf": "000000.00 - MODELISATIONS"
       }, 
-      "ordre": 1, 
-      "label": "< Par défaut >", 
-      "options_liaisons": {
-        "view_only": false, 
-        "placement": "Automatique - Emplacement partage", 
-        "layers": "Tous", 
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "units": "Metres"
-      }
-    }, 
-    {
-      "systeme": false, 
-      "vues": {
-        "famille": "Plan d'etage", 
-        "vue_par_niveau": true, 
-        "type_personnalise": "Temporaire"
-      }, 
-      "ordre": 2, 
-      "label": "Coordination CAO", 
-      "options_liaisons": {
-        "view_only": false, 
-        "placement": "Automatique - Emplacement partage", 
-        "layers": "Tous", 
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "units": "Metres"
-      }
-    }, 
-    {
-      "systeme": false, 
-      "vues": {
-        "famille": "Plan d'etage", 
-        "vue_par_niveau": true, 
-        "type_personnalise": "Temporaire"
-      }, 
-      "ordre": 3, 
-      "label": "Traitements", 
-      "options_liaisons": {
-        "view_only": true, 
-        "placement": "Automatique - Emplacement partage", 
-        "layers": "Tous", 
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "units": "Metres"
-      }
-    }, 
-    {
-      "systeme": false, 
-      "vues": {
-        "famille": "Plan d'etage", 
-        "vue_par_niveau": true, 
-        "type_personnalise": "FM"
-      }, 
-      "ordre": 4, 
-      "label": "FM", 
-      "options_liaisons": {
-        "view_only": false, 
-        "placement": "Automatique - Emplacement partage", 
-        "layers": "Tous", 
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "units": "Metres"
-      }
-    }
-  ], 
-  "nomenclatures_colonnes_couleurs": {
-    "colonnes_occurrences": [
-      255, 
-      255, 
-      151
-    ], 
-    "colonnes_types": [
-      232, 
-      113, 
-      134
-    ], 
-    "colonnes_readonly": [
-      192, 
-      192, 
-      192
-    ]
-  }, 
-  "types_vues_personnalises": [
-    {
-      "valeur_1": "", 
-      "titre": "TEMP", 
-      "systeme": true, 
-      "usage": "Temporaire", 
-      "valeur_2": "", 
-      "ordre": 1, 
       "label": "Temporaire"
     }, 
     {
-      "valeur_1": "", 
-      "titre": "FM", 
-      "systeme": true, 
-      "usage": "Livrable", 
-      "valeur_2": "", 
-      "ordre": 2, 
+      "gabarits": {
+        "vue-surface": "", 
+        "vue-dessin": "S4R_200000.09 - ARCHITECTURE - DESSINS TECHNIQUES", 
+        "vue-plan": "S4R_200000.02 - ARCHITECTURE - PLAN BATIMENT - SANS MOBILIER", 
+        "vue-legende": "", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
+        "vue-elevation": "", 
+        "vue-structure": "", 
+        "vue-coupe": "", 
+        "vue-plaf": "S4R_200000.03 - ARCHITECTURE - PLAN PLAFONDS"
+      }, 
       "label": "FM"
     }, 
     {
-      "valeur_1": "SCH ARMOIRE", 
-      "titre": "ELECTRICITE", 
-      "systeme": true, 
-      "usage": "Livrable", 
-      "valeur_2": "", 
-      "ordre": 5, 
-      "label": "ELECTRICITE"
-    }
-  ], 
-  "emplacements": {
-    "enregistrements_rvt": {
-      "nb_rep_parents_enregistrement_rvt": 2
-    }
-  }, 
-  "vues_en_masse": {
-    "types_vues": [
-      {
-        "nom_type_vue": "TRAITEMENTS DONNEES EXISTANTES", 
-        "nom": "Plans de repérage", 
-        "template_nom": "{nom_niveau} - Repérage", 
-        "famille": "Plan d'étage"
-      }
-    ], 
-    "filtres_types_niveaux_defaut": {
-      "toiture": false, 
-      "batiment": true, 
-      "origine": false, 
-      "fondations": false, 
-      "autres": false
-    }
-  }, 
-  "activer_logs_scripts": false, 
-  "gabarits_vues": [
-    {
-      "label": "Temporaire", 
       "gabarits": {
-        "vue-3d": "000000.00 - MODELISATIONS", 
-        "vue-plan": "000000.00 - MODELISATIONS", 
-        "vue-elevation": "000000.00 - MODELISATIONS", 
-        "vue-coupe": "000000.00 - MODELISATIONS", 
-        "vue-plaf": "000000.00 - MODELISATIONS"
-      }
-    }, 
-    {
-      "label": "FM", 
-      "gabarits": {
-        "vue-structure": "", 
-        "vue-3d": "", 
-        "vue-legende": "", 
         "vue-surface": "", 
-        "vue-plan": "S4R_200000.02 - ARCHITECTURE - PLAN BATIMENT - SANS MOBILIER", 
+        "vue-dessin": "", 
+        "vue-plan": "S4R_400000.02 - ELECTRICITE - PLAN BATIMENT", 
+        "vue-legende": "", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
         "vue-elevation": "", 
+        "vue-structure": "", 
         "vue-coupe": "", 
-        "vue-dessin": "S4R_200000.09 - ARCHITECTURE - DESSINS TECHNIQUES", 
-        "vue-plaf": "S4R_200000.03 - ARCHITECTURE - PLAN PLAFONDS"
-      }
+        "vue-plaf": ""
+      }, 
+      "label": "ELECTRICITE"
     }, 
     {
-      "label": "ELECTRICITE", 
-      "gabarits": {}
+      "gabarits": {
+        "vue-surface": "", 
+        "vue-dessin": "", 
+        "vue-plan": "", 
+        "vue-legende": "", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
+        "vue-elevation": "", 
+        "vue-structure": "", 
+        "vue-coupe": "", 
+        "vue-plaf": ""
+      }, 
+      "label": "PIECES 3D"
     }
   ], 
-  "nomenclatures_titres_couleurs": {
-    "saisies_occurrences": [
-      255, 
-      255, 
-      151
+  "creer_niveaux": {
+    "Eleva_Niv_Rdc": 0.0, 
+    "Eleva_Niv_Origine": -1.0, 
+    "sens": [
+      {
+        "signe": "+", 
+        "definition": "Positif"
+      }, 
+      {
+        "signe": "-", 
+        "definition": "Négatif"
+      }
     ], 
-    "nomenclatures_presentations": [
-      241, 
-      141, 
-      0
-    ], 
-    "saisies_types": [
-      232, 
-      113, 
-      134
-    ], 
-    "tables_de_styles": [
-      192, 
-      192, 
-      192
+    "espacement_default": 5.0, 
+    "prefixes": [
+      {
+        "positif": true, 
+        "systeme": true, 
+        "definition": "Batiment", 
+        "negatif": true, 
+        "prefixe": "R"
+      }, 
+      {
+        "positif": true, 
+        "systeme": true, 
+        "definition": "Toiture", 
+        "negatif": false, 
+        "prefixe": "T"
+      }, 
+      {
+        "positif": false, 
+        "systeme": true, 
+        "definition": "Fondations", 
+        "negatif": true, 
+        "prefixe": "F"
+      }, 
+      {
+        "positif": true, 
+        "systeme": true, 
+        "definition": "Origine", 
+        "negatif": true, 
+        "prefixe": "O"
+      }
     ]
   }, 
   "detect_pieces_dwg": {
-    "dilatation_pix": 2, 
-    "resolution_m": 0.10000000000000001, 
-    "grille_max_px": 5000000, 
     "mots_cles_exclure": [
       "meuble", 
       "mobilier", 
@@ -367,193 +134,449 @@
       "arbre", 
       "parking"
     ], 
-    "aire_min_m2": 2.0, 
-    "simplifier_tol_m": 0.10000000000000001, 
+    "resolution_m": 0.10000000000000001, 
     "presets_qualite": [
       {
-        "dilatation_pix": 4, 
-        "seuil_long_m": 0.29999999999999999, 
-        "resolution_m": 0.20000000000000001, 
-        "grille_max_px": 3000000, 
-        "description": "Résolution grossière, forte dilatation. Convient aux DWG dégradés ou très chargés.", 
-        "aire_min_m2": 3.0, 
         "nom": "Rapide — DWG très sale (grosse maille, beaucoup de micro-gaps)", 
+        "description": "Résolution grossière, forte dilatation. Convient aux DWG dégradés ou très chargés.", 
+        "resolution_m": 0.20000000000000001, 
         "simplifier_tol_m": 0.20000000000000001, 
-        "marge_m": 1.5
+        "dilatation_pix": 4, 
+        "marge_m": 1.5, 
+        "aire_min_m2": 3.0, 
+        "grille_max_px": 3000000, 
+        "seuil_long_m": 0.29999999999999999
       }, 
       {
-        "dilatation_pix": 2, 
-        "seuil_long_m": 0.20000000000000001, 
-        "resolution_m": 0.10000000000000001, 
-        "grille_max_px": 5000000, 
-        "description": "Réglages équilibrés, adaptés à la majorité des DWG de plans architecturaux.", 
-        "aire_min_m2": 2.0, 
         "nom": "Standard — DWG courant (réglages par défaut)", 
+        "description": "Réglages équilibrés, adaptés à la majorité des DWG de plans architecturaux.", 
+        "resolution_m": 0.10000000000000001, 
         "simplifier_tol_m": 0.10000000000000001, 
-        "marge_m": 1.0
+        "dilatation_pix": 2, 
+        "marge_m": 1.0, 
+        "aire_min_m2": 2.0, 
+        "grille_max_px": 5000000, 
+        "seuil_long_m": 0.20000000000000001
       }, 
       {
-        "dilatation_pix": 1, 
-        "seuil_long_m": 0.080000000000000002, 
-        "resolution_m": 0.050000000000000003, 
-        "grille_max_px": 10000000, 
-        "description": "Haute résolution pour les DWG bien dessinés sans micro-gaps. Plus lent.", 
-        "aire_min_m2": 1.0, 
         "nom": "Précis — DWG propre (fine maille, peu de micro-gaps)", 
+        "description": "Haute résolution pour les DWG bien dessinés sans micro-gaps. Plus lent.", 
+        "resolution_m": 0.050000000000000003, 
         "simplifier_tol_m": 0.050000000000000003, 
-        "marge_m": 0.5
+        "dilatation_pix": 1, 
+        "marge_m": 0.5, 
+        "aire_min_m2": 1.0, 
+        "grille_max_px": 10000000, 
+        "seuil_long_m": 0.080000000000000002
       }
     ], 
-    "marge_m": 1.0
+    "dilatation_pix": 2, 
+    "simplifier_tol_m": 0.10000000000000001, 
+    "marge_m": 1.0, 
+    "grille_max_px": 5000000, 
+    "aire_min_m2": 2.0
   }, 
-  "mises_a_jour": {
-    "source_url": "https://github.com/data8bim/py-NM-BATII"
-  },
-  "dispo_types_pers_lier_cao": [
+  "activer_logs_scripts": false, 
+  "emplacements": {
+    "enregistrements_rvt": {
+      "nb_rep_parents_enregistrement_rvt": 2
+    }
+  }, 
+  "fichiers_lies_dwg": {
+    "color_mode_default": "conserver", 
+    "placement_default": "shared", 
+    "layers_default": "Visibles", 
+    "unit_default": "Mètres", 
+    "include_sub": false, 
+    "view_only": false, 
+    "correct_lines": true
+  }, 
+  "nomenclatures_types": [
     {
-      "lier_cao": true, 
-      "vues_plus": true, 
-      "label": "Temporaire"
+      "type_vue": "2 - SAISIES DES DONNEES", 
+      "label": "2a - Saisie des caractéristiques du TYPE"
     }, 
     {
-      "lier_cao": true, 
-      "vues_plus": true, 
-      "label": "FM"
+      "type_vue": "2 - SAISIES DES DONNEES", 
+      "label": "2b - Saisie des caractéristiques d'OCCURRENCES"
     }, 
     {
-      "lier_cao": false, 
-      "vues_plus": true, 
-      "label": "ELECTRICITE"
+      "type_vue": "3 - PRESENTATIONS DES DONNEES", 
+      "label": "3a - Présentation des caractéristiques du TYPE"
+    }, 
+    {
+      "type_vue": "3 - PRESENTATIONS DES DONNEES", 
+      "label": "3b - Présentation des caractéristiques d'OCCURRENCES"
+    }, 
+    {
+      "type_vue": "3 - PRESENTATIONS DES DONNEES", 
+      "label": "3c - Présentation des caractéristiques AUTRES"
     }
   ], 
   "conventions_nommage": {
-    "nommage_niveaux": [
-      {
-        "template": "{construction}_{niveau}_{demi-niv}", 
-        "label": "Niveaux Revit", 
-        "id": "niveaux-revit"
-      }
-    ], 
     "templates": [
       {
+        "template": "{site}_{construction}_{niveau-code}_{demi-niv}_{producteur}_{specialite}_{nom-site-court}_{rest-nom}", 
         "systeme": true, 
-        "template": "{site}_{construction}_{niveau}_{demi-niv}_{producteur}_{specialite}_{nom-site-court}_{rest-nom}", 
-        "label": "Fichiers", 
-        "id": "fichiers"
-      }
-    ], 
-    "nommage_presentations": [
-      {
-        "template": "{construction} - {specialite} - {niveau}", 
-        "label": "Présentation", 
-        "id": "present-plan"
+        "id": "fichiers", 
+        "label": "Fichiers"
       }
     ], 
     "nommage_niveaux_code": [
       {
         "template": "{pref-niv}{sens-niv}{num-niv}", 
-        "label": "Niveau (code)", 
-        "id": "niveau"
+        "id": "niveau-code", 
+        "label": "Niveau (code)"
       }
     ], 
     "nommage_vues": [
       {
-        "template": "{vue-pers-titre} - {niveau}", 
+        "pieces_3d": false, 
         "vues_et_dwg": true, 
-        "vues_plus": true, 
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "id": "vue-plan", 
         "label": "Plan d'étage", 
-        "id": "vue-plan"
+        "vues_plus": true
       }, 
       {
-        "template": "{vue-pers-titre} - {niveau}", 
+        "pieces_3d": false, 
         "vues_et_dwg": true, 
-        "vues_plus": true, 
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "id": "vue-plaf", 
         "label": "Plan de faux plafond", 
-        "id": "vue-plaf"
+        "vues_plus": true
       }, 
       {
-        "template": "{vue-pers-titre} - {niveau}", 
+        "pieces_3d": false, 
         "vues_et_dwg": true, 
-        "vues_plus": true, 
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "id": "vue-structure", 
         "label": "Vue en plan (Structure)", 
-        "id": "vue-structure"
+        "vues_plus": true
       }, 
       {
-        "template": "{vue-pers-titre} - {niveau}", 
-        "vues_et_dwg": false, 
-        "vues_plus": false, 
+        "pieces_3d": false, 
+        "vues_et_dwg": true, 
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "id": "vue-surface", 
         "label": "Plan de surface", 
-        "id": "vue-surface"
+        "vues_plus": true
       }, 
       {
-        "template": "{vue-pers-titre} - COUPE", 
+        "pieces_3d": false, 
         "vues_et_dwg": false, 
-        "vues_plus": false, 
+        "template": "{vue-pers-titre:val} - COUPE - {phase:val}", 
+        "id": "vue-coupe", 
         "label": "Coupe", 
-        "id": "vue-coupe"
+        "vues_plus": false
       }, 
       {
-        "template": "{vue-pers-titre} - ELEVATION", 
+        "pieces_3d": false, 
         "vues_et_dwg": false, 
-        "vues_plus": false, 
+        "template": "{vue-pers-titre:val} - ELEVATION - {phase:val}", 
+        "id": "vue-elevation", 
         "label": "Élévation", 
-        "id": "vue-elevation"
+        "vues_plus": false
       }, 
       {
-        "template": "{vue-pers-titre} - 3D", 
+        "pieces_3d": true, 
         "vues_et_dwg": false, 
-        "vues_plus": false, 
+        "template": "{vue-pers-titre:val} - 3D - {phase:val}", 
+        "id": "vue-3d", 
         "label": "Vue 3D", 
-        "id": "vue-3d"
+        "vues_plus": true
       }, 
       {
-        "template": "{vue-pers-titre} - {niveau} - {vue-pers-valeur-1} - {vue-pers-valeur-2}", 
+        "pieces_3d": false, 
         "vues_et_dwg": true, 
-        "vues_plus": true, 
+        "template": "{vue-pers-titre:val} - {niveau} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val} - {phase:val}", 
+        "id": "vue-dessin", 
         "label": "Vue de dessin", 
-        "id": "vue-dessin"
+        "vues_plus": true
       }, 
       {
-        "template": "{vue-pers-titre} - {vue-pers-valeur-1} - {vue-pers-valeur-2}", 
+        "pieces_3d": false, 
         "vues_et_dwg": true, 
-        "vues_plus": true, 
+        "template": "{vue-pers-titre:val} - {niveau} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val} - {phase:val}", 
+        "id": "vue-legende", 
         "label": "Légende", 
-        "id": "vue-legende"
+        "vues_plus": true
+      }, 
+      {
+        "pieces_3d": false, 
+        "vues_et_dwg": false, 
+        "template": "{CATEGORIE} - {PHASE} - {type-nomenclature:val}", 
+        "id": "vue-nomenclature", 
+        "label": "Nomenclature", 
+        "vues_plus": false
+      }
+    ], 
+    "nommage_niveaux": [
+      {
+        "template": "{construction}_{niveau-code}_{demi-niv}", 
+        "id": "niveau-revit", 
+        "label": "Niveau Revit"
+      }
+    ], 
+    "nommage_presentations": [
+      {
+        "template": "{construction} - {specialite} - {niveau}", 
+        "id": "present-plan", 
+        "label": "Présentation"
       }
     ]
   }, 
+  "pieces_3d": {
+    "nom_vue_3d": "3D - PIECES 3D", 
+    "gabarit_vue_3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D"
+  }, 
+  "nomenclatures_colonnes_couleurs": {
+    "colonnes_occurrences": [
+      255, 
+      255, 
+      151
+    ], 
+    "colonnes_types": [
+      232, 
+      113, 
+      134
+    ], 
+    "colonnes_readonly": [
+      192, 
+      192, 
+      192
+    ]
+  }, 
+  "contraintes_hauteur_pieces": {
+    "nb_niveaux": 1, 
+    "decalage_inferieur": 0.0, 
+    "decalage_limite": 0.0
+  }, 
   "surface": {
-    "param_shob": "ANS - SURFACE - SHOB", 
+    "col_filter": "Nom", 
     "param_s_plancher": "ANS - SURFACE - S Plancher", 
-    "col_shon": "SHON", 
-    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
     "default_shon_schedule": "SURFACES - SHON/SHOB", 
+    "param_shob": "ANS - SURFACE - SHOB", 
+    "col_plancher": "Surface Plancher - SP", 
     "param_shon": "ANS - SURFACE - SHON", 
     "col_shob": "SHOB", 
-    "col_plancher": "Surface Plancher - SP", 
-    "col_filter": "Nom"
+    "col_shon": "SHON", 
+    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER"
+  }, 
+  "nomenclatures_titres_couleurs": {
+    "nomenclatures_presentations": [
+      241, 
+      141, 
+      0
+    ], 
+    "saisies_types": [
+      232, 
+      113, 
+      134
+    ], 
+    "saisies_occurrences": [
+      255, 
+      255, 
+      151
+    ], 
+    "tables_de_styles": [
+      192, 
+      192, 
+      192
+    ]
+  }, 
+  "nettoyage": {
+    "lignes": true, 
+    "dwg_liens": false, 
+    "texts": true, 
+    "zones_pochages": true, 
+    "dwg_imports": true, 
+    "pieces_espaces": true
+  }, 
+  "profils_liaison_cao": [
+    {
+      "options_liaisons": {
+        "units": "Metres", 
+        "color_mode": "Conserver", 
+        "layers": "Tous", 
+        "view_only": false, 
+        "placement": "Automatique - Emplacement partage", 
+        "correct_lines": true
+      }, 
+      "vues": {
+        "famille": "Plan d'etage", 
+        "vue_par_niveau": false, 
+        "type_personnalise": "Temporaire"
+      }, 
+      "label": "< Par défaut >", 
+      "systeme": true, 
+      "ordre": 1
+    }, 
+    {
+      "options_liaisons": {
+        "units": "Metres", 
+        "color_mode": "Conserver", 
+        "layers": "Tous", 
+        "view_only": false, 
+        "placement": "Automatique - Emplacement partage", 
+        "correct_lines": true
+      }, 
+      "vues": {
+        "famille": "Plan d'etage", 
+        "vue_par_niveau": true, 
+        "type_personnalise": "Temporaire"
+      }, 
+      "label": "Coordination CAO", 
+      "systeme": false, 
+      "ordre": 2
+    }, 
+    {
+      "options_liaisons": {
+        "units": "Metres", 
+        "color_mode": "Conserver", 
+        "layers": "Tous", 
+        "view_only": true, 
+        "placement": "Automatique - Emplacement partage", 
+        "correct_lines": true
+      }, 
+      "vues": {
+        "famille": "Plan d'etage", 
+        "vue_par_niveau": true, 
+        "type_personnalise": "Temporaire"
+      }, 
+      "label": "Traitements", 
+      "systeme": false, 
+      "ordre": 3
+    }, 
+    {
+      "options_liaisons": {
+        "units": "Metres", 
+        "color_mode": "Conserver", 
+        "layers": "Tous", 
+        "view_only": false, 
+        "placement": "Automatique - Emplacement partage", 
+        "correct_lines": true
+      }, 
+      "vues": {
+        "famille": "Plan d'etage", 
+        "vue_par_niveau": true, 
+        "type_personnalise": "FM"
+      }, 
+      "label": "FM", 
+      "systeme": false, 
+      "ordre": 4
+    }
+  ], 
+  "mises_a_jour": {
+    "source_url": "https://github.com/data8bim/py-NM-BATII"
+  }, 
+  "types_vues_personnalises": [
+    {
+      "valeur_2": "", 
+      "valeur_1": "", 
+      "usage": "Temporaire", 
+      "label": "Temporaire", 
+      "systeme": true, 
+      "ordre": 1, 
+      "titre": "TEMP"
+    }, 
+    {
+      "valeur_2": "", 
+      "valeur_1": "", 
+      "usage": "Livrable", 
+      "label": "FM", 
+      "systeme": true, 
+      "ordre": 2, 
+      "titre": "FM"
+    }, 
+    {
+      "valeur_2": "", 
+      "valeur_1": "SCH ARMOIRE", 
+      "usage": "Livrable", 
+      "label": "ELECTRICITE", 
+      "systeme": true, 
+      "ordre": 5, 
+      "titre": "ELECTRICITE"
+    }, 
+    {
+      "valeur_2": "", 
+      "valeur_1": "", 
+      "usage": "", 
+      "label": "PIECES 3D", 
+      "systeme": true, 
+      "ordre": 999, 
+      "titre": "PIECES 3D"
+    }
+  ], 
+  "dispo_types_pers_lier_cao": [
+    {
+      "lier_cao": true, 
+      "vues_plus": true, 
+      "pieces_3d": false, 
+      "label": "Temporaire"
+    }, 
+    {
+      "lier_cao": true, 
+      "vues_plus": true, 
+      "pieces_3d": false, 
+      "label": "FM"
+    }, 
+    {
+      "lier_cao": false, 
+      "vues_plus": true, 
+      "pieces_3d": false, 
+      "label": "ELECTRICITE"
+    }, 
+    {
+      "lier_cao": false, 
+      "vues_plus": false, 
+      "pieces_3d": true, 
+      "label": "PIECES 3D"
+    }
+  ], 
+  "vues_en_masse": {
+    "types_vues": [
+      {
+        "template_nom": "{nom_niveau} - Repérage", 
+        "famille": "Plan d'étage", 
+        "nom": "Plans de repérage", 
+        "nom_type_vue": "TRAITEMENTS DONNEES EXISTANTES"
+      }
+    ], 
+    "filtres_types_niveaux_defaut": {
+      "batiment": true, 
+      "origine": false, 
+      "autres": false, 
+      "toiture": false, 
+      "fondations": false
+    }
   }, 
   "types_vues": [
     {
       "types": {
-        "vue-structure": "TEST", 
-        "vue-3d": "3D", 
-        "vue-legende": "LEG", 
         "vue-surface": "SURF", 
-        "vue-plan": "ETG", 
-        "vue-elevation": "TRAITEMENTS DONNEES EXISTANTES", 
-        "vue-coupe": "CP", 
         "vue-dessin": "DES", 
+        "vue-plan": "ETG", 
+        "vue-legende": "LEG", 
+        "vue-3d": "3D", 
+        "vue-elevation": "TRAITEMENTS DONNEES EXISTANTES", 
+        "vue-structure": "TEST", 
+        "vue-coupe": "CP", 
         "vue-plaf": "PLF"
       }, 
       "label": "Temporaire"
     }, 
     {
       "types": {
-        "vue-3d": "Vue 3D", 
+        "vue-surface": "", 
+        "vue-dessin": "", 
         "vue-plan": "Plan d'étage", 
+        "vue-legende": "", 
+        "vue-3d": "Vue 3D", 
         "vue-elevation": "Elévation", 
+        "vue-structure": "", 
         "vue-coupe": "Coupe", 
+        "vue-nomenclature": "", 
         "vue-plaf": "Plan de faux plafond"
       }, 
       "label": "FM"
@@ -561,6 +584,96 @@
     {
       "types": {}, 
       "label": "ELECTRICITE"
+    }, 
+    {
+      "types": {}, 
+      "label": "PIECES 3D"
     }
-  ]
+  ], 
+  "suppression_masse_etiquettes_pieces": {
+    "types_selectionnes": [
+      "200000 - Etiquette - Pièce - Commentaire - 2.0 - (Ba) : 1 - Nom"
+    ]
+  }, 
+  "nm_convention_noms_fichiers": {
+    "valeur_si_bim_2d": "BIM-2D", 
+    "groupes": [
+      {
+        "id": "site", 
+        "regex": "s\\d{7}", 
+        "label": "Site", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "construction", 
+        "regex": "\\d{3}", 
+        "label": "Construction (bâtiment)", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "pref-niv", 
+        "regex": "[RTFO]", 
+        "label": "Préfixe niveau", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "sens-niv", 
+        "regex": "[+\\-]", 
+        "label": "Sens niveau", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "num-niv", 
+        "regex": "\\d{2}", 
+        "label": "Numéro niveau", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "demi-niv", 
+        "regex": "\\d{1}", 
+        "label": "Demi-niveau", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "producteur", 
+        "regex": "p\\d{3}", 
+        "label": "Producteur", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "specialite", 
+        "regex": "\\d{3}", 
+        "label": "Spécialité", 
+        "optionnel": false, 
+        "systeme": true
+      }, 
+      {
+        "id": "nom-site-court", 
+        "regex": "[A-Z0-9-]{5,30}", 
+        "label": "Nom site court", 
+        "optionnel": false, 
+        "systeme": false
+      }, 
+      {
+        "id": "rest-nom", 
+        "regex": "[A-Za-z0-9()_-]+", 
+        "label": "Reste du nom", 
+        "optionnel": true, 
+        "systeme": false
+      }
+    ], 
+    "valeur_si_nul": "X"
+  }, 
+  "etiquette_masse_pieces": {
+    "types_selectionnes": [
+      "200000 - Etiquette - Pièce - Commentaire - 2.0 - (Ba) : 1 - Nom"
+    ]
+  }
 }

@@ -42,17 +42,35 @@
 				 TextWrapping="Wrap"
 				 VerticalScrollBarVisibility="Auto" />
 
-		<Button x:Name="btnRename"
-				Content="Renommer"
-				Grid.Row="3"
-				Grid.Column="1"
-				HorizontalAlignment="Stretch" />	
-		
-		<Button x:Name="btnReplace"
-				Content="Remplacer"
-				Grid.Row="3"
-				Grid.Column="2"
-				HorizontalAlignment="Stretch" />
+		<!-- Pied a 2 actions principales de meme niveau : deux colonnes
+		     elastiques egales (*), meme style Appliquer. "Annuler" garde la
+		     largeur fixe 130 du bouton de sortie ; le script gere deja
+		     l'abandon (if not win.show_dialog(): return None).
+		     Grid.Row corrige de 3 a 2 : le Grid ne definit que 3 lignes (0-2),
+		     WPF rabattait silencieusement les boutons sur la derniere. -->
+		<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="8"/>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="8"/>
+				<ColumnDefinition Width="130"/>
+			</Grid.ColumnDefinitions>
+
+			<Button Grid.Column="0" x:Name="btnRename"
+					Content="▶  Renommer"
+					Style="{DynamicResource NMButtonAppliquer}"
+					IsDefault="True" />
+
+			<Button Grid.Column="2" x:Name="btnReplace"
+					Content="▶  Remplacer"
+					Style="{DynamicResource NMButtonAppliquer}" />
+
+			<Button Grid.Column="4" x:Name="btnCancel"
+					Content="Annuler"
+					Style="{DynamicResource NMButtonAnnuler}"
+					IsCancel="True" />
+		</Grid>
 
     </Grid>
 </Window>

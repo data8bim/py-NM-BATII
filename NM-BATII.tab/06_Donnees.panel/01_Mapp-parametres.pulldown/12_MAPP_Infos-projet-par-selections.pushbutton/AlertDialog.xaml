@@ -46,14 +46,16 @@
                  VerticalAlignment="Center"/>
     </Border>
 
+    <!-- Fenetre a bouton unique : "Fermer" prend le style Appliquer sur toute
+         la largeur, puisqu'il est la seule action possible. -->
     <Button x:Name="btnClose"
             Content="Fermer"
             Grid.Row="2"
             Grid.Column="0" Grid.ColumnSpan="3"
             HorizontalAlignment="Stretch"
             Margin="5,0"
-            Height="30"
             IsDefault="True"
-            IsCancel="True"/>
+            IsCancel="True"
+            Style="{DynamicResource NMButtonAppliquer}"/>
   </Grid>
 </Window>

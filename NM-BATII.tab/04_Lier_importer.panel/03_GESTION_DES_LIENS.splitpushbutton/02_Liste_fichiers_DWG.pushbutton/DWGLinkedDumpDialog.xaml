@@ -15,8 +15,12 @@
              HorizontalScrollBarVisibility="Auto"
              IsReadOnly="True"
              DockPanel.Dock="Top"/>
-    <Button Content="Fermer" Name="btnClose" Width="90"
-            HorizontalAlignment="Right" DockPanel.Dock="Bottom"
-            Margin="0,10,0,0"/>
+    <!-- Fenetre a bouton unique : "Fermer" prend le style Appliquer sur toute
+         la largeur, puisqu'il est la seule action possible. -->
+    <Button Content="Fermer" Name="btnClose"
+            HorizontalAlignment="Stretch" DockPanel.Dock="Bottom"
+            Margin="0,10,0,0"
+            IsDefault="True"
+            Style="{DynamicResource NMButtonAppliquer}"/>
   </DockPanel>
 </Window>

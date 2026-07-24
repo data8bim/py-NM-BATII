@@ -1,0 +1,30 @@
+title:
+  en_us: "Edit room\nseparators"
+  fr_fr: "Edition séparateurs\nde pièces"
+tooltip:
+  en_us: "Edit mode for room separation lines.
+         \nPins every other element of the active view and turns off selection
+         \nof pinned elements: they stay VISIBLE (context kept for alignment)
+         \nbut become neither selectable nor editable.
+         \nView switching is blocked while active — the mode only protects the
+         \nview it was armed on.
+         \nOnly what the script pinned is unpinned on exit; your own pinned
+         \nelements are preserved.
+         \nRe-running the button (or its keyboard shortcut) toggles the mode.
+         \n\nVersion: {{version}}-[{{date}}.009]"
+
+  fr_fr: "Mode édition des séparateurs de pièces.
+         \nÉpingle tous les autres éléments de la vue active et coupe la
+         \nsélection des éléments épinglés : ils restent VISIBLES (contexte
+         \nconservé pour l'alignement) mais ne sont ni sélectionnables ni
+         \nmodifiables.
+         \nLe changement de vue est bloqué pendant le mode — celui-ci ne
+         \nprotège que la vue où il a été armé.
+         \nÀ la sortie, seuls les éléments épinglés par le script sont
+         \ndépinglés ; vos propres épinglages sont préservés.
+         \nRelancer le bouton (ou son raccourci clavier) bascule le mode.
+         \n\nVersion: {{version}}-[{{date}}.009]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-plan-view

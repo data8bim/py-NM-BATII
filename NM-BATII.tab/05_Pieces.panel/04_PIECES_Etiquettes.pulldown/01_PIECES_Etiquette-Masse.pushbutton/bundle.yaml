@@ -1,0 +1,14 @@
+title:
+  en_us: "Tag rooms (bulk)"
+  fr_fr: "Étiqueter en masse"
+tooltip:
+  en_us: "Tags multiple rooms at once. Choose a room tag type and a scope
+         (whole project or active view, all rooms or only untagged ones).
+         \n\nVersion: {{version}}-[{{date}}.002]"
+  fr_fr: "Étiquette plusieurs pièces en une seule opération. Choisir un type
+         d'étiquette de pièce et une portée (projet ou vue active, toutes
+         les pièces ou uniquement celles sans étiquette).
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

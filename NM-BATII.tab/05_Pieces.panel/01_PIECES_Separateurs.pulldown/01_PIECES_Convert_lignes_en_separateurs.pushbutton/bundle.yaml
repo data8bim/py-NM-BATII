@@ -1,0 +1,20 @@
+title:
+  en_us: "Lines → Room\nseparators"
+  fr_fr: "Lignes →\nSéparateurs"
+tooltip:
+  en_us: "Copy lines to room separators — modeless palette.
+         \nThe window stays open while you build your selection in the view
+         \nwith all the native Revit tools (selection filter, select all
+         \ninstances, VG overrides, hide in view...), then click Convert.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+  fr_fr: "Recopie des lignes en séparateurs de pièces — palette non modale.
+         \nLa fenêtre reste ouverte pendant que vous composez votre sélection
+         \ndans la vue avec tous les outils natifs Revit (filtre de sélection,
+         \nsélectionner toutes les occurrences, VG, masquer dans la vue...),
+         \npuis cliquez sur « Convertir la sélection ».
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-plan-view

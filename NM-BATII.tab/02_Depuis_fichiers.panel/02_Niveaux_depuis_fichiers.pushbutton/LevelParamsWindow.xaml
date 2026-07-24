@@ -58,28 +58,28 @@
 			<Grid.RowDefinitions>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
+			<!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
-				<ColumnDefinition Width="5"/>
-				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="8"/>
+				<ColumnDefinition Width="130"/>
 			</Grid.ColumnDefinitions>
 
 			<Button	x:Name="btnOk"
-					Content="Valider"
-					Style="{StaticResource NMButtonValideOnly}"
+					Content="▶  Appliquer"
+					Style="{DynamicResource NMButtonAppliquer}"
+					IsDefault="True"
 					Grid.Row="0"
 					Grid.Column="0"
-					HorizontalAlignment="Stretch"
-					VerticalAlignment="Stretch"/>
-					
+					HorizontalAlignment="Stretch"/>
+
 			<Button	x:Name="btnCancel"
 					Content="Annuler"
 					IsCancel="True"
-					Style="{StaticResource NMButtonValideOnly}"
+					Style="{DynamicResource NMButtonAnnuler}"
 					Grid.Row="0"
 					Grid.Column="2"
-					HorizontalAlignment="Stretch"
-					VerticalAlignment="Stretch"/>
+					HorizontalAlignment="Stretch"/>
 			</Grid>
 
     </Grid>

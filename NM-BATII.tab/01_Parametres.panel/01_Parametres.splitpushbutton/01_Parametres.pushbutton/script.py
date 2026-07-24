@@ -22,8 +22,18 @@
 #__title__ = 'Parametres'
 #__author__ = 'data8bim (d8b)'
 
-import os, json, codecs
+import os, sys, json, codecs, re
 from pyrevit import forms
+
+# Feuille de styles WPF partagee (lib/dialogs/dialogs_styles.xaml) : rend
+# disponibles les cles NMButtonAppliquer / NMButtonAnnuler utilisees par les
+# pieds de dialogue. Tous les styles y sont nommes (x:Key), le chargement
+# n'applique donc rien de lui-meme aux controles existants.
+_lib = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'lib')
+if _lib not in sys.path:
+    sys.path.insert(0, _lib)
+from dialogs.dialogs_styles_loader import load as _charger_styles
+_charger_styles()
 
 
 # ---------------------------------------------------------------------------
@@ -77,6 +87,33 @@ def set_chk(wpf, name, value):
     ctrl = getattr(wpf, name, None)
     if ctrl:
         ctrl.IsChecked = bool(value)
+
+
+def _commit_datagrid_edit(dg):
+    """
+    Force la validation de la cellule/ligne en cours d'édition d'un DataGrid.
+    Un clic sur un bouton "OK" situé hors de la grille ne déclenche pas
+    toujours le commit du binding de la dernière case cochée/cellule
+    modifiée (le focus n'a pas encore quitté la cellule) : sans cet appel,
+    la dernière modification peut être silencieusement perdue.
+    """
+    try:
+        dg.CommitEdit()
+        dg.CommitEdit()
+    except Exception:
+        pass
+
+
+def _int_or(val, default):
+    """
+    Convertit val en int, ou retourne default si impossible. Couvre le cas
+    d'une cellule de DataGrid laissée vide via la ligne d'ajout intégrée
+    (System.DBNull, distinct de None, que int() ne sait pas convertir).
+    """
+    try:
+        return int(val)
+    except Exception:
+        return default
 
 
 def get_color(wpf, r_name, g_name, b_name):
@@ -321,7 +358,7 @@ def main():
     # ── Templates de nommage (DataGrid unifié) ────────────────────────────────
     _defaut_templates = [
         {'id': 'fichiers',          'label': 'Fichiers',
-         'systeme': True, 'template': '{site}_{construction}_{niveau}_{demi-niv}_{producteur}_{specialite}_{nom-site-court}_{rest-nom}'},
+         'systeme': True, 'template': '{site}_{construction}_{niveau-code}_{demi-niv}_{producteur}_{specialite}_{nom-site-court}_{rest-nom}'},
     ]
     _dt_tpl = SysDataTable()
     _dt_tpl.Columns.Add('label')
@@ -394,12 +431,20 @@ def main():
     # Dicts disponibilite types personnalises
     # _dispo_types_pers    : True = disponible dans "Lier CAO → Vues"
     # _dispo_types_pers_vp : True = disponible dans "Vues +"
+    # _dispo_types_pers_p3d: True = type utilisé pour les vues "Pièces 3D"
+    #                        (un seul label peut être à True à la fois)
+    # Les nomenclatures ne sont plus concernees : elles ont leur propre table
+    # (onglet "Nomenclatures"), les types de vue personnalises n'entrent plus
+    # dans leur creation. L'ancienne cle 'nomenclatures' des entrees existantes
+    # de config.json est simplement ignoree, puis supprimee a l'enregistrement.
     _dispo_types_pers    = {}
     _dispo_types_pers_vp = {}
+    _dispo_types_pers_p3d = {}
     for _d in cfg.get(u'dispo_types_pers_lier_cao', []):
         _lbl_d = _d.get(u'label', u'')
-        _dispo_types_pers[_lbl_d]    = bool(_d.get(u'lier_cao',  True))
-        _dispo_types_pers_vp[_lbl_d] = bool(_d.get(u'vues_plus', True))
+        _dispo_types_pers[_lbl_d]     = bool(_d.get(u'lier_cao',  True))
+        _dispo_types_pers_vp[_lbl_d]  = bool(_d.get(u'vues_plus', True))
+        _dispo_types_pers_p3d[_lbl_d] = bool(_d.get(u'pieces_3d', False))
 
     _LOCKED_TVP_LABELS = {u'Temporaire', u'FM'}
 
@@ -456,8 +501,8 @@ def main():
     _ctx_tvp.Opened += _tvp_ctx_opened
 
     def _tvp_next_ordre():
-        _vals = [int(_row['ordre']) for _row in _dt_tvp.Rows
-                 if _row['ordre'] is not None]
+        _vals = [_v for _v in (_int_or(_row['ordre'], None) for _row in _dt_tvp.Rows)
+                 if _v is not None]
         return (max(_vals) + 1) if _vals else 3
 
     def _tvp_nouvelle(sender, e):
@@ -516,13 +561,36 @@ def main():
     for _gab in cfg.get('gabarits_vues', []):
         _gabarits_store[_gab.get('label', '')] = dict(_gab.get('gabarits', {}))
 
+    # Migration : ancienne valeur unique "Gabarit de vue 3D" (avant l'entrée
+    # 'vue-3d' par type personnalisé dans la table "Gabarits de vues") —
+    # préremplit l'entrée 'vue-3d' de chaque label non encore configuré.
+    _legacy_gabarit_vue_3d = (cfg.get('pieces_3d', {}) or {}).get('gabarit_vue_3d', u'')
+    if _legacy_gabarit_vue_3d:
+        for _row_gab in _dt_tvp.Rows:
+            _lbl_gab = str(_row_gab['label']) if _row_gab['label'] is not None else u''
+            if not _lbl_gab:
+                continue
+            _gabarits_store.setdefault(_lbl_gab, {})
+            if not _gabarits_store[_lbl_gab].get('vue-3d'):
+                _gabarits_store[_lbl_gab]['vue-3d'] = _legacy_gabarit_vue_3d
+
     # ── Helpers communs aux deux dialogues dynamiques ─────────────────────────
     def _get_vue_noms_from_grid():
-        """Lit la liste (label, vue_id, col_key) depuis dgNommageVues."""
+        """
+        Lit la liste (label, vue_id, col_key) depuis dgNommageVues.
+
+        "Nomenclature" en est exclue : les nomenclatures ne se declinent pas
+        par type de vue personnalise et disposent de leur propre table
+        (onglet "Nomenclatures"), qui porte deja le type de vue Revit a
+        appliquer. Elle n'a donc pas a apparaitre comme colonne dans les
+        dialogues "Types de vues" et "Gabarits de vues".
+        """
         _result = []
         for _r in wpf.dgNommageVues.ItemsSource:
             _lbl_v = str(_r['label']) if _r['label'] is not None else ''
             _vid_v = str(_r['id'])    if _r['id']    is not None else ''
+            if _vid_v == u'vue-nomenclature':
+                continue
             if _lbl_v or _vid_v:
                 _key_v = 'col_' + _vid_v.replace('-', '_').replace(' ', '_')
                 _result.append((_lbl_v, _vid_v, _key_v))
@@ -645,22 +713,302 @@ def main():
 
     wpf.dgTypesVues.AddHandler(ButtonBase.ClickEvent, RoutedEventHandler(_on_tvp_button_click))
 
+    # ══════════════════════════════════════════════════════════════════════════
+    # Panneau de composition des conventions de nommage
+    # ══════════════════════════════════════════════════════════════════════════
+    # Un clic dans une cellule "Template" ouvre TemplateBuilderDialog.xaml, qui
+    # ne propose que les variables réellement applicables à la ligne éditée.
+
+    # -- Variables des lignes de "Nommage des vues" ---------------------------
+    # Communes à toutes les familles de vues.
+    # {phase} est isolée : c'est la seule de cette liste que la ligne
+    # "Nomenclature" partage (elle n'a pas de type de vue personnalisé).
+    _VAR_PHASE = (u'phase', u'Phase de projet choisie à l\'exécution')
+    _VARS_VUE_COMMUNES = [
+        (u'vue-pers-titre',    u'Titre du type personnalisé (ex. FM, TEMP)'),
+        (u'vue-pers-label',    u'Label du type personnalisé'),
+        (u'vue-pers-valeur-1', u'Valeur-1 du type personnalisé'),
+        (u'vue-pers-valeur-2', u'Valeur-2 du type personnalisé'),
+        (u'vue-pers-usage',    u'Usage : Temporaire ou Livrable'),
+        _VAR_PHASE,
+    ]
+    # Familles pouvant être déclinées par niveau. "Vue 3D" en fait partie même
+    # si Vues + ne gère pas les niveaux pour les vues 3D : la variable reste
+    # disponible pour de futurs scripts créant des vues 3D par niveau. Un
+    # script qui ne fournit pas {niveau} le laisse vide et le segment est
+    # supprimé (voir _VARIABLES_CANONIQUES dans lib/utils/vues_creation.py).
+    # Nomenclature en est exclue : une nomenclature n'a pas de niveau.
+    _IDS_VUE_AVEC_NIVEAU = (u'vue-plan', u'vue-plaf', u'vue-structure',
+                            u'vue-surface', u'vue-dessin', u'vue-legende',
+                            u'vue-3d', u'vue-coupe', u'vue-elevation')
+    _VAR_NIVEAU = (u'niveau', u'Nom du niveau Revit (toujours la valeur exacte)')
+    # Variables dont la valeur n'est jamais transformee par le moteur de
+    # nommage (_CASSE_EXEMPT dans lib/utils/vues_creation.py) : proposer un
+    # choix de casse serait trompeur, le clic insere directement {niveau}.
+    _VARS_SANS_CASSE = (u'niveau',)
+    _VARS_NOMENCLATURE = [
+        (u'categorie',         u'Catégorie Revit (ex. Portes)'),
+        (u'type-nomenclature', u'Type de nomenclature (ex. 2a - Saisie...)'),
+    ]
+
+    # -- Casses proposées au clic sur un bouton de variable --------------------
+    # (description, fonction produisant le jeton pour un identifiant donné)
+    _CASSES = [
+        (u'valeur brute, inchangée', lambda i: u'{%s:val}' % i),
+        (u'MAJUSCULES',              lambda i: u'{%s}' % i.upper()),
+        (u'minuscules',              lambda i: u'{%s}' % i.lower()),
+        (u'1re lettre en majuscule', lambda i: u'{%s}' % (i[0].upper() + i[1:].lower() if i else i)),
+        (u'Chaque Mot Capitalisé',   lambda i: u'{%s:cap}' % i),
+    ]
+
+    def _groupes_atomiques_courants():
+        """Identifiants de la table 'Groupes atomiques', lus en direct."""
+        _res = []
+        for _r in _dt_grp.Rows:
+            _gid = str(_r['id']) if _r['id'] is not None else u''
+            _lbl = str(_r['label']) if _r['label'] is not None else u''
+            if _gid:
+                _res.append((_gid, _lbl or _gid))
+        return _res
+
+    def _variables_pour(cle_table, row_id):
+        """
+        Retourne (liste_de_variables, casse_autorisee) pour la ligne editee.
+        liste_de_variables : [(identifiant, description), ...]
+        """
+        if cle_table == u'vues':
+            # "Nomenclature" ne passe pas par les types de vue personnalisés :
+            # proposer les {vue-pers-*} produirait un jeton que le script de
+            # création ne sait pas alimenter, donc un segment vide dans le nom.
+            if row_id == u'vue-nomenclature':
+                return list(_VARS_NOMENCLATURE) + [_VAR_PHASE], True
+            _vars = list(_VARS_VUE_COMMUNES)
+            if row_id in _IDS_VUE_AVEC_NIVEAU:
+                _vars.insert(0, _VAR_NIVEAU)
+            return _vars, True
+
+        # "Nommage des presentations" combine les groupes atomiques et la
+        # variable {niveau} (nom du niveau Revit), comme les vues.
+        _vars = list(_groupes_atomiques_courants())
+        # Regex calculees automatiquement, absentes de dgGroupes mais utilisables.
+        _vars.append((u'pref-niv', u'Préfixe niveau (calculé depuis les préfixes)'))
+        _vars.append((u'sens-niv', u'Sens niveau (calculé depuis les signes)'))
+        if cle_table in (u'fichiers', u'niveau-revit'):
+            _vars.append((u'niveau-code', u'Sous-template « Niveau (code) »'))
+        if cle_table == u'present':
+            _vars.append(_VAR_NIVEAU)
+        # "Nommage de fichiers" et "Niveau (code)" alimentent build_regex(), qui
+        # resout les identifiants a l'identique : aucune variante de casse.
+        _casse_ok = cle_table not in (u'fichiers', u'niveau-code')
+        return _vars, _casse_ok
+
+    _LIBELLES_TABLE = {
+        u'fichiers':     u'Nommage de fichiers',
+        u'niveau-code':  u'Nommage des niveaux (code)',
+        u'niveau-revit': u'Nommage des niveaux du modèle Revit',
+        u'vues':         u'Nommage des vues',
+        u'present':      u'Nommage des présentations',
+    }
+
+    from System.Windows.Controls import DataGridCell as _DGCellTpl
+    from System.Windows.Media import VisualTreeHelper as _VTHTpl
+    from System.Windows import Thickness as _Thickness
+    from System.Windows.Controls import ContextMenu as _CtxMenu
+    from System.Windows.Controls import MenuItem as _MenuItem
+    from System.Windows.Controls.Primitives import PlacementMode as _PlacementMode
+    from System.Windows.Media import Brushes as _Brushes
+
+    # Jetons {xxx} d'un template, pour reperer une variable mal orthographiee.
+    _TOKEN_RE_TPL = re.compile(u'\\{([^{}]*)\\}')
+    _BrushAide   = _Brushes.SlateGray
+    _BrushErreur = _Brushes.Firebrick
+
+    def _cellule_parente(source):
+        """Remonte l'arbre visuel jusqu'a la DataGridCell contenant 'source'."""
+        _o = source
+        while _o is not None and not isinstance(_o, _DGCellTpl):
+            try:
+                _o = _VTHTpl.GetParent(_o)
+            except Exception:
+                return None
+        return _o
+
+    def _ouvrir_panneau_template(row_view, cle_table):
+        """Ouvre le panneau et ecrit le resultat dans la cellule 'template'."""
+        _row_id = str(row_view['id']) if row_view['id'] is not None else u''
+        _row_lbl = str(row_view['label']) if row_view['label'] is not None else u''
+        _vars, _casse_ok = _variables_pour(cle_table, _row_id)
+
+        _xaml = os.path.join(os.path.dirname(__file__), 'TemplateBuilderDialog.xaml')
+        _dlg = forms.WPFWindow(_xaml)
+        _dlg.Title = u"Composer — {}".format(_row_lbl or _row_id)
+        _dlg.txtContexte.Text = (
+            u"Table « {} »  •  ligne « {} »  (identifiant : {})".format(
+                _LIBELLES_TABLE.get(cle_table, cle_table), _row_lbl, _row_id))
+        _dlg.txtTemplate.Text = (
+            str(row_view['template']) if row_view['template'] is not None else u'')
+
+        _AIDE = (
+            u"Cliquez sur une variable pour choisir sa casse, puis l'insérer "
+            u"à la position du curseur. Les variables vides sont retirées "
+            u"avec leur séparateur « - »."
+            if _casse_ok else
+            u"Cette table sert à analyser des noms existants : les variantes "
+            u"de casse n'y sont pas applicables, la variable est insérée telle "
+            u"quelle.")
+        _dlg.txtApercu.Foreground = _BrushAide
+        _dlg.txtApercu.Text = _AIDE
+
+        def _inserer_jeton(_jeton):
+            """Insere le jeton a la position du curseur."""
+            _txt = _dlg.txtTemplate.Text or u''
+            _pos = _dlg.txtTemplate.SelectionStart
+            _len = _dlg.txtTemplate.SelectionLength
+            _dlg.txtTemplate.Text = _txt[:_pos] + _jeton + _txt[_pos + _len:]
+            _dlg.txtTemplate.SelectionStart = _pos + len(_jeton)
+            _dlg.txtTemplate.SelectionLength = 0
+            _dlg.txtTemplate.Focus()
+
+        def _menu_casse(_btn, _ident):
+            """Menu deroulant sous le bouton : une entree par casse."""
+            _menu = _CtxMenu()
+            _menu.PlacementTarget = _btn
+            _menu.Placement = _PlacementMode.Bottom
+            for _desc_c, _fn in _CASSES:
+                _jeton = _fn(_ident)
+                _mi = _MenuItem()
+                _mi.Header = u'{}      {}'.format(_jeton, _desc_c)
+                _mi.Click += (lambda _j: (lambda s, e: _inserer_jeton(_j)))(_jeton)
+                _menu.Items.Add(_mi)
+            _menu.IsOpen = True
+
+        # Style "pilule" (bords totalement arrondis) defini dans les
+        # ressources du XAML — voir NMPillVarButton pour le detail (forme
+        # uniquement, couleurs neutres deja utilisees dans l'application).
+        _style_pilule = _dlg.Resources[u'NMPillVarButton']
+
+        for _ident, _desc in _vars:
+            _btn = _WpfButton()
+            _btn.Content = u'{%s}' % _ident
+            _btn.Style = _style_pilule
+            _btn.Margin = _Thickness(0, 0, 6, 6)
+            # Capture de _ident / _btn par application immediate : sinon toutes
+            # les lambdas partageraient la derniere valeur de la boucle.
+            if _casse_ok and _ident not in _VARS_SANS_CASSE:
+                _btn.ToolTip = u'{}\nCliquez pour choisir la casse.'.format(_desc)
+                _btn.Click += (lambda _i, _b: (
+                    lambda s, e: _menu_casse(_b, _i)))(_ident, _btn)
+            else:
+                if _ident in _VARS_SANS_CASSE:
+                    _btn.ToolTip = (u'{}\nDisponible en valeur brute '
+                                    u'uniquement.'.format(_desc))
+                else:
+                    _btn.ToolTip = _desc
+                _btn.Click += (lambda _i: (
+                    lambda s, e: _inserer_jeton(u'{%s}' % _i)))(_ident)
+            _dlg.pnlVariables.Children.Add(_btn)
+
+        def _effacer(s, e):
+            _dlg.txtTemplate.Text = u''
+            _dlg.txtApercu.Foreground = _BrushAide
+            _dlg.txtApercu.Text = _AIDE
+            _dlg.txtTemplate.Focus()
+
+        _admis = set(_i.lower() for _i, _ in _vars)
+
+        def _jetons_inconnus(_tpl):
+            """Jetons {xxx} du template ne figurant pas parmi les variables."""
+            _res = []
+            for _brut in _TOKEN_RE_TPL.findall(_tpl or u''):
+                _nom = _brut.split(u':')[0] if u':' in _brut else _brut
+                if not _nom.strip():
+                    continue
+                if _nom.lower() not in _admis and _nom not in _res:
+                    _res.append(_nom)
+            return _res
+
+        def _appliquer(s, e):
+            # Un jeton inconnu serait recopie tel quel dans le nom de
+            # l'element Revit : on refuse l'enregistrement.
+            _mauvais = _jetons_inconnus(_dlg.txtTemplate.Text)
+            if _mauvais:
+                _dlg.txtApercu.Foreground = _BrushErreur
+                _dlg.txtApercu.Text = (
+                    u"Variable inconnue : {}  —  elle serait recopiée telle "
+                    u"quelle dans le nom. Utilisez les boutons ci-dessous ou "
+                    u"corrigez l'orthographe.".format(
+                        u", ".join(u"{%s}" % _m for _m in _mauvais)))
+                _dlg.txtTemplate.Focus()
+                return
+            setattr(_dlg, 'DialogResult', True)
+
+        _dlg.btnEffacer.Click   += _effacer
+        _dlg.btnAppliquer.Click += _appliquer
+        _dlg.btnAnnuler.Click   += lambda s, e: setattr(_dlg, 'DialogResult', False)
+
+        if _dlg.show_dialog():
+            row_view.Row['template'] = _dlg.txtTemplate.Text or u''
+
+    def _brancher_panneau_template(grid, cle_table):
+        """
+        Ouvre le panneau au clic sur une cellule "Template" de 'grid' et
+        empeche l'edition en place de cette colonne.
+        """
+        def _on_click(s, e):
+            try:
+                _cell = _cellule_parente(e.OriginalSource)
+                if _cell is None:
+                    return
+                if str(_cell.Column.Header or u'') != u'Template':
+                    return
+                _ctx = getattr(_cell, 'DataContext', None)
+                if _ctx is None or not hasattr(_ctx, 'Row'):
+                    return
+                e.Handled = True
+                _ouvrir_panneau_template(_ctx, cle_table)
+            except Exception:
+                # En cas d'echec, on laisse le comportement standard du
+                # DataGrid reprendre la main plutot que de bloquer l'edition.
+                pass
+
+        def _on_begin_edit(s, e):
+            # Filet pour le clavier (F2, saisie directe) : on annule l'edition
+            # en place, la colonne se modifie uniquement via le panneau.
+            try:
+                if str(e.Column.Header or u'') == u'Template':
+                    e.Cancel = True
+                    _ouvrir_panneau_template(e.Row.Item, cle_table)
+            except Exception:
+                pass
+
+        grid.PreviewMouseLeftButtonDown += _on_click
+        grid.BeginningEdit += _on_begin_edit
+
     _dt_vue_nm = SysDataTable()
     _dt_vue_nm.Columns.Add('label')
     _dt_vue_nm.Columns.Add('id')
     _dt_vue_nm.Columns.Add('template')
     _dt_vue_nm.Columns.Add('vues_et_dwg', _SysBool)
     _dt_vue_nm.Columns.Add('vues_plus',   _SysBool)
+    _dt_vue_nm.Columns.Add('pieces_3d',   _SysBool)
+    # Casse : un jeton tout en minuscules force les minuscules. Les valeurs qui
+    # doivent rester telles quelles portent donc ':val' (voir l'infobulle de la
+    # table "Nommage des vues").
     _defaut_nommage_vues = [
-        {'label': u"Plan d'\xe9tage",           'id': u'vue-plan',       'template': u'{vue-pers-titre} - {niveau}',                              'vues_et_dwg': True,  'vues_plus': True},
-        {'label': u"Plan de faux plafond",      'id': u'vue-plaf',       'template': u'{vue-pers-titre} - {niveau}',                              'vues_et_dwg': True,  'vues_plus': True},
-        {'label': u"Vue en plan (Structure)",   'id': u'vue-structure',  'template': u'{vue-pers-titre} - {niveau}',                              'vues_et_dwg': True,  'vues_plus': True},
-        {'label': u"Plan de surface",           'id': u'vue-surface',    'template': u'{vue-pers-titre} - {niveau}',                              'vues_et_dwg': False, 'vues_plus': False},
-        {'label': u"Coupe",                     'id': u'vue-coupe',      'template': u'{vue-pers-titre} - COUPE',                                 'vues_et_dwg': False, 'vues_plus': False},
-        {'label': u"\xc9l\xe9vation",           'id': u'vue-elevation',  'template': u'{vue-pers-titre} - ELEVATION',                             'vues_et_dwg': False, 'vues_plus': False},
-        {'label': u"Vue 3D",                    'id': u'vue-3d',         'template': u'{vue-pers-titre} - 3D',                                    'vues_et_dwg': False, 'vues_plus': False},
-        {'label': u"Vue de dessin",             'id': u'vue-dessin',     'template': u'{vue-pers-titre} - {vue-pers-valeur-1} - {vue-pers-valeur-2}', 'vues_et_dwg': True,  'vues_plus': True},
-        {'label': u"L\xe9gende",               'id': u'vue-legende',    'template': u'{vue-pers-titre} - {vue-pers-valeur-1} - {vue-pers-valeur-2}', 'vues_et_dwg': True,  'vues_plus': True},
+        {'label': u"Plan d'\xe9tage",           'id': u'vue-plan',       'template': u'{vue-pers-titre:val} - {niveau}',                              'vues_et_dwg': True,  'vues_plus': True},
+        {'label': u"Plan de faux plafond",      'id': u'vue-plaf',       'template': u'{vue-pers-titre:val} - {niveau}',                              'vues_et_dwg': True,  'vues_plus': True},
+        {'label': u"Vue en plan (Structure)",   'id': u'vue-structure',  'template': u'{vue-pers-titre:val} - {niveau}',                              'vues_et_dwg': True,  'vues_plus': True},
+        {'label': u"Plan de surface",           'id': u'vue-surface',    'template': u'{vue-pers-titre:val} - {niveau}',                              'vues_et_dwg': False, 'vues_plus': False},
+        {'label': u"Coupe",                     'id': u'vue-coupe',      'template': u'{vue-pers-titre:val} - COUPE',                                 'vues_et_dwg': False, 'vues_plus': False},
+        {'label': u"\xc9l\xe9vation",           'id': u'vue-elevation',  'template': u'{vue-pers-titre:val} - ELEVATION',                             'vues_et_dwg': False, 'vues_plus': False},
+        {'label': u"Vue 3D",                    'id': u'vue-3d',         'template': u'{vue-pers-titre:val} - 3D',                                    'vues_et_dwg': False, 'vues_plus': False, 'pieces_3d': True},
+        {'label': u"Vue de dessin",             'id': u'vue-dessin',     'template': u'{vue-pers-titre:val} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val}', 'vues_et_dwg': True,  'vues_plus': True},
+        {'label': u"L\xe9gende",               'id': u'vue-legende',    'template': u'{vue-pers-titre:val} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val}', 'vues_et_dwg': True,  'vues_plus': True},
+        # Nomenclature : famille a part, non creable par Vues + / Lier CAO /
+        # Pieces 3D, et sans type de vue personnalise (table dediee dans
+        # l'onglet "Nomenclatures"). Seules variables : {categorie}, {phase}
+        # et {type-nomenclature}.
+        {'label': u"Nomenclature",              'id': u'vue-nomenclature', 'template': u'{CATEGORIE} - {phase:val} - {type-nomenclature:val}', 'vues_et_dwg': False, 'vues_plus': False},
     ]
     for _v in (cnv.get('nommage_vues') or _defaut_nommage_vues):
         _rv = _dt_vue_nm.NewRow()
@@ -669,8 +1017,39 @@ def main():
         _rv['template']   = _v.get('template', '')
         _rv['vues_et_dwg'] = bool(_v.get('vues_et_dwg', False))
         _rv['vues_plus']   = bool(_v.get('vues_plus',   _v.get('vues_et_dwg', False)))
+        # Seule la ligne "Vue 3D" peut porter ce flag (imposé côté dialogue
+        # de disponibilité) ; les autres restent forcées à False par sécurité.
+        _rv['pieces_3d']   = bool(_v.get('pieces_3d', False)) and _rv['id'] == u'vue-3d'
+        _dt_vue_nm.Rows.Add(_rv)
+    # Migration : les config.json anterieurs a l'ajout des nomenclatures n'ont
+    # pas la ligne "Nomenclature". On l'injecte depuis les valeurs par defaut
+    # pour qu'elle apparaisse sans avoir a reinitialiser la configuration.
+    if not any(str(_r['id']) == u'vue-nomenclature' for _r in _dt_vue_nm.Rows):
+        _v_nom = next(_d for _d in _defaut_nommage_vues
+                      if _d['id'] == u'vue-nomenclature')
+        _rv = _dt_vue_nm.NewRow()
+        _rv['label']         = _v_nom['label']
+        _rv['id']            = _v_nom['id']
+        _rv['template']      = _v_nom['template']
+        _rv['vues_et_dwg']   = False
+        _rv['vues_plus']     = False
+        _rv['pieces_3d']     = False
         _dt_vue_nm.Rows.Add(_rv)
     wpf.dgNommageVues.ItemsSource = _dt_vue_nm.DefaultView
+
+    # Les handlers Checked/Unchecked des dialogues de disponibilite sont poses
+    # sur la grille entiere : ce helper permet de savoir a quelle colonne
+    # appartient la case cochee, sinon un clic sur n'importe quelle colonne
+    # declencherait la logique de toutes les autres.
+    from System.Windows.Controls.Primitives import ToggleButton as _ToggleBtnCommon
+
+    def _binding_path(_cb):
+        """Nom de la colonne liee a la case a cocher, ou '' si indeterminable."""
+        try:
+            _be = _cb.GetBindingExpression(_ToggleBtnCommon.IsCheckedProperty)
+            return _be.ParentBinding.Path.Path if _be is not None else u''
+        except Exception:
+            return u''
 
     # ── Bouton Disponibilite Vues + DWG ───────────────────────────────────────
     def _open_vues_et_dwg_dispo(sender, args):
@@ -681,24 +1060,107 @@ def main():
         from System import Boolean as _SysBoolDlg
         _dt_dispo = _DT_dispo()
         _dt_dispo.Columns.Add('label')
+        # Colonne non affichee : sert de cle stable aux DataTriggers du XAML
+        # (plus fiable que 'label', qui porte des accents et peut etre renomme).
+        _dt_dispo.Columns.Add('id')
         _dt_dispo.Columns.Add('vues_et_dwg', _SysBoolDlg)
         _dt_dispo.Columns.Add('vues_plus',   _SysBoolDlg)
+        _dt_dispo.Columns.Add('pieces_3d',   _SysBoolDlg)
         for _r in _dt_vue_nm.Rows:
             _dr = _dt_dispo.NewRow()
             _dr['label']      = str(_r['label']) if _r['label'] is not None else u''
+            _dr['id']         = str(_r['id'])    if _r['id']    is not None else u''
             _dr['vues_et_dwg'] = bool(_r['vues_et_dwg']) if _r['vues_et_dwg'] is not None else False
             _dr['vues_plus']   = bool(_r['vues_plus'])   if _r['vues_plus']   is not None else False
+            _dr['pieces_3d']   = bool(_r['pieces_3d'])   if _r['pieces_3d']   is not None else False
             _dt_dispo.Rows.Add(_dr)
         _dlg.dgDispo.ItemsSource = _dt_dispo.DefaultView
-        _dlg.btnOk.Click     += lambda s, e: setattr(_dlg, 'DialogResult', True)
+
+        # Écriture explicite des cases à cocher dans la DataRow lors du
+        # (dé)cochage : les trois colonnes portent un ElementStyle/
+        # EditingElementStyle personnalisé (grisage de certaines lignes) qui,
+        # en pratique, empêche le binding TwoWay standard de committer
+        # correctement la valeur — on ne se fie donc pas qu'au binding, on
+        # écrit aussi en dur depuis le code, comme pour l'exclusivité de
+        # "Vues personnalisées".
+        from System.Windows.Controls import CheckBox as _WpfCheckBox2
+        from System.Windows.Controls.Primitives import ToggleButton as _ToggleBtn2
+
+        # Familles non prises en charge par 03_Vues.panel/01_Vues_+ : leur case
+        # "Vues +" est grisee dans le XAML et forcee a False ici.
+        _VP_NON_GEREES = (u'vue-coupe', u'vue-elevation', u'vue-nomenclature')
+        # Idem pour 04_Lier_importer.panel/01_Lier_CAO, colonne "Lier CAO → Vues".
+        _VED_NON_GEREES = (u'vue-coupe', u'vue-elevation', u'vue-3d',
+                           u'vue-nomenclature')
+
+        def _on_dispo_vue_toggled(sender, e, _val):
+            _cb = e.OriginalSource
+            if not isinstance(_cb, _WpfCheckBox2):
+                return
+            # Le handler est pose sur la grille entiere : on aiguille selon la
+            # colonne, sinon un clic sur "Lier CAO" ou "Vues +" ecraserait
+            # pieces_3d.
+            _col = _binding_path(_cb)
+            _row_ctx = getattr(_cb, 'DataContext', None)
+            if _row_ctx is None or not hasattr(_row_ctx, 'Row'):
+                return
+
+            if _col == u'vues_plus':
+                # Cette colonne porte elle aussi un ElementStyle personnalise :
+                # meme precaution que pour pieces_3d, on ecrit en dur.
+                _row_ctx.Row['vues_plus'] = (
+                    _val and str(_row_ctx['id']) not in _VP_NON_GEREES)
+                return
+
+            if _col == u'vues_et_dwg':
+                _row_ctx.Row['vues_et_dwg'] = (
+                    _val and str(_row_ctx['id']) not in _VED_NON_GEREES)
+                return
+
+            if _col != u'pieces_3d':
+                return
+            if str(_row_ctx['label']) != u'Vue 3D':
+                _row_ctx.Row['pieces_3d'] = False
+                return
+            _row_ctx.Row['pieces_3d'] = _val
+
+        _dlg.dgDispo.AddHandler(
+            _ToggleBtn2.CheckedEvent,
+            RoutedEventHandler(lambda s, e: _on_dispo_vue_toggled(s, e, True)))
+        _dlg.dgDispo.AddHandler(
+            _ToggleBtn2.UncheckedEvent,
+            RoutedEventHandler(lambda s, e: _on_dispo_vue_toggled(s, e, False)))
+
+        def _on_ok_dispo_vue(s, e):
+            # Force la validation de la cellule/ligne en cours d'édition avant
+            # de refermer : un clic direct sur "OK" (hors de la grille) ne
+            # déclenche pas toujours le commit des autres colonnes éditées.
+            _commit_datagrid_edit(_dlg.dgDispo)
+            setattr(_dlg, 'DialogResult', True)
+
+        _dlg.btnOk.Click     += _on_ok_dispo_vue
         _dlg.btnCancel.Click += lambda s, e: setattr(_dlg, 'DialogResult', False)
         if _dlg.show_dialog():
             _dispo_rows = list(_dt_dispo.Rows)
             _nm_rows    = list(_dt_vue_nm.Rows)
             for _i, _dr in enumerate(_dispo_rows):
                 if _i < len(_nm_rows):
-                    _nm_rows[_i]['vues_et_dwg'] = bool(_dr['vues_et_dwg'])
-                    _nm_rows[_i]['vues_plus']   = bool(_dr['vues_plus'])
+                    # Meme logique que "Vues +" ci-dessous : le XAML grise
+                    # Coupe / Elevation / Vue 3D, on force aussi la valeur ici
+                    # pour assainir une config existante.
+                    _nm_rows[_i]['vues_et_dwg'] = (
+                        bool(_dr['vues_et_dwg'])
+                        and str(_nm_rows[_i]['id']) not in _VED_NON_GEREES)
+                    # Le XAML grise "Vues +" pour Coupe et Elevation ; on force
+                    # aussi la valeur ici, au cas ou une config existante les
+                    # aurait deja a True (elles seraient sinon conservees).
+                    _nm_rows[_i]['vues_plus']   = (
+                        bool(_dr['vues_plus'])
+                        and str(_nm_rows[_i]['id']) not in _VP_NON_GEREES)
+                    # Le XAML grise/désactive la case pour toutes les lignes
+                    # sauf "Vue 3D" ; on retranscrit tel quel (ce sera False
+                    # pour les lignes désactivées).
+                    _nm_rows[_i]['pieces_3d']   = bool(_dr['pieces_3d']) and str(_nm_rows[_i]['label']) == u'Vue 3D'
 
     wpf.btnNommageVuesDispo.Click += _open_vues_et_dwg_dispo
 
@@ -713,6 +1175,7 @@ def main():
         _dt_tpd.Columns.Add('label')
         _dt_tpd.Columns.Add('lier_cao',  _SysBoolTpd)
         _dt_tpd.Columns.Add('vues_plus', _SysBoolTpd)
+        _dt_tpd.Columns.Add('pieces_3d', _SysBoolTpd)
         for _r in _dt_tvp.Rows:
             _lbl_tpd = str(_r['label']) if _r['label'] is not None else u''
             if not _lbl_tpd:
@@ -721,16 +1184,62 @@ def main():
             _dr['label']     = _lbl_tpd
             _dr['lier_cao']  = _dispo_types_pers.get(_lbl_tpd,    True)
             _dr['vues_plus'] = _dispo_types_pers_vp.get(_lbl_tpd, True)
+            _dr['pieces_3d'] = _dispo_types_pers_p3d.get(_lbl_tpd, False)
             _dt_tpd.Rows.Add(_dr)
         _dlg.dgDispo.ItemsSource = _dt_tpd.DefaultView
-        _dlg.btnOk.Click     += lambda s, e: setattr(_dlg, 'DialogResult', True)
+
+        # "Pièces 3D" est une sélection exclusive : cocher une ligne décoche
+        # automatiquement toutes les autres. Comme pour la table "Nommage
+        # des vues", on écrit explicitement la valeur dans la DataRow depuis
+        # le code plutôt que de se fier uniquement au binding TwoWay (évite
+        # toute perte silencieuse si le commit du binding est retardé/raté).
+        from System.Windows.Controls import CheckBox as _WpfCheckBox
+        from System.Windows.Controls.Primitives import ToggleButton as _ToggleBtn
+
+        def _on_dispo_tpd_toggled(sender, e, _val):
+            _cb = e.OriginalSource
+            if not isinstance(_cb, _WpfCheckBox):
+                return
+            # Le handler est pose sur la grille entiere : on aiguille selon la
+            # colonne, sinon cocher "Lier CAO" ecraserait pieces_3d et
+            # decocherait les autres lignes.
+            _col = _binding_path(_cb)
+            _row_ctx = getattr(_cb, 'DataContext', None)
+            if _row_ctx is None or not hasattr(_row_ctx, 'Row'):
+                return
+
+            if _col != u'pieces_3d':
+                return
+            _row_ctx.Row['pieces_3d'] = _val
+            if _val:
+                _checked_row = _row_ctx.Row
+                for _dr2 in _dt_tpd.Rows:
+                    if _dr2 is not _checked_row and bool(_dr2['pieces_3d']):
+                        _dr2['pieces_3d'] = False
+
+        _dlg.dgDispo.AddHandler(
+            _ToggleBtn.CheckedEvent,
+            RoutedEventHandler(lambda s, e: _on_dispo_tpd_toggled(s, e, True)))
+        _dlg.dgDispo.AddHandler(
+            _ToggleBtn.UncheckedEvent,
+            RoutedEventHandler(lambda s, e: _on_dispo_tpd_toggled(s, e, False)))
+
+        def _on_ok_dispo_tpd(s, e):
+            # Force la validation de la cellule/ligne en cours d'édition avant
+            # de refermer (autres colonnes texte éventuellement en cours de
+            # saisie) : un clic direct sur "OK" ne la déclenche pas toujours.
+            _commit_datagrid_edit(_dlg.dgDispo)
+            setattr(_dlg, 'DialogResult', True)
+
+        _dlg.btnOk.Click     += _on_ok_dispo_tpd
         _dlg.btnCancel.Click += lambda s, e: setattr(_dlg, 'DialogResult', False)
         if _dlg.show_dialog():
             for _dr in _dt_tpd.Rows:
                 _lbl_tpd = str(_dr['label']) if _dr['label'] is not None else u''
                 if _lbl_tpd:
-                    _dispo_types_pers[_lbl_tpd]    = bool(_dr['lier_cao'])
-                    _dispo_types_pers_vp[_lbl_tpd] = bool(_dr['vues_plus'])
+                    _dispo_types_pers[_lbl_tpd]     = bool(_dr['lier_cao'])
+                    _dispo_types_pers_vp[_lbl_tpd]  = bool(_dr['vues_plus'])
+                    _dispo_types_pers_p3d[_lbl_tpd] = bool(_dr['pieces_3d'])
 
     wpf.btnTypesPersDispo.Click += _open_types_pers_dispo
 
@@ -739,8 +1248,11 @@ def main():
     _dt_niv_code_nm.Columns.Add('label')
     _dt_niv_code_nm.Columns.Add('id')
     _dt_niv_code_nm.Columns.Add('template')
+    # Identifiant 'niveau-code' (et non 'niveau') pour ne pas preter a confusion
+    # avec la variable {niveau} des tables "Nommage des vues" et "des
+    # presentations", qui designe le nom du niveau Revit.
     _defaut_nommage_niveaux_code = [
-        {'label': 'Niveau (code)', 'id': 'niveau',
+        {'label': 'Niveau (code)', 'id': 'niveau-code',
          'template': '{pref-niv}{sens-niv}{num-niv}'},
     ]
     for _nc2 in (cnv.get('nommage_niveaux_code') or _defaut_nommage_niveaux_code):
@@ -757,8 +1269,8 @@ def main():
     _dt_niv_nm.Columns.Add('id')
     _dt_niv_nm.Columns.Add('template')
     _defaut_nommage_niveaux = [
-        {'label': 'Niveaux Revit', 'id': 'niveaux-revit',
-         'template': '{construction}_{niveau}_{demi-niv}'},
+        {'label': 'Niveau Revit', 'id': 'niveau-revit',
+         'template': '{construction}_{niveau-code}_{demi-niv}'},
     ]
     for _n in (cnv.get('nommage_niveaux') or _defaut_nommage_niveaux):
         _rn = _dt_niv_nm.NewRow()
@@ -784,6 +1296,14 @@ def main():
         _rp['template'] = _p.get('template', '')
         _dt_present_nm.Rows.Add(_rp)
     wpf.dgNommagePresent.ItemsSource = _dt_present_nm.DefaultView
+
+    # ── Panneau de composition sur les 5 tables de nommage ────────────────────
+    # Branché ici, une fois toutes les ItemsSource affectées.
+    _brancher_panneau_template(wpf.dgTemplates,           u'fichiers')
+    _brancher_panneau_template(wpf.dgNommageNiveauxCode,  u'niveau-code')
+    _brancher_panneau_template(wpf.dgNommageNiveaux,      u'niveau-revit')
+    _brancher_panneau_template(wpf.dgNommageVues,         u'vues')
+    _brancher_panneau_template(wpf.dgNommagePresent,      u'present')
 
     # ── Nommage exports ────────────────────────────────────────────────────────
 
@@ -903,8 +1423,8 @@ def main():
     _ctx_profil.Opened += _profil_ctx_opened
 
     def _profil_next_ordre():
-        _vals = [int(_row[u'ordre']) for _row in _dt_profils.Rows
-                 if _row[u'ordre'] is not None]
+        _vals = [_v for _v in (_int_or(_row[u'ordre'], None) for _row in _dt_profils.Rows)
+                 if _v is not None]
         return (max(_vals) + 1) if _vals else 2
 
     def _profil_nouveau(sender, e):
@@ -1063,6 +1583,92 @@ def main():
     set_chk(wpf, 'net_pieces',      net.get('pieces_espaces', True))
     set_chk(wpf, 'net_zones',       net.get('zones_pochages', True))
 
+    # ── Types de nomenclatures ────────────────────────────────────────────────
+    # Table propre aux nomenclatures : leur axe de declinaison est
+    # (categorie x phase x type de nomenclature) et non (niveau x type de vue
+    # personnalise). Elle ne passe donc pas par types_vues_personnalises.
+    from utils.nomenclatures_types import (
+        get_types_nomenclatures as _get_types_nom,
+    )
+    _dt_types_nom = SysDataTable()
+    _dt_types_nom.Columns.Add('label')
+    _dt_types_nom.Columns.Add('type_vue')
+    for _tn in _get_types_nom(cfg):
+        _rtn = _dt_types_nom.NewRow()
+        _rtn['label']    = _tn.get(u'label', u'')
+        _rtn['type_vue'] = _tn.get(u'type_vue', u'')
+        _dt_types_nom.Rows.Add(_rtn)
+    wpf.dgTypesNomenclatures.ItemsSource = _dt_types_nom.DefaultView
+
+    # ── Menu contextuel Types de nomenclatures ────────────────────────────────
+    # Meme mecanique que "Vues personnalisées" : SelectedItem n'est pas fiable
+    # au moment de l'ouverture du menu, on retient l'item vise par le clic droit.
+    _tnom_ctx_item = [None]
+
+    def _tnom_right_click(sender, e):
+        _obj = e.OriginalSource
+        while _obj is not None:
+            _dc = getattr(_obj, 'DataContext', None)
+            if _dc is not None and hasattr(_dc, 'Row'):
+                _tnom_ctx_item[0] = _dc
+                wpf.dgTypesNomenclatures.SelectedItem = _dc
+                return
+            try:
+                _obj = _VTH.GetParent(_obj)
+            except Exception:
+                break
+        _tnom_ctx_item[0] = None
+
+    wpf.dgTypesNomenclatures.PreviewMouseRightButtonDown += _tnom_right_click
+
+    _ctx_tnom           = wpf.dgTypesNomenclatures.ContextMenu
+    _ctx_tnom_nouvelle  = _ctx_tnom.Items[0]
+    _ctx_tnom_dupliquer = _ctx_tnom.Items[1]
+    # Items[2] = Separator
+    _ctx_tnom_supprimer = _ctx_tnom.Items[3]
+
+    def _tnom_ctx_opened(sender, e):
+        _sel = _tnom_ctx_item[0]
+        _has_sel = _sel is not None and hasattr(_sel, 'Row')
+        _ctx_tnom_dupliquer.IsEnabled = _has_sel
+        _ctx_tnom_supprimer.IsEnabled = _has_sel
+
+    _ctx_tnom.Opened += _tnom_ctx_opened
+
+    def _tnom_nouvelle(sender, e):
+        _r = _dt_types_nom.NewRow()
+        _r['label']    = u''
+        _r['type_vue'] = u''
+        _dt_types_nom.Rows.Add(_r)
+
+    def _tnom_dupliquer(sender, e):
+        _sel = _tnom_ctx_item[0]
+        if _sel is None or not hasattr(_sel, 'Row'):
+            return
+        _base = str(_sel['label']) if _sel['label'] is not None else u''
+        _existing = {str(_row['label']) for _row in _dt_types_nom.DefaultView
+                     if _row['label'] is not None}
+        _idx = 2
+        while True:
+            _new_lbl = u'{}_{}'.format(_base, _idx)
+            if _new_lbl not in _existing:
+                break
+            _idx += 1
+        _r = _dt_types_nom.NewRow()
+        _r['label']    = _new_lbl
+        _r['type_vue'] = str(_sel['type_vue']) if _sel['type_vue'] is not None else u''
+        _dt_types_nom.Rows.Add(_r)
+
+    def _tnom_supprimer(sender, e):
+        _sel = _tnom_ctx_item[0]
+        if _sel is None or not hasattr(_sel, 'Row'):
+            return
+        _sel.Row.Delete()
+
+    _ctx_tnom_nouvelle.Click  += _tnom_nouvelle
+    _ctx_tnom_dupliquer.Click += _tnom_dupliquer
+    _ctx_tnom_supprimer.Click += _tnom_supprimer
+
     # ── Couleurs Titres ───────────────────────────────────────────────────────
     set_color(wpf,'tc_styles_r','tc_styles_g','tc_styles_b', tc.get('tables_de_styles', [192,192,192]))
     set_color(wpf,'tc_types_r', 'tc_types_g', 'tc_types_b',  tc.get('saisies_types',   [232,113,134]))
@@ -1165,8 +1771,15 @@ def main():
     wpf.lien_tabler.MouseLeftButtonUp  += _open_url('https://tabler.io/icons')
 
     # Boutons
+    def _on_save_click(s, e):
+        # "Types de nomenclatures" est une grille librement éditable : un clic
+        # direct sur Enregistrer alors qu'une cellule est encore en édition ne
+        # déclenche pas son commit, et la saisie serait perdue.
+        _commit_datagrid_edit(wpf.dgTypesNomenclatures)
+        setattr(wpf, 'DialogResult', True)
+
     wpf.btnCancel.Click += lambda s, e: setattr(wpf, 'DialogResult', False)
-    wpf.btnSave.Click   += lambda s, e: setattr(wpf, 'DialogResult', True)
+    wpf.btnSave.Click   += _on_save_click
 
     if not wpf.show_dialog():
         return
@@ -1278,7 +1891,7 @@ def main():
         _ord  = _row['ordre']
         if _lbl:
             tvp_out.append({
-                'ordre':    int(_ord) if _ord is not None else 999,
+                'ordre':    _int_or(_ord, 999),
                 'label':    _lbl,
                 'titre':    _tit,
                 'valeur_1': _val1,
@@ -1288,15 +1901,16 @@ def main():
             })
     cfg['types_vues_personnalises'] = tvp_out
 
-    # Disponibilite types personnalises (Lier CAO → Vues + Vues +)
+    # Disponibilite types personnalises (Lier CAO → Vues + Vues + + Pièces 3D)
     dispo_tpd_out = []
     for _row in wpf.dgTypesVues.ItemsSource:
         _lbl = str(_row['label']) if _row['label'] is not None else ''
         if _lbl:
             dispo_tpd_out.append({
-                'label':    _lbl,
-                'lier_cao': _dispo_types_pers.get(_lbl, True),
+                'label':     _lbl,
+                'lier_cao':  _dispo_types_pers.get(_lbl, True),
                 'vues_plus': _dispo_types_pers_vp.get(_lbl, True),
+                'pieces_3d': _dispo_types_pers_p3d.get(_lbl, False),
             })
     cfg['dispo_types_pers_lier_cao'] = dispo_tpd_out
 
@@ -1343,10 +1957,11 @@ def main():
         _tpl = str(_row['template']) if _row['template'] is not None else ''
         _ved = bool(_row['vues_et_dwg']) if _row['vues_et_dwg'] is not None else False
         _vp  = bool(_row['vues_plus'])   if _row['vues_plus']   is not None else False
+        _p3d = bool(_row['pieces_3d'])   if _row['pieces_3d']   is not None else False
         if _lbl or _id:
             nommage_vues_out.append({
                 'label': _lbl, 'id': _id, 'template': _tpl,
-                'vues_et_dwg': _ved, 'vues_plus': _vp,
+                'vues_et_dwg': _ved, 'vues_plus': _vp, 'pieces_3d': _p3d,
             })
     nommage_present_out = []
     for _row in wpf.dgNommagePresent.ItemsSource:
@@ -1407,7 +2022,7 @@ def main():
         _ord_p = _row_p[u'ordre']
         _store_entry = _profils_store.get(_lbl_p, {})
         profils_out.append({
-            u'ordre':   int(_ord_p) if _ord_p is not None else 999,
+            u'ordre':   _int_or(_ord_p, 999),
             u'label':   _lbl_p,
             u'systeme': _sys_p,
             u'options_liaisons': dict(_store_entry.get(u'options_liaisons', _DEFAULT_PROFIL_OPTIONS)),
@@ -1426,6 +2041,21 @@ def main():
     }
 
     # Couleurs Titres
+    # Types de nomenclatures (onglet Nomenclatures)
+    # Les lignes sans label sont ignorées : la grille autorise l'ajout de
+    # lignes vides et le label est la clé de la case à cocher côté script de
+    # création. Les doublons de label le seraient aussi, on ne garde que le
+    # premier.
+    types_nom_out = []
+    _labels_nom_vus = set()
+    for _row in wpf.dgTypesNomenclatures.ItemsSource:
+        _lbl_n = str(_row['label']).strip() if _row['label'] is not None else ''
+        _tv_n  = str(_row['type_vue']).strip() if _row['type_vue'] is not None else ''
+        if _lbl_n and _lbl_n not in _labels_nom_vus:
+            _labels_nom_vus.add(_lbl_n)
+            types_nom_out.append({'label': _lbl_n, 'type_vue': _tv_n})
+    cfg['nomenclatures_types'] = types_nom_out
+
     cfg['nomenclatures_titres_couleurs'] = {
         'tables_de_styles':          get_color(wpf,'tc_styles_r','tc_styles_g','tc_styles_b'),
         'saisies_types':             get_color(wpf,'tc_types_r', 'tc_types_g', 'tc_types_b'),

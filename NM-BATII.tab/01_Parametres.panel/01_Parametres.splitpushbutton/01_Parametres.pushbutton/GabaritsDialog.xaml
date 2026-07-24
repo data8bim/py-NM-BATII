@@ -3,7 +3,7 @@
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   Title="Gabarits de vues"
-  Width="780" Height="280"
+  Width="880" Height="280"
   MinWidth="500" MinHeight="220"
   ResizeMode="CanResize"
   WindowStartupLocation="CenterOwner">
@@ -28,12 +28,18 @@
               HeadersVisibility="Column"
               Margin="0,0,0,8"/>
 
-    <StackPanel Grid.Row="2" Orientation="Horizontal"
-                HorizontalAlignment="Right">
-      <Button x:Name="btnCancel" Content="Annuler" Width="80"
-              IsCancel="True" Margin="0,0,6,0"/>
-      <Button x:Name="btnOK" Content="OK" Width="80"
-              IsDefault="True"/>
-    </StackPanel>
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnOK" Content="▶  Appliquer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
   </Grid>
 </Window>

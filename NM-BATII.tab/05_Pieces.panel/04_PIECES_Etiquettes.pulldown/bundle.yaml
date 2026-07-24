@@ -1,0 +1,9 @@
+title:
+  en_us: Room tags
+  fr_fr: Étiquettes
+layout:
+  - 01_PIECES_Etiquette-Masse
+  - 02_PIECES_Etiquette-Reproduire
+  - 03_PIECES_Etiquette
+  - ---
+  - 04_PIECES_Etiquette-Suppression

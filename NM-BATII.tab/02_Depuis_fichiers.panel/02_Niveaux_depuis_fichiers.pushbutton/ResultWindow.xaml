@@ -85,7 +85,8 @@
 				Content="Fermer"
 				Grid.Row="3"
 				HorizontalAlignment="Stretch"
-				IsDefault="True"/>
+				IsDefault="True"
+				Style="{DynamicResource NMButtonAppliquer}"/>
 
 	</Grid>
 </Window>

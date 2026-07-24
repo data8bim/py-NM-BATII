@@ -137,18 +137,20 @@
 
         <!-- ── Boutons bas ─────────────────────────────────────────── -->
         <Grid Grid.Row="6" Margin="0,10,0,0">
+            <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="btnCancel" Grid.Column="0"
+            <Button x:Name="btnValider" Grid.Column="0"
+                    Content="▶  Appliquer"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True"/>
+            <Button x:Name="btnCancel" Grid.Column="2"
                     Content="Annuler"
-                    Style="{DynamicResource NMButtonStandard}"
-                    Height="40" Margin="0,0,8,0"/>
-            <Button x:Name="btnValider" Grid.Column="1"
-                    Content="Valider"
-                    Style="{DynamicResource NMButtonValide}"
-                    Height="40" IsDefault="True"/>
+                    Style="{DynamicResource NMButtonAnnuler}"
+                    IsCancel="True"/>
         </Grid>
     </Grid>
 </Window>

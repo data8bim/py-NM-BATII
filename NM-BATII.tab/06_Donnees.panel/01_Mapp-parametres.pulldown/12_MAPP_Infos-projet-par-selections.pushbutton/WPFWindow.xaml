@@ -147,39 +147,45 @@
 
     <!-- ═══ Boutons bas ════════════════════════════════════════════════════════ -->
     <Grid Grid.Row="9">
+      <!-- Pied a 4 elements : l'indicateur et "⊕ Selectionner" restent sur la
+           meme ligne. "▶ Appliquer" garde la largeur elastique de la reference,
+           "Fermer" sa largeur fixe de 130. -->
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>   <!-- 0 : indicateur de selection -->
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>    <!-- 2 : ⊕ Selectionner -->
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>      <!-- 4 : ▶ Appliquer -->
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>    <!-- 6 : Fermer -->
       </Grid.ColumnDefinitions>
 
       <!-- Statut de la sélection courante -->
       <Border Grid.Column="0"
               Background="#F0F6FF" BorderBrush="#B8D4F0"
               BorderThickness="1" CornerRadius="3" Padding="8,0"
-              VerticalAlignment="Center" Margin="0,0,8,0">
+              Height="30" VerticalAlignment="Center">
         <TextBlock x:Name="txtSelCount"
                    Text="Aucun objet sélectionné"
                    FontSize="11" Foreground="#2C5F8A"
-                   VerticalAlignment="Center" Height="32"
-                   Padding="0,8,0,0"/>
+                   VerticalAlignment="Center"/>
       </Border>
 
-      <!-- Boutons d'action -->
-      <StackPanel Grid.Column="1" Orientation="Horizontal">
-        <Button x:Name="btnSelect"
-                Content="⊕  Sélectionner" Width="130" Height="32"
-                Margin="0,0,8,0"
-                ToolTip="Minimise la fenêtre et vous permet de sélectionner des objets dans Revit (Multiple / Terminer / Annuler)"/>
-        <Button x:Name="btnApply"
-                Content="▶  Appliquer" Width="120" Height="32"
-                Style="{DynamicResource NMButtonValide}"
-                IsDefault="True" Margin="0,0,8,0"
-                ToolTip="Copier les valeurs des Informations Projet vers les paramètres des objets sélectionnés"/>
-        <Button x:Name="btnClose"
-                Content="Fermer" Width="90" Height="32"
-                Style="{DynamicResource NMButtonValide}"
-                IsCancel="True"/>
-      </StackPanel>
+      <Button Grid.Column="2" x:Name="btnSelect"
+              Content="⊕  Sélectionner"
+              Style="{DynamicResource NMButtonSecondaire}"
+              VerticalAlignment="Center"
+              ToolTip="Minimise la fenêtre et vous permet de sélectionner des objets dans Revit (Multiple / Terminer / Annuler)"/>
+      <Button Grid.Column="4" x:Name="btnApply"
+              Content="▶  Appliquer"
+              Style="{DynamicResource NMButtonAppliquer}"
+              IsDefault="True"
+              ToolTip="Copier les valeurs des Informations Projet vers les paramètres des objets sélectionnés"/>
+      <Button Grid.Column="6" x:Name="btnClose"
+              Content="Fermer"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"
+              VerticalAlignment="Center"/>
     </Grid>
 
   </Grid>

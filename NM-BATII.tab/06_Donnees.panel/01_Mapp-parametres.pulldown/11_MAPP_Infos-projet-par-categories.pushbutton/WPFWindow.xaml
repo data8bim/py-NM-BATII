@@ -127,17 +127,23 @@
          Ordre : [▶ Appliquer (large, mise en avant)] [Fermer]
          Même hauteur pour les deux.
     ═══════════════════════════════════════════════════════════════════════ -->
-    <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Right">
-      <Button x:Name="btnApply"
-              Content="▶  Appliquer" Width="160" Height="32"
-              Style="{DynamicResource NMButtonValide}"
-              IsDefault="True" Margin="0,0,8,0"
+    <Grid Grid.Row="7">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnApply"
+              Content="▶  Appliquer"
+              Style="{DynamicResource NMButtonAppliquer}"
+              IsDefault="True"
               ToolTip="Copier les valeurs des Informations Projet vers les paramètres des objets"/>
-      <Button x:Name="btnClose"
-              Content="Fermer" Width="90" Height="32"
-              Style="{DynamicResource NMButtonValide}"
-              IsCancel="True"/>
-    </StackPanel>
+      <Button Grid.Column="2" x:Name="btnClose"
+              Content="Fermer"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"
+              VerticalAlignment="Center"/>
+    </Grid>
 
   </Grid>
 </Window>

@@ -164,14 +164,15 @@
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
+			<!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
-				<ColumnDefinition Width="*"/>
-				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="8"/>
+				<ColumnDefinition Width="130"/>
 			</Grid.ColumnDefinitions>
 
-			<Button x:Name="OkButton"     Content="OK"      Style="{StaticResource NMButtonValideOnly}" Grid.Row="0" Grid.Column="1"/>
-			<Button x:Name="CancelButton" Content="Annuler" Style="{StaticResource NMButtonValideOnly}" Grid.Row="0" Grid.Column="2"/>
+			<Button x:Name="OkButton"     Content="▶  Appliquer" Style="{DynamicResource NMButtonAppliquer}" IsDefault="True" Grid.Row="0" Grid.Column="0"/>
+			<Button x:Name="CancelButton" Content="Annuler"      Style="{DynamicResource NMButtonAnnuler}"   IsCancel="True"  Grid.Row="0" Grid.Column="2"/>
 			
 		</Grid>		
 

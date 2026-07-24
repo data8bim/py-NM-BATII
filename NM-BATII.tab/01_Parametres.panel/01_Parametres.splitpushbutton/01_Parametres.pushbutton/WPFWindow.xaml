@@ -242,8 +242,30 @@
                 </GroupBox>
 
                 <!-- GroupBox : Templates de nommage -->
-                <GroupBox Header="Templates de nommage" Margin="0,0,0,0"
-                          ToolTip="Utilisez {id} pour les groupes atomiques et {tpl-*} pour les sous-templates.">
+                <GroupBox Header="Templates de nommage" Margin="0,0,0,0">
+                  <GroupBox.ToolTip>
+                    <TextBlock TextWrapping="Wrap" MaxWidth="540">
+                      <Run FontWeight="Bold" Text="Composer un template"/><LineBreak/>
+                      Assemblez des variables <Run FontFamily="Consolas" Text="{}{...}"/> et des séparateurs littéraux (<Run FontFamily="Consolas" Text="_"/> ou <Run FontFamily="Consolas" Text=" - "/>).<LineBreak/>
+                      <LineBreak/>
+                      <Run FontWeight="Bold" Text="Deux sortes de variables :"/><LineBreak/>
+                      • un <Run FontStyle="Italic" Text="groupe atomique"/> de la table « Groupes atomiques » ci-dessus, désigné par son identifiant —<LineBreak/>
+                      <Run FontFamily="Consolas" Text="{}   {site}  {construction}  {producteur}  {specialite}  {num-niv}"/><LineBreak/>
+                      • un <Run FontStyle="Italic" Text="autre template"/> de ce même groupe, réutilisé par son identifiant —<LineBreak/>
+                      <Run FontFamily="Consolas" Text="{}   {niveau}"/> reprend la ligne « Niveau (code) » = <Run FontFamily="Consolas" Text="{}{pref-niv}{sens-niv}{num-niv}"/><LineBreak/>
+                      <LineBreak/>
+                      <Run FontWeight="Bold" Text="Casse (nommage des niveaux uniquement) :"/><LineBreak/>
+                      <Run FontFamily="Consolas" Text="{}   {CONSTRUCTION}"/> MAJUSCULES, <Run FontFamily="Consolas" Text="{}{construction}"/> minuscules, <Run FontFamily="Consolas" Text="{}{Construction}"/> 1re lettre.<LineBreak/>
+                      <Run FontFamily="Consolas" Text="{}   {construction:val}"/> valeur inchangée, <Run FontFamily="Consolas" Text="{}{construction:cap}"/> Chaque Mot.<LineBreak/>
+                      <Run FontStyle="Italic" Text="Sans effet sur « Nommage de fichiers », qui sert à analyser des noms existants et non à en produire."/><LineBreak/>
+                      <LineBreak/>
+                      <Run FontWeight="Bold" Text="Exemple (nommage de fichiers) :"/><LineBreak/>
+                      <Run FontFamily="Consolas" Text="{}   {site}_{construction}_{niveau}_{demi-niv}_{producteur}"/><LineBreak/>
+                      <Run FontFamily="Consolas" Text="   →  s1234567_001_R+02_0_D8B"/><LineBreak/>
+                      <LineBreak/>
+                      <Run FontStyle="Italic" Text="Ne s'applique pas à la table « Nommage des vues », qui a ses propres variables (voir son infobulle)."/>
+                    </TextBlock>
+                  </GroupBox.ToolTip>
                   <StackPanel Margin="5">
 
                     <TextBlock Text="Nommage de fichiers"
@@ -375,6 +397,44 @@
                               HeadersVisibility="Column"
                               MinHeight="80"
                               Margin="0,0,0,8">
+                      <DataGrid.ToolTip>
+                        <TextBlock TextWrapping="Wrap" MaxWidth="560">
+                          <Run FontWeight="Bold" Text="Composer le nom d'une vue"/><LineBreak/>
+                          Assemblez des variables en les séparant par <Run FontFamily="Consolas" Text=" - "/> (espace tiret espace).<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {vue-pers-titre} - {niveau} - {phase}"/><LineBreak/>
+                          <Run FontFamily="Consolas" Text="   →  FM - R+02 - Existant"/><LineBreak/>
+                          <LineBreak/>
+                          Une variable vide est retirée <Run FontStyle="Italic" Text="avec"/> son séparateur : pas de «&#160;- -&#160;» ni de tiret orphelin en fin de nom.<LineBreak/>
+                          <LineBreak/>
+                          <Run FontWeight="Bold" Text="Casse : écrivez le nom du jeton comme vous voulez le résultat"/><LineBreak/>
+                          Exemple avec une phase nommée « Existant » :<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {PHASE}"/> → EXISTANT<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {phase}"/> → existant<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {Phase}"/> → Existant  (1re lettre seulement)<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {phase:val}"/> → Existant  (valeur Revit inchangée)<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {phase:cap}"/> → Existant  (chaque mot capitalisé)<LineBreak/>
+                          <LineBreak/>
+                          <Run FontStyle="Italic" Text="Attention : un jeton tout en minuscules force les minuscules. Pour conserver la valeur exacte fournie par Revit, utilisez :val"/><LineBreak/>
+                          <Run FontStyle="Italic" Text="Exception : {niveau} rend toujours le nom exact du niveau Revit, quelle que soit la casse écrite (il sert aussi de clé de correspondance)."/><LineBreak/>
+                          <LineBreak/>
+                          <Run FontWeight="Bold" Text="Variables communes :"/><LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {niveau}"/> — nom du niveau Revit<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {phase}"/> — phase de projet choisie à l'exécution<LineBreak/>
+                          <LineBreak/>
+                          <Run FontWeight="Bold" Text="Depuis le type de vue personnalisé"/> (onglet « Vues personnalisées », choisi à l'exécution) :<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {vue-pers-titre}"/> — colonne Titre (ex. FM, TEMP)<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {vue-pers-valeur-1}"/> et <Run FontFamily="Consolas" Text="{}{vue-pers-valeur-2}"/> — colonnes Valeur-1 / Valeur-2<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {vue-pers-label}"/> — colonne Label<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {vue-pers-usage}"/> — colonne Usage (Temporaire / Livrable)<LineBreak/>
+                          <Run FontStyle="Italic" Text="Indisponibles sur la ligne « Nomenclature » : elle ne passe pas par les types de vue personnalisés."/><LineBreak/>
+                          <LineBreak/>
+                          <Run FontWeight="Bold" Text="Ligne « Nomenclature » uniquement"/> (avec <Run FontFamily="Consolas" Text="{}{phase}"/>, à l'exclusion de toute autre variable) :<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {categorie}"/> — catégorie Revit en MAJUSCULES (ex. PORTES)<LineBreak/>
+                          <Run FontFamily="Consolas" Text="{}   {type-nomenclature}"/> — colonne « Label » de la table « Types de nomenclatures » (onglet Nomenclatures)<LineBreak/>
+                          <LineBreak/>
+                          <Run FontStyle="Italic" Text="Les variables des autres tables ({site}, {construction}, {specialite}…) ne fonctionnent pas ici."/>
+                        </TextBlock>
+                      </DataGrid.ToolTip>
                       <DataGrid.Columns>
                         <DataGridTextColumn Header="Label" Binding="{Binding label}" Width="180"
                                             IsReadOnly="True">
@@ -586,6 +646,151 @@
                 </GroupBox>
 
               </StackPanel>
+            </GroupBox>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Nomenclatures (Types + Couleurs Titres + Colonnes)     -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <TabItem Header="Nomenclatures">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
+          <StackPanel Margin="5">
+
+            <!-- Alimente la liste à cocher de 06_Donnees > « Créer
+                 NOMENCLATURES ». La colonne « Label » fournit aussi la valeur
+                 de la variable {type-nomenclature} du template de nommage. -->
+            <GroupBox Header="Types de nomenclatures" Margin="0,0,0,8">
+              <StackPanel Margin="5">
+                <TextBlock Text="Chaque ligne devient une case à cocher dans « Créer NOMENCLATURES ». Le label sert de valeur à la variable {type-nomenclature} du nommage. Le type de nomenclature est le nom exact du type de vue Revit à appliquer — il est créé s'il n'existe pas ; laisser vide pour conserver le type par défaut."
+                           FontStyle="Italic" Foreground="Gray" FontSize="11"
+                           TextWrapping="Wrap" Margin="0,0,0,6"/>
+                <DataGrid x:Name="dgTypesNomenclatures"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="True"
+                          CanUserDeleteRows="True"
+                          HeadersVisibility="Column"
+                          MinHeight="120"
+                          Margin="0,0,0,0">
+                  <DataGrid.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="Nouvelle"/>
+                      <MenuItem Header="Dupliquer"/>
+                      <Separator/>
+                      <MenuItem Header="Supprimer"/>
+                    </ContextMenu>
+                  </DataGrid.ContextMenu>
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Label"
+                                        Binding="{Binding label}"
+                                        Width="2*"/>
+                    <DataGridTextColumn Header="Type de nomenclature"
+                                        Binding="{Binding type_vue}"
+                                        Width="1.4*"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+              </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Couleurs Titres" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Tables de styles"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_styles_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Saisies types"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_types_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Saisies occurrences"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_occur_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,6" Text="Nomenclatures présentations"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="tc_pres_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+              </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Couleurs Colonnes" Margin="0,0,0,0">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Colonnes lecture seule"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_readonly_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Colonnes types"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_types_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Colonnes occurrences"
+                           VerticalAlignment="Center"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
+                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_r" Width="45" Margin="2,0"/>
+                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_g" Width="45" Margin="2,0"/>
+                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
+                  <TextBox x:Name="cc_occur_b" Width="45" Margin="2,0"/>
+                </StackPanel>
+              </Grid>
             </GroupBox>
 
           </StackPanel>
@@ -805,116 +1010,6 @@
       </TabItem>
 
       <!-- ═══════════════════════════════════════════════════════ -->
-      <!-- Nomenclatures (Couleurs Titres + Colonnes)             -->
-      <!-- ═══════════════════════════════════════════════════════ -->
-      <TabItem Header="Nomenclatures">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
-          <StackPanel Margin="5">
-
-            <GroupBox Header="Couleurs Titres" Margin="0,0,0,8">
-              <Grid Margin="5">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="220"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Tables de styles"
-                           VerticalAlignment="Center"/>
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
-                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_styles_r" Width="45" Margin="2,0"/>
-                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_styles_g" Width="45" Margin="2,0"/>
-                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_styles_b" Width="45" Margin="2,0"/>
-                </StackPanel>
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Saisies types"
-                           VerticalAlignment="Center"/>
-                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
-                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_types_r" Width="45" Margin="2,0"/>
-                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_types_g" Width="45" Margin="2,0"/>
-                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_types_b" Width="45" Margin="2,0"/>
-                </StackPanel>
-                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Saisies occurrences"
-                           VerticalAlignment="Center"/>
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
-                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_occur_r" Width="45" Margin="2,0"/>
-                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_occur_g" Width="45" Margin="2,0"/>
-                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_occur_b" Width="45" Margin="2,0"/>
-                </StackPanel>
-                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,6" Text="Nomenclatures présentations"
-                           VerticalAlignment="Center"/>
-                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
-                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_pres_r" Width="45" Margin="2,0"/>
-                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_pres_g" Width="45" Margin="2,0"/>
-                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="tc_pres_b" Width="45" Margin="2,0"/>
-                </StackPanel>
-              </Grid>
-            </GroupBox>
-
-            <GroupBox Header="Couleurs Colonnes" Margin="0,0,0,0">
-              <Grid Margin="5">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="220"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,6" Text="Colonnes lecture seule"
-                           VerticalAlignment="Center"/>
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
-                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_readonly_r" Width="45" Margin="2,0"/>
-                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_readonly_g" Width="45" Margin="2,0"/>
-                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_readonly_b" Width="45" Margin="2,0"/>
-                </StackPanel>
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6" Text="Colonnes types"
-                           VerticalAlignment="Center"/>
-                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
-                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_types_r" Width="45" Margin="2,0"/>
-                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_types_g" Width="45" Margin="2,0"/>
-                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_types_b" Width="45" Margin="2,0"/>
-                </StackPanel>
-                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6" Text="Colonnes occurrences"
-                           VerticalAlignment="Center"/>
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="2,2">
-                  <TextBlock Text="R" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_occur_r" Width="45" Margin="2,0"/>
-                  <TextBlock Text="G" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_occur_g" Width="45" Margin="2,0"/>
-                  <TextBlock Text="B" Width="14" VerticalAlignment="Center"/>
-                  <TextBox x:Name="cc_occur_b" Width="45" Margin="2,0"/>
-                </StackPanel>
-              </Grid>
-            </GroupBox>
-
-          </StackPanel>
-        </ScrollViewer>
-      </TabItem>
-
-      <!-- ═══════════════════════════════════════════════════════ -->
       <!-- À PROPOS                                               -->
       <!-- ═══════════════════════════════════════════════════════ -->
       <TabItem Header="À propos">
@@ -1041,13 +1136,20 @@
     </TabControl>
 
     <!-- Boutons bas -->
-    <StackPanel Grid.Row="1" Orientation="Horizontal"
-                HorizontalAlignment="Right" Margin="0,8,0,0">
-      <Button x:Name="btnCancel"  Content="Annuler"      Width="90"
-              IsCancel="True" Margin="0,0,6,0"/>
-      <Button x:Name="btnSave"    Content="Enregistrer"  Width="90"
-              IsDefault="True"/>
-    </StackPanel>
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
+         Le verbe reste "Enregistrer" : l'action ecrit reellement dans config.json. -->
+    <Grid Grid.Row="1" Margin="0,8,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnSave" Content="▶  Enregistrer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
 
   </Grid>
 </Window>

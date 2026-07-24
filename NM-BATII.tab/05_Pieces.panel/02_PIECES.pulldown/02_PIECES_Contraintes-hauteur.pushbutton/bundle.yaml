@@ -1,0 +1,18 @@
+title:
+  en_us: "Height\nconstraints"
+  fr_fr: "Contraintes\nde hauteur"
+tooltip:
+  en_us: "Bulk-edit the height constraints of rooms (Upper Limit, Limit
+         Offset, Base Offset). Choose a scope (whole project, selected
+         levels, selected rooms, active view, or selection in the active
+         view).
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Règle en masse les contraintes de hauteur des pièces (Limite
+         supérieure, Décalage limite, Décalage inférieur). Choisir une
+         portée (tout le projet, niveaux, pièces sélectionnées, vue
+         active, ou sélection dans la vue active).
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-plan-view

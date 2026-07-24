@@ -50,7 +50,9 @@ if lib_dir not in sys.path:
     sys.path.append(lib_dir)
 
 from utils.config_loader                     import load_config
-from utils.extrac_nom_fichier_convention     import delimiter_from_regex, build_regex
+from utils.extrac_nom_fichier_convention     import (delimiter_from_regex, build_regex,
+                                                     diagnostiquer_nom_fichier,
+                                                     get_convention_template)
 from dialogs.dialogs_styles_loader           import load as load_styles, show_alert
 
 # ─── Système de logs ──────────────────────────────────────────────────────────
@@ -134,6 +136,27 @@ def save_last_state(checkboxes, chk_bim2d):
 
 
 # ─── Helpers regex ───────────────────────────────────────────────────────────
+
+def resoudre_groupe_niveau(naming, groups_ordered):
+    """
+    Retourne le nom du groupe de niveau dans la regex de convention.
+
+    Ce nom derive de l'identifiant du sous-template "Niveau (code)" via
+    _safe_name() : 'niveau-code' -> 'niveau_code'. L'ancien identifiant
+    'niveau' reste accepte pour les config.json anterieurs au renommage.
+
+    On detecte le nom reellement present dans la regex plutot que de le coder
+    en dur : sans cela, le niveau ne serait plus remplace par la valeur
+    "sans niveau" et cesserait d'etre un groupe obligatoire.
+    """
+    explicite = naming.get("group_niveau")
+    if explicite:
+        return explicite
+    for candidat in ("niveau_code", "niveau"):
+        if candidat in groups_ordered:
+            return candidat
+    return "niveau_code"
+
 
 def get_named_groups_ordered(pattern):
     """Retourne la liste des noms de groupes dans leur ordre d'apparition dans la regex."""
@@ -371,10 +394,11 @@ def main():
 
         # Groupes obligatoires (gérés par le panel Paramètres, pas de checkbox)
         # Les noms utilisés sont ceux des groupes dans la regex (safe_name : '-' → '_')
+        _g_niveau_regex = resoudre_groupe_niveau(naming, groups_ordered)
         mandatory_groups = set([
             naming.get("group_site",         "site"),
             naming.get("group_construction", "construction"),
-            naming.get("group_niveau",       "niveau"),
+            _g_niveau_regex,
             naming.get("group_demi",         "demi_niv"),
         ])
 
@@ -402,13 +426,24 @@ def main():
         # ── Extraction des valeurs depuis le nom ─────────────────────────────
         group_values = parse_filename_all_groups(file_info["basename"], pattern)
         if group_values is None:
-            show_alert(
-                u"Nom non conforme à la convention",
-                u"Le fichier sélectionné ne respecte pas la convention de nommage :\n\n"
-                u"{0}\n\n"
-                u"Veuillez renommer correctement tous les fichiers du projet\n"
-                u"avant de relancer cette commande.".format(file_info["basename"])
-            )
+            # Diagnostic element par element : indique OU la lecture echoue,
+            # plutot qu'un simple "non conforme" qui laisse chercher.
+            try:
+                _ok_diag, _lignes = diagnostiquer_nom_fichier(
+                    file_info["basename"], cfg)
+                _detail = u"\n".join(_lignes)
+            except Exception:
+                _detail = u""
+            _msg = (u"Le fichier sélectionné ne respecte pas la convention "
+                    u"de nommage :\n\n    {0}\n\n".format(file_info["basename"]))
+            if _detail:
+                _msg += _detail + u"\n\n"
+            _msg += (u"Convention attendue :\n    {0}\n\n"
+                     u"Veuillez renommer correctement tous les fichiers du projet\n"
+                     u"avant de relancer cette commande.".format(
+                         get_convention_template(cfg, "fichiers",
+                                                 u"(non configurée)")))
+            show_alert(u"Nom non conforme à la convention", _msg)
             return
 
         # ── Valeurs par défaut (remplacent les valeurs extraites du témoin) ──
@@ -418,7 +453,7 @@ def main():
         #           la valeur extraite du fichier témoin (ex. "0" → "X", "00" → "XX")
         # BIM-2D  → libellé dérivé de valeur_si_bim_2d (ex. "_BIM-2D" → "BIM-2D")
 
-        _g_niveau = naming.get("group_niveau", "niveau")
+        _g_niveau = _g_niveau_regex
         _g_demi   = naming.get("group_demi",   "demi_niv")
 
         _val_nul      = naming.get("valeur_si_nul", "X")

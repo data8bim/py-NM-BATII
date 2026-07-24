@@ -61,13 +61,18 @@ from System.Windows.Input import Keyboard, Key as WpfKey
 from System.Windows.Media import Brushes
 
 # ─── Chargement des styles de l'extension (NMWindowStandard, NMButtonValide…) ─
+# Le dossier lib/ de l'extension est auto-ajoute au sys.path par pyRevit, donc
+# « from dialogs.dialogs_styles_loader import ... » suffit. L'ancien bloc
+# importait « dialogs_styles_loader » SANS le prefixe « dialogs. » (module
+# inexistant) : l'import echouait TOUJOURS et show_alert retombait sur une
+# boite native hors charte. _charger_styles() place les cles NMButton*/NMWindow*
+# dans Application.Resources — indispensable aux fenetres locales et a show_alert.
 try:
-    import dialogs_styles_loader          # noqa: F401  (effets de bord à l'import)
-    from dialogs.dialogs_styles_loader import show_alert
-except ImportError:
+    from dialogs.dialogs_styles_loader import load as _charger_styles, show_alert
+    _charger_styles()
+except Exception:
     def show_alert(titre, message):
-        # Dernier recours : boîte de dialogue Windows native (pas pyRevit).
-        WinForms.MessageBox.Show(message, titre)
+        forms.alert(message, title=titre)
 
 
 # ─── Fenêtre non-modale : référence pour instance unique ─────────────────────
@@ -1222,6 +1227,12 @@ def main():
             load_rows(last)
     except Exception as ex:
         _log(u'Chargement auto echoue : ' + str(ex))
+
+    # Toujours au moins une ligne de mappage, meme vierge : sans elle la zone de
+    # mappage reste vide et se confond visuellement avec les champs de filtre
+    # situes juste au-dessus (confusion constatee a l'usage).
+    if not row_list:
+        add_row()
 
     # ── Fenêtre non-modale via DispatcherFrame ────────────────────────────────
     _frame = Threading.DispatcherFrame()

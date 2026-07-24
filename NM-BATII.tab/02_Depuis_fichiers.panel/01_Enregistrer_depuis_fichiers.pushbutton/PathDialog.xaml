@@ -47,12 +47,15 @@
                 x:Name="btnCopy"
                 Content="Copier dans le presse-papier"/>
 
+        <!-- Fenetre a bouton unique : "Fermer" prend le style Appliquer sur
+             toute la largeur, puisqu'il est la seule action de sortie. -->
         <Button Grid.Row="3"
-				Grid.Column="2"
+				Grid.Column="0" Grid.ColumnSpan="3"
                 x:Name="btnClose"
-                Content="Terminé"
+                Content="Fermer"
                 HorizontalAlignment="Stretch"
-				Style="{StaticResource NMButtonValideOnly}" />
+                IsDefault="True"
+				Style="{DynamicResource NMButtonAppliquer}" />
 
     </Grid>
 </Window>

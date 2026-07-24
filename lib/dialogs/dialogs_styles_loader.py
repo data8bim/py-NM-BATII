@@ -19,24 +19,141 @@
 import os
 from System.IO import StreamReader
 from System.Windows.Markup import XamlReader
-from System.Windows import Application
-from System.Windows.Forms import MessageBox
+from System.Windows import Application, Visibility, FrameworkElement, TextAlignment
+from System.Windows.Controls import Grid, Button, ColumnDefinition
+from System.Windows.Documents import Run, Bold
+from System.Windows import GridLength, GridUnitType
+from System.Windows.Forms import MessageBox, MessageBoxButtons, DialogResult as WinDialogResult
 from pyrevit import forms
 
 _ALERT_XAML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "AlertWindow.xaml")
 
 
-def show_alert(title, message):
-    """Affiche un message dans le style graphique de l'extension NM-BATII."""
+def _set_rich_text(text_block, message):
+    """
+    Affecte 'message' à un TextBlock en interprétant les segments encadrés
+    par '**' comme du texte en gras (léger sous-ensemble Markdown). Les
+    messages sans '**' s'affichent exactement comme avec 'Text = message'.
+    """
+    text_block.Inlines.Clear()
+    segments = message.split(u'**')
+    for i, part in enumerate(segments):
+        if not part:
+            continue
+        if i % 2 == 1:
+            b = Bold()
+            b.Inlines.Add(Run(part))
+            text_block.Inlines.Add(b)
+        else:
+            text_block.Inlines.Add(Run(part))
+
+
+def show_alert(title, message, close_label=None, centrer=False):
+    """
+    Affiche un message dans le style graphique de l'extension NM-BATII.
+
+    close_label : libellé du bouton de fermeture. Si None (par défaut), le
+        libellé défini dans AlertWindow.xaml ("Fermer") est conservé — ne rien
+        changer aux scripts existants. Passer par ex. u'Retour' quand le
+        message ne met pas fin à l'opération et que l'utilisateur revient à
+        un dialogue resté ouvert.
+    centrer : True pour centrer le texte. Réservé aux messages courts d'une
+        ou deux lignes. Laisser False (défaut) pour tout message multi-lignes
+        ou en colonnes — les diagnostics de convention de nommage, par
+        exemple, deviendraient illisibles une fois centrés.
+    """
     try:
         w = forms.WPFWindow(_ALERT_XAML)
         w.Title = title
-        w.txtMessage.Text = message
+        _set_rich_text(w.txtMessage, message)
+        if close_label:
+            w.btnClose.Content = close_label
+        if centrer:
+            w.txtMessage.TextAlignment = TextAlignment.Center
         w.btnClose.Click += lambda s, e: setattr(w, 'DialogResult', True)
         w.ShowDialog()
     except Exception:
         # Dernier recours : boîte de dialogue Windows native (pas pyRevit).
         MessageBox.Show(message, title)
+
+
+def show_confirm(title, message, yes_label=u'Oui', no_label=u'Non',
+                  yes_style_key=u'NMButtonAppliquer',
+                  no_style_key=u'NMButtonAnnuler', no_width=130):
+    """
+    Affiche une confirmation Oui/Non dans le style graphique de l'extension
+    NM-BATII (remplace le bouton "Fermer" d'AlertWindow.xaml par deux
+    boutons). Retourne True si l'utilisateur clique sur le bouton "yes_label",
+    False sinon.
+
+    yes_label / no_label : libellés des boutons (par défaut "Oui"/"Non" —
+        laisser tel quel pour ne rien changer aux scripts existants).
+    yes_style_key / no_style_key : nom d'un style partagé défini dans
+        dialogs_styles.xaml (chargé via load()) à appliquer dynamiquement au
+        bouton correspondant — ignoré si le style n'est pas trouvé. Par défaut
+        'NMButtonAppliquer'/'NMButtonAnnuler', soit le pied de dialogue
+        standard NM-BATII. Passer None pour n'appliquer aucun style.
+    no_width : largeur fixe (en pixels) du bouton "no" ; le bouton "yes"
+        occupe alors tout le reste de la largeur de la fenêtre. 130 par défaut,
+        largeur du bouton de sortie standard. Passer None pour que les deux
+        boutons se partagent la largeur à parts égales.
+    """
+    result = [False]
+    try:
+        w = forms.WPFWindow(_ALERT_XAML)
+        w.Title = title
+        _set_rich_text(w.txtMessage, message)
+
+        btn_grid = Grid()
+        c1 = ColumnDefinition(); c1.Width = GridLength(1, GridUnitType.Star)
+        c2 = ColumnDefinition(); c2.Width = GridLength(8)
+        c3 = ColumnDefinition()
+        c3.Width = GridLength(no_width) if no_width else GridLength(1, GridUnitType.Star)
+        btn_grid.ColumnDefinitions.Add(c1)
+        btn_grid.ColumnDefinitions.Add(c2)
+        btn_grid.ColumnDefinitions.Add(c3)
+
+        # Pas de Height impose ici : la hauteur (40) vient des styles partages.
+        btn_yes = Button(); btn_yes.Content = yes_label
+        Grid.SetColumn(btn_yes, 0)
+        btn_no = Button(); btn_no.Content = no_label
+        Grid.SetColumn(btn_no, 2)
+
+        if yes_style_key:
+            try:
+                btn_yes.SetResourceReference(FrameworkElement.StyleProperty, yes_style_key)
+            except Exception:
+                pass
+        if no_style_key:
+            try:
+                btn_no.SetResourceReference(FrameworkElement.StyleProperty, no_style_key)
+            except Exception:
+                pass
+
+        def _on_yes(s, e):
+            result[0] = True
+            setattr(w, 'DialogResult', True)
+
+        def _on_no(s, e):
+            result[0] = False
+            setattr(w, 'DialogResult', False)
+
+        btn_yes.Click += _on_yes
+        btn_no.Click += _on_no
+        btn_grid.Children.Add(btn_yes)
+        btn_grid.Children.Add(btn_no)
+
+        w.btnClose.Visibility = Visibility.Collapsed
+        parent_grid = w.btnClose.Parent
+        Grid.SetRow(btn_grid, Grid.GetRow(w.btnClose))
+        parent_grid.Children.Add(btn_grid)
+
+        w.ShowDialog()
+    except Exception:
+        # Dernier recours : boîte de dialogue Windows native (pas pyRevit).
+        r = MessageBox.Show(message.replace(u'**', u''), title, MessageBoxButtons.YesNo)
+        result[0] = (r == WinDialogResult.Yes)
+    return result[0]
 
 # ✅ FIX : chemin résolu depuis __file__ (robuste quel que soit l'emplacement
 # d'installation de l'extension sur le poste).

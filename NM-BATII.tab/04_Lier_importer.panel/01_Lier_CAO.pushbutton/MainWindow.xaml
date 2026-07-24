@@ -141,6 +141,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -152,14 +153,19 @@
                                Grid.Row="0" Grid.Column="0" Margin="0,0,6,0"/>
                     <ComboBox x:Name="cmbViewFamily" Grid.Row="0" Grid.Column="1"/>
 
-                    <TextBlock Text="Type personnalise :"
+                    <TextBlock Text="Phase :"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                Grid.Row="1" Grid.Column="0" Margin="0,0,6,0"/>
-                    <ComboBox x:Name="cmbVueTypePers" Grid.Row="1" Grid.Column="1"/>
+                    <ComboBox x:Name="cmbPhase" Grid.Row="1" Grid.Column="1"/>
+
+                    <TextBlock Text="Type personnalise :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="2" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbVueTypePers" Grid.Row="2" Grid.Column="1"/>
 
                     <CheckBox x:Name="chkVueNiveau"
                               Content="Une vue par niveau"
-                              Margin="5" Grid.Row="2" Grid.Column="1"/>
+                              Margin="5" Grid.Row="3" Grid.Column="1"/>
                 </Grid>
             </GroupBox>
 
@@ -247,21 +253,22 @@
 
         <!-- Boutons de validation -->
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+            <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="130"/>
             </Grid.ColumnDefinitions>
             <Button x:Name="btnOk"
-                    Content="Lier CAO"
-                    Style="{StaticResource NMButtonValideOnly}"
-                    Grid.Column="2"/>
+                    Content="▶  Lier CAO"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True"
+                    Grid.Column="0"/>
             <Button x:Name="btnCancel"
                     Content="Annuler"
-                    Style="{StaticResource NMButtonValideOnly}"
+                    Style="{DynamicResource NMButtonAnnuler}"
                     IsCancel="True"
-                    Grid.Column="3"/>
+                    Grid.Column="2"/>
         </Grid>
 
     </Grid>

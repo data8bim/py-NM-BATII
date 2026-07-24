@@ -62,19 +62,20 @@
 
         <!-- Boutons Annuler / Supprimer -->
         <Grid Grid.Row="3" Margin="5,0,5,5">
+            <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="130"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="btnCancel" Grid.Column="0"
+            <Button x:Name="btnConfirm" Grid.Column="0"
+                    Content="▶  Supprimer"
+                    Style="{DynamicResource NMButtonAppliquer}"
+                    IsDefault="True"/>
+            <Button x:Name="btnCancel" Grid.Column="2"
                     Content="Annuler"
-                    Style="{DynamicResource NMButtonStandard}"
-                    Height="40" IsCancel="True"/>
-            <Button x:Name="btnConfirm" Grid.Column="2"
-                    Content="Supprimer"
-                    Style="{DynamicResource NMButtonValide}"
-                    Height="40" IsDefault="True"/>
+                    Style="{DynamicResource NMButtonAnnuler}"
+                    IsCancel="True"/>
         </Grid>
     </Grid>
 </Window>

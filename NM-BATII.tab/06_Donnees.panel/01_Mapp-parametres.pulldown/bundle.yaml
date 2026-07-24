@@ -11,8 +11,11 @@ layout:
   - 15_MAPP_Infos-Pieces-par-categories
   - 16_MAPP_Infos-Pieces-par-selection
   - -----
-  - 17_MAPP_Infos-Objets-par-categories
-  - 18_MAPP_Infos-Objets-par-selection
+  - 17_MAPP_Infos-Espaces-par-categories
+  - 18_MAPP_Infos-Espaces-par-selection
+  - -----
+  - 19_MAPP_Infos-Objets-par-categories
+  - 20_MAPP_Infos-Objets-par-selection
   - -----
   - -----
   - 21_MAPP_SP-SHON-SHOB

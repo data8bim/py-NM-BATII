@@ -41,17 +41,25 @@
 				 TextWrapping="Wrap"
 				 VerticalScrollBarVisibility="Auto" />
 				 
-		<Button x:Name="btnOk"
-				Content="OK"
-				Grid.Row="3"
-				Grid.Column="1"
-				HorizontalAlignment="Stretch" />
-				
-		<Button x:Name="btnCancel"
-				Content="Annuler"
-				Grid.Row="3"
-				Grid.Column="2"
-				HorizontalAlignment="Stretch" />		 
+		<!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
+		     Grid.Row corrige de 3 a 2 : le Grid ne definit que 3 lignes (0-2),
+		     WPF rabattait silencieusement les boutons sur la derniere. -->
+		<Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="8"/>
+				<ColumnDefinition Width="130"/>
+			</Grid.ColumnDefinitions>
+			<Button Grid.Column="0" x:Name="btnOk"
+					Content="▶  Appliquer"
+					Style="{DynamicResource NMButtonAppliquer}"
+					IsDefault="True" />
+			<Button Grid.Column="2" x:Name="btnCancel"
+					Content="Annuler"
+					Style="{DynamicResource NMButtonAnnuler}"
+					IsCancel="True" />
+		</Grid>
+
     </Grid>
 </Window>
 
