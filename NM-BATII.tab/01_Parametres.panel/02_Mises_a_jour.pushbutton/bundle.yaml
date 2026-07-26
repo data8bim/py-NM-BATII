@@ -6,3 +6,13 @@ tooltip: >
   depuis GitHub ou depuis un répertoire réseau.
   La source est configurée dans Paramètres > onglet LOG > groupe Mises à jour.
 title: Mise à jour
+
+# Moteur IronPython neuf a chaque lancement (meme choix que le bouton Reload
+# de pyRevit, outil de meme nature). Deux raisons :
+#   - cet outil reecrit lib/ et NM-BATII.tab sur le disque : repartir d'un
+#     moteur vierge evite d'operer avec des modules deja caches en memoire ;
+#   - sans ca, le script herite des imports des boutons lances avant lui dans
+#     la session, ce qui masque en developpement les erreurs que subissent les
+#     utilisateurs qui cliquent ce bouton en premier apres le demarrage.
+engine:
+  clean: true

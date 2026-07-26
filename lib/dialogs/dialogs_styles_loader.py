@@ -17,6 +17,18 @@
 # You should have received a copy of the GNU General Public License
 # along with py-NM-BATII. If not, see <https://www.gnu.org/licenses/>.
 import os
+
+# Les assemblies WPF/WinForms ne sont PAS chargees par defaut dans le moteur
+# IronPython de pyRevit : elles n'arrivent que si un module tiers les a deja
+# referencees (typiquement 'pyrevit.forms'). Comme ce module partage peut etre
+# importe en tout premier par un script (ex. 02_Mises_a_jour), on les reference
+# explicitement ici, sinon : ImportError: No module named Windows.
+import clr
+clr.AddReference('PresentationFramework')   # Application, Controls, Documents, Markup.XamlReader
+clr.AddReference('PresentationCore')        # Visibility, TextAlignment
+clr.AddReference('WindowsBase')             # GridLength, GridUnitType
+clr.AddReference('System.Windows.Forms')    # MessageBox (fallback ultime)
+
 from System.IO import StreamReader
 from System.Windows.Markup import XamlReader
 from System.Windows import Application, Visibility, FrameworkElement, TextAlignment

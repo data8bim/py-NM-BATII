@@ -28,16 +28,6 @@ import codecs
 import shutil
 import tempfile
 
-# Feuille de styles WPF partagee (lib/dialogs/dialogs_styles.xaml) : rend
-# disponibles les cles NMButtonAppliquer / NMButtonAnnuler utilisees par les
-# pieds de dialogue. Tous les styles y sont nommes (x:Key), le chargement
-# n'applique donc rien de lui-meme aux controles existants.
-_lib = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')
-if _lib not in sys.path:
-    sys.path.insert(0, _lib)
-from dialogs.dialogs_styles_loader import load as _charger_styles
-_charger_styles()
-
 import clr
 clr.AddReference('System')
 clr.AddReference('System.Net')
@@ -48,6 +38,27 @@ from System.Net import WebClient, WebException, ServicePointManager, SecurityPro
 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
 from pyrevit import forms, script
+
+# Feuille de styles WPF partagee (lib/dialogs/dialogs_styles.xaml) : rend
+# disponibles les cles NMButtonAppliquer / NMButtonAnnuler utilisees par les
+# pieds de dialogue. Tous les styles y sont nommes (x:Key), le chargement
+# n'applique donc rien de lui-meme aux controles existants.
+#
+# IMPORTANT — cet outil est le mecanisme de reparation de l'extension : il doit
+# rester lancable meme si lib/ est casse, absent, ou a moitie copie par une MAJ
+# interrompue. Sinon l'utilisateur perd tout moyen de se remettre a jour.
+# D'ou les deux precautions :
+#   1. l'import arrive APRES 'pyrevit.forms' (qui charge les assemblies WPF) ;
+#   2. son echec est tolere — les styles sont cosmetiques ici, MajWindow.xaml
+#      les reference en DynamicResource et s'affiche sans eux.
+_lib = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'lib')
+if _lib not in sys.path:
+    sys.path.insert(0, _lib)
+try:
+    from dialogs.dialogs_styles_loader import load as _charger_styles
+    _charger_styles()
+except Exception:
+    pass
 
 output = script.get_output()
 
