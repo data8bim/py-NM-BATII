@@ -5,4 +5,5 @@ layout:
   - 04_Lier_importer
   - 05_Pieces
   - 06_Donnees
-  - 07_Nettoyer
+  - 07_Modifier
+  - 08_Nettoyer

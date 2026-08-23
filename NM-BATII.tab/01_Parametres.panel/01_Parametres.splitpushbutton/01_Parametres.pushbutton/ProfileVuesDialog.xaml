@@ -17,36 +17,50 @@
 
   <Grid Margin="12">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/><!-- 0 : famille -->
+      <RowDefinition Height="Auto"/><!-- 1 : discipline -->
+      <RowDefinition Height="Auto"/><!-- 2 : type personnalise -->
+      <RowDefinition Height="Auto"/><!-- 3 : phase -->
+      <RowDefinition Height="Auto"/><!-- 4 : une vue par niveau -->
       <RowDefinition Height="12"/>
-      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/><!-- 6 : pied -->
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="160"/>
       <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
 
+    <!-- Meme cascade et meme ordre que le dialogue de « Lier CAO → Vues » :
+         Famille -> Discipline -> Type personnalise -> Phase. Les listes sont
+         remplies depuis config.json par le script, jamais en dur ici — des
+         libelles figes finiraient par diverger de « Nommage des vues ». -->
     <TextBlock Text="Famille de vue :" VerticalAlignment="Center"
                Grid.Row="0" Grid.Column="0" Margin="0,4"/>
-    <ComboBox x:Name="cmbFamille" Grid.Row="0" Grid.Column="1" Margin="0,2">
-      <ComboBoxItem>Plan d'etage</ComboBoxItem>
-      <ComboBoxItem>Plans de faux-plafonds</ComboBoxItem>
-      <ComboBoxItem>Plan de structure</ComboBoxItem>
-      <ComboBoxItem>Vue de dessin</ComboBoxItem>
-    </ComboBox>
+    <ComboBox x:Name="cmbFamille" Grid.Row="0" Grid.Column="1" Margin="0,2"/>
+
+    <TextBlock Text="Discipline :" VerticalAlignment="Center"
+               Grid.Row="1" Grid.Column="0" Margin="0,4"/>
+    <ComboBox x:Name="cmbDiscipline" Grid.Row="1" Grid.Column="1" Margin="0,2"
+              ToolTipService.ShowOnDisabled="True"/>
 
     <TextBlock Text="Type personnalisé :" VerticalAlignment="Center"
-               Grid.Row="1" Grid.Column="0" Margin="0,4"/>
-    <ComboBox x:Name="cmbTypePerso" Grid.Row="1" Grid.Column="1" Margin="0,2"/>
+               Grid.Row="2" Grid.Column="0" Margin="0,4"/>
+    <ComboBox x:Name="cmbTypePerso" Grid.Row="2" Grid.Column="1" Margin="0,2"
+              ToolTipService.ShowOnDisabled="True"/>
+
+    <!-- Les phases sont celles du PROJET COURANT ; seul leur nom est
+         enregistre, un autre projet retombant sur sa derniere phase. -->
+    <TextBlock Text="Phase :" VerticalAlignment="Center"
+               Grid.Row="3" Grid.Column="0" Margin="0,4"/>
+    <ComboBox x:Name="cmbPhase" Grid.Row="3" Grid.Column="1" Margin="0,2"
+              ToolTipService.ShowOnDisabled="True"/>
 
     <CheckBox x:Name="chkVueParNiveau"
               Content="Une vue par niveau"
-              Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4"/>
+              Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4"/>
 
     <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
-    <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+    <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="8"/>

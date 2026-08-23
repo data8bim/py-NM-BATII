@@ -1,8 +1,0 @@
-title:
-  en_us: "Text →\nRooms (bulk)"
-  fr_fr: "Texte →\nPièces (masse)"
-layout:
-  - 01_Notes-Textes_Select_et_vers_Parametre_VUE
-  - 02_Notes-Textes_vers_Parametre_VUE
-  - ---
-  - 04_Notes-Textes_check_VUE

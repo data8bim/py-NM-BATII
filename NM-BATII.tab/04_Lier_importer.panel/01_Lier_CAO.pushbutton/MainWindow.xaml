@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Lier CAO &#x2192; Vues"
     Width="960"
-    Height="680"
+    Height="780"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterScreen">
 
@@ -31,8 +31,12 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Colonne gauche : Fichiers + Options de liaisons + Vues -->
-        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
+        <!-- Colonne gauche : Fichiers + Options de liaisons + Vues + Profil.
+             Nommee : c'est elle qui donne sa hauteur au groupe "Fichiers a
+             lier" de droite, pour que les deux colonnes se terminent au meme
+             niveau (voir le binding sur son ActualHeight plus bas). -->
+        <StackPanel x:Name="pnlColonneGauche"
+                    Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
 
             <!-- Groupe Fichiers -->
             <GroupBox Header="Fichiers" Margin="0,0,0,8">
@@ -73,7 +77,7 @@
             </GroupBox>
 
             <!-- Groupe Options de liaisons -->
-            <GroupBox x:Name="grpDwgOptions" Header="Options de liaisons" Margin="0,0,0,8">
+            <GroupBox Header="Options de liaisons" Margin="0,0,0,8">
                 <Grid Margin="4">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -142,35 +146,68 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Famille de vue :"
+                    <!-- CASCADE : Discipline -> Sous-discipline -> Famille de
+                         vue -> Type personnalise -> Phase. Chaque menu ne
+                         propose que des valeurs qui laissent au moins un choix
+                         au suivant (voir _depuis dans script.py). L'ordre
+                         visuel EST l'ordre du filtrage.
+                         Les disciplines offertes sont celles REELLEMENT
+                         employees par les vues personnalisees, pas les ~100
+                         lignes du referentiel de l'onglet « Disciplines ».
+                         Les quatre premiers menus sont editables : la frappe y
+                         filtre les valeurs (dialogs/combo_recherche.py).
+                         Un menu vide affiche le marqueur _AUCUNE_VALEUR et se
+                         grise. ShowOnDisabled : sans lui, l'infobulle qui
+                         explique l'indisponibilite ne s'afficherait justement
+                         pas quand le menu est grise. -->
+                    <TextBlock Text="Discipline :"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                Grid.Row="0" Grid.Column="0" Margin="0,0,6,0"/>
-                    <ComboBox x:Name="cmbViewFamily" Grid.Row="0" Grid.Column="1"/>
+                    <ComboBox x:Name="cmbDiscipline" Grid.Row="0" Grid.Column="1"
+                              ToolTipService.ShowOnDisabled="True"/>
 
-                    <TextBlock Text="Phase :"
+                    <TextBlock Text="Sous-discipline :"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                Grid.Row="1" Grid.Column="0" Margin="0,0,6,0"/>
-                    <ComboBox x:Name="cmbPhase" Grid.Row="1" Grid.Column="1"/>
+                    <ComboBox x:Name="cmbSousDiscipline" Grid.Row="1" Grid.Column="1"
+                              ToolTipService.ShowOnDisabled="True"/>
+
+                    <TextBlock Text="Famille de vue :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="2" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbViewFamily" Grid.Row="2" Grid.Column="1"
+                              ToolTipService.ShowOnDisabled="True"/>
 
                     <TextBlock Text="Type personnalise :"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
-                               Grid.Row="2" Grid.Column="0" Margin="0,0,6,0"/>
-                    <ComboBox x:Name="cmbVueTypePers" Grid.Row="2" Grid.Column="1"/>
+                               Grid.Row="3" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbVueTypePers" Grid.Row="3" Grid.Column="1"
+                              ToolTipService.ShowOnDisabled="True"/>
+
+                    <!-- Grise tant que les menus au-dessus n'ont pas chacun
+                         une valeur reelle. -->
+                    <TextBlock Text="Phase :"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Grid.Row="4" Grid.Column="0" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="cmbPhase" Grid.Row="4" Grid.Column="1"
+                              ToolTipService.ShowOnDisabled="True"/>
 
                     <CheckBox x:Name="chkVueNiveau"
                               Content="Une vue par niveau"
-                              Margin="5" Grid.Row="3" Grid.Column="1"/>
+                              Margin="5" Grid.Row="5" Grid.Column="1"/>
                 </Grid>
             </GroupBox>
 
-            <!-- Groupe Profils -->
-            <GroupBox Header="Profils">
+            <!-- Groupe Profil -->
+            <GroupBox Header="Profil">
                 <Grid Margin="4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -184,8 +221,14 @@
 
         </StackPanel>
 
-        <!-- Colonne droite : Fichiers a lier -->
-        <GroupBox Header="Fichiers a lier" Grid.Row="0" Grid.Column="2">
+        <!-- Colonne droite : Fichiers a lier.
+             Hauteur calee sur la colonne de gauche plutot que sur la ligne :
+             les deux colonnes se terminent ainsi exactement au meme niveau (bas
+             du groupe "Profil" = bas de "Fichiers a lier"), et le mou eventuel
+             de la fenetre se retrouve SOUS les deux, pas entre elles. -->
+        <GroupBox Header="Fichiers a lier" Grid.Row="0" Grid.Column="2"
+                  VerticalAlignment="Top"
+                  Height="{Binding ActualHeight, ElementName=pnlColonneGauche}">
             <Grid Margin="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

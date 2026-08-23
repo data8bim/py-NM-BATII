@@ -1,0 +1,8 @@
+title:
+  en_us: "Room\ndata"
+  fr_fr: "Données\ndes pièces"
+layout:
+  - 01_PIECES_Donnees-Notes-Textes-vers-Pieces-MASSE
+  - 02_PIECES_Donnees-Notes-Textes-vers-Pieces-SELECTION
+  - ---
+  - 03_PIECES_Donnees-Nettoy-Check

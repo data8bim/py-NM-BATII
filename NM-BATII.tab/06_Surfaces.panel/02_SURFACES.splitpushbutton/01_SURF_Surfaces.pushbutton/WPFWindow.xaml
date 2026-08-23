@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Palette non modale d'attribution des clés de style aux surfaces.
+
+     Redimensionnable, contrairement à « Édition des séparateurs » : le nombre
+     de boutons de style dépend entièrement du projet (une ligne par clé de la
+     table), il n'existe donc aucune hauteur juste à figer. La liste des styles
+     est la seule zone élastique (Height="*"), tout le reste est en Auto :
+     agrandir la palette agrandit la liste, jamais les bandeaux.
+
+     Aucun binding : les boutons de style sont créés en Python à chaque
+     changement de filtre (voir _reconstruire_boutons). -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Surfaces"
+        Width="330" Height="600"
+        MinWidth="290" MinHeight="360"
+        WindowStartupLocation="Manual"
+        ShowInTaskbar="False">
+
+  <Window.Resources>
+    <!-- ═══ Style LOCAL des boutons de style ══════════════════════════════════
+         Copie de NMButtonStandard (lib/dialogs/dialogs_styles.xaml) avec une
+         seule différence : le ContentPresenter relaie HorizontalContentAlignment
+         au lieu d'être figé sur Center. C'est ce Center codé en dur qui centrait
+         les libellés, et aucune propriété posée sur le bouton ne pouvait le
+         contredire.
+
+         Pourquoi une COPIE LOCALE plutôt qu'un correctif dans le fichier
+         partagé :
+           - dialogs_styles.xaml sert toutes les boîtes de l'extension ; y
+             changer l'alignement des boutons les toucherait toutes ;
+           - ce dictionnaire est fusionné une fois par session dans
+             Application.Current.Resources (dialogs_styles_loader.load() ignore
+             un Source déjà chargé) : une modification n'y serait visible
+             qu'après un redémarrage complet de Revit, alors que ce XAML-ci est
+             relu à chaque ouverture de la palette.
+         Pas de BasedOn : il exigerait un StaticResource, donc résolu au parsing.
+         Si le dictionnaire partagé n'était pas chargé, la fenêtre entière
+         échouerait au lieu de s'ouvrir avec des boutons au look par défaut. -->
+    <Style x:Key="NMButtonStyleListe" TargetType="Button">
+      <Setter Property="FontFamily" Value="Segoe UI"/>
+      <Setter Property="FontWeight" Value="Normal"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Foreground" Value="Black"/>
+      <Setter Property="Padding" Value="8,6"/>
+      <Setter Property="Margin" Value="2"/>
+      <Setter Property="Background" Value="#FFF0F0F0"/>
+      <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="border"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="4">
+              <ContentPresenter
+                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                  VerticalAlignment="Center"
+                  Margin="{TemplateBinding Padding}"
+                  RecognizesAccessKey="True"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FFE0F0FF"/>
+                <Setter Property="BorderBrush" Value="DodgerBlue"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#a4c0f4"/>
+                <Setter Property="BorderBrush" Value="#489cdc"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="border" Property="Background" Value="#FFEFEFEF"/>
+                <Setter TargetName="border" Property="BorderBrush" Value="#FFCCCCCC"/>
+                <Setter Property="Foreground" Value="#FFAAAAAA"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="8">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 type de calcul -->
+      <RowDefinition Height="Auto"/>   <!-- 1 recherche -->
+      <RowDefinition Height="Auto"/>   <!-- 2 actions : effacer + aide -->
+      <RowDefinition Height="Auto"/>   <!-- 3 étiquetage -->
+      <RowDefinition Height="*"/>      <!-- 4 boutons de style -->
+      <RowDefinition Height="Auto"/>   <!-- 5 état : sélection, pose, comptes rendus -->
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Type de calcul ════════════════════════════════════════════════════ -->
+    <!-- Alimentée par les valeurs distinctes de la colonne « type de calcul »
+         de la table de style (paramétrable dans 01_Parametres > Surfaces).
+         Filtre la liste de boutons ci-dessous. -->
+    <StackPanel Grid.Row="0" Margin="0,0,0,6">
+      <TextBlock Text="Type de calcul de surface"
+                 FontSize="12" Foreground="#555555" Margin="2,0,0,2"/>
+      <ComboBox x:Name="cboCalcul"
+                Margin="0"
+                Padding="6,4"
+                FontSize="13"/>
+    </StackPanel>
+
+    <!-- ═══ Recherche ═════════════════════════════════════════════════════════ -->
+    <!-- Filtre en direct les boutons par nom de clé. Le TextBlock de fond fait
+         office de texte d'invite : WPF n'a pas de PlaceholderText, et un
+         Text="Rechercher…" effacé au focus obligerait à distinguer la saisie
+         réelle du gabarit. Ici les deux ne se mélangent jamais. -->
+    <Grid Grid.Row="1" Margin="0,0,0,6">
+      <TextBox x:Name="txtRecherche"
+               Padding="6,4"
+               FontSize="13"/>
+      <TextBlock x:Name="txtInvite"
+                 Text="Rechercher un style…"
+                 Margin="9,0,0,0"
+                 FontSize="13"
+                 Foreground="#999999"
+                 VerticalAlignment="Center"
+                 IsHitTestVisible="False"/>
+    </Grid>
+
+    <!-- ═══ Actions ═══════════════════════════════════════════════════════════ -->
+    <!-- Placée AVANT la liste, avec les filtres : « Effacer le style » agit sur
+         la sélection, comme les boutons de style, et l'aide n'a pas à être
+         cherchée en bas d'une liste qui défile. La liste reste ainsi le dernier
+         bloc interactif, suivi des seuls bandeaux d'état.
+         Proportions du pied de dialogue de l'extension : action | 8 | secondaire.
+         L'aide reste carrée, calée sur la hauteur du bouton. -->
+    <Grid Grid.Row="2" Margin="0,0,0,6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+
+      <Button Grid.Column="0"
+              x:Name="btnEffacer"
+              Content="Effacer le style"
+              Height="32"
+              Margin="0" MinWidth="0" MinHeight="0"
+              Padding="10,0"
+              FontSize="13"
+              HorizontalAlignment="Stretch"
+              Style="{DynamicResource NMButtonSecondaire}"
+              ToolTip="Vide le paramètre de clé de style sur les surfaces sélectionnées."/>
+
+      <!-- Roue crantée : le référentiel des styles, à portée de main depuis la
+           palette. C'est là qu'on constate qu'un style manque ou qu'une couleur
+           ne va pas ; imposer le détour par « Paramètres > Surfaces » pour y
+           remédier fait perdre le fil.
+
+           Glyphe E713 de Segoe Fluent Icons (Windows 11), avec repli sur Segoe
+           MDL2 Assets (Windows 10) : les deux y placent la roue de réglages.
+           Une police plutôt qu'un PNG — le rendu suit la résolution de l'écran,
+           et il n'y a pas d'icône claire/sombre à maintenir. -->
+      <Button Grid.Column="2"
+              x:Name="btnConfig"
+              Content="&#xE713;"
+              FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+              Width="32" Height="32"
+              Margin="0" MinWidth="0" MinHeight="0"
+              Padding="0"
+              FontSize="15"
+              Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Ouvre « Gestion de types de calculs » : ordre, repères, couleurs, motifs et étiquettes des styles."/>
+
+      <Button Grid.Column="4"
+              x:Name="btnAide"
+              Content="?"
+              Width="32" Height="32"
+              Margin="0" MinWidth="0" MinHeight="0"
+              Padding="0"
+              FontSize="13"
+              Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Comment fonctionne cette palette ?"/>
+    </Grid>
+
+    <!-- ═══ Étiquetage ════════════════════════════════════════════════════════ -->
+    <!-- La case ne dit pas seulement « j'étiquette », elle montre QUOI : la
+         liste déroulante affiche l'étiquette qui sera posée, et laisse en
+         choisir une autre sans passer par les paramètres. On ne découvre pas
+         l'oubli après trente surfaces.
+
+         Elle se recale sur l'étiquette configurée à chaque changement de type
+         de calcul : les paramètres restent la référence, le choix manuel est un
+         écart ponctuel, jamais un réglage qui s'installe à l'insu de tous.
+
+         L'interrupteur est ici, et pas dans les paramètres, parce que la
+         décision se prend en travaillant. Le MAPPAGE, lui, est un référentiel :
+         il se règle dans « Paramètres > Surfaces > Étiquettes par type de
+         calcul… ». L'état de la case est mémorisé dans config.json, celui qui
+         étiquette toujours ne la recoche jamais.
+
+         Les entrées portent « Famille : Type » en entier, comme le dialogue des
+         paramètres : deux types de même nom dans deux familles différentes
+         étaient indistinguables. La liste déroulée s'élargit d'elle-même au
+         contenu ; seule la ligne fermée, à la largeur de la palette, tronque —
+         l'infobulle y supplée. -->
+    <Grid Grid.Row="3" Margin="2,0,2,6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+
+      <CheckBox Grid.Row="0" Grid.Column="0"
+                x:Name="chkEtiqueter"
+                Content="Étiqueter"
+                FontSize="12"
+                VerticalAlignment="Center"
+                Margin="0,0,6,0"
+                ToolTip="Étiquette chaque surface traitée par la palette, dans la vue courante."/>
+
+      <ComboBox Grid.Row="0" Grid.Column="1"
+                x:Name="cboEtiquette"
+                Padding="6,3"
+                FontSize="12"
+                VerticalAlignment="Center"/>
+
+      <!-- Alignée sous la liste et non sous la case « Étiqueter » : c'est une
+           propriété de l'étiquette choisie au-dessus, pas un second
+           interrupteur de même rang.
+           Même discipline que la liste : elle affiche le réglage du type de
+           calcul courant et s'y recale à chaque changement, un écart manuel ne
+           s'installant jamais à l'insu de tous. -->
+      <CheckBox Grid.Row="1" Grid.Column="1"
+                x:Name="chkRepere"
+                Content="Ligne de repère"
+                FontSize="12"
+                Foreground="#555555"
+                VerticalAlignment="Center"
+                Margin="0,4,0,0"
+                ToolTip="Pose l'étiquette avec sa ligne de repère."/>
+    </Grid>
+
+    <!-- ═══ Boutons de style ══════════════════════════════════════════════════ -->
+    <!-- StackPanel vertical et non WrapPanel : les noms de clés sont longs
+         (« SP - Surface Plancher »…), une disposition en colonnes les
+         tronquerait. Chaque bouton occupe toute la largeur, texte calé à
+         gauche (style NMButtonStyleListe ci-dessus), son infobulle porte le
+         commentaire de la ligne correspondante. -->
+    <Border Grid.Row="4"
+            BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="3"
+            Padding="4">
+      <ScrollViewer VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+        <StackPanel x:Name="pnlStyles"/>
+      </ScrollViewer>
+    </Border>
+
+    <!-- Pas de bandeau « mode pose » ni de bouton d'arrêt : c'est ÉCHAP, dans
+         Revit, qui met fin au placement. Un bouton d'arrêt dans la palette
+         obligeait à cliquer hors de Revit, ce qui lui retire le focus — et
+         aucune API Revit ne permet d'interrompre la commande active pour
+         compenser (les 567 membres de PostableCommand ne comportent ni Modify
+         ni Cancel, et RevitAPIUI n'expose rien de tel). Le style courant est
+         rappelé dans le compte rendu ci-dessous. -->
+
+    <!-- ═══ État ══════════════════════════════════════════════════════════════ -->
+    <!-- UNE seule zone, qui dit à la fois ce qu'il y a et ce qu'on peut faire.
+         Deux zones cohabitaient auparavant — sélection d'un côté, compte rendu
+         de l'autre — et il fallait lire les deux pour comprendre la situation.
+
+         Elles étaient séparées pour une raison technique : la sélection est
+         réécrite par l'événement Idling plusieurs fois par seconde, ce qui
+         effaçait les messages avant qu'on ait pu les lire. La fusion est donc
+         conditionnée à une PRIORITÉ D'AFFICHAGE gérée côté script (voir
+         _rafraichir_message) : un compte rendu ou une erreur gèlent la zone,
+         Idling ne la reprend qu'ensuite.
+
+         Orangé, comme l'ancien bandeau de pose : c'est la seule zone vivante
+         de la palette, elle doit accrocher l'œil sans crier. -->
+    <Border Grid.Row="5"
+            Background="#FFF6E0" BorderBrush="#E8B33C" BorderThickness="1"
+            CornerRadius="3" Padding="8,6" Margin="0,6,0,0">
+      <TextBlock x:Name="txtEtat"
+                 TextWrapping="Wrap"
+                 FontSize="12"
+                 Foreground="#7A5B00"
+                 Text="Cliquez sur un style pour créer des surfaces de ce style."/>
+    </Border>
+  </Grid>
+</Window>

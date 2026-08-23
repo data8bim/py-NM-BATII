@@ -1,0 +1,19 @@
+title:
+  en_us: "Mapp parameters"
+  fr_fr: "Mapp paramètres"
+layout:
+  - 11_MAPP_Infos-projet-par-categories
+  - 12_MAPP_Infos-projet-par-selections
+  - -----
+  - 13_MAPP_Infos-Niveaux-par-categories
+  - 14_MAPP_Infos-Niveaux-par-selection
+  - -----
+  - 15_MAPP_Infos-Pieces-par-categories
+  - 16_MAPP_Infos-Pieces-par-selection
+  - -----
+  - 17_MAPP_Infos-Espaces-par-categories
+  - 18_MAPP_Infos-Espaces-par-selection
+  - -----
+  - 19_MAPP_Infos-Objets-par-categories
+  - 20_MAPP_Infos-Objets-par-selection
+icon: icon.png

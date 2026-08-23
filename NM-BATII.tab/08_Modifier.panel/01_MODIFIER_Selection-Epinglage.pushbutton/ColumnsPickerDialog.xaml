@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Colonnes à afficher"
+        Width="480" Height="620"
+        MinWidth="320" MinHeight="320"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner">
+
+  <Window.Resources>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}"/>
+    <Style TargetType="Button"    BasedOn="{StaticResource NMButtonStandard}"/>
+    <Style TargetType="TextBox"   BasedOn="{StaticResource NMTextBoxStandard}"/>
+    <Style TargetType="CheckBox"  BasedOn="{StaticResource NMCheckBoxStandard}">
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="4"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0" TextWrapping="Wrap" FontSize="12"
+               Text="Cochez les paramètres à afficher en colonnes dans le tableau. Les colonnes fixes (catégorie, famille, type, niveau, épinglage...) restent toujours affichées."/>
+
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Contient" VerticalAlignment="Center"/>
+      <TextBox Grid.Column="2" x:Name="txtSearch"/>
+    </Grid>
+
+    <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Ne contient pas" VerticalAlignment="Center"/>
+      <TextBox Grid.Column="2" x:Name="txtSearchExclude"/>
+    </Grid>
+
+    <!-- Trois colonnes égales et des marges identiques : les boutons ont
+         exactement la même taille quelle que soit la largeur de la fenêtre. -->
+    <Grid Grid.Row="6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnSelectAll"   Content="Tout sélectionner"   Margin="0" Padding="6,2"/>
+      <Button Grid.Column="2" x:Name="btnDeselectAll" Content="Tout désélectionner" Margin="0" Padding="6,2"/>
+      <Button Grid.Column="4" x:Name="btnInvert"      Content="Inverser"            Margin="0" Padding="6,2"/>
+    </Grid>
+
+    <Border Grid.Row="8" BorderThickness="1" BorderBrush="LightGray">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel x:Name="valuesPanel" Margin="4"/>
+      </ScrollViewer>
+    </Border>
+
+    <Grid Grid.Row="10">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnOk"
+              Content="▶  Appliquer"
+              Style="{DynamicResource NMButtonAppliquer}"
+              IsDefault="True"/>
+      <Button Grid.Column="2" x:Name="btnCancel"
+              Content="Annuler"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"/>
+    </Grid>
+  </Grid>
+</Window>

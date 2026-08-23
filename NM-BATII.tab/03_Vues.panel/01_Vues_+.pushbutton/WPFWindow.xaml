@@ -19,27 +19,31 @@
         <Style x:Key="NMButtonValideOnly" TargetType="Button" BasedOn="{StaticResource NMButtonValide}" />
         <Style TargetType="ComboBox" BasedOn="{StaticResource NMComboBoxStandard}" />
         <Style TargetType="ListBox" BasedOn="{StaticResource NMListBoxStandard}" />
+
+        <!-- Libelle de menu : colonne de gauche, aligne a droite contre son
+             menu. Sans NoWrap, la colonne Auto se laisserait comprimer et les
+             libelles passeraient sur deux lignes. -->
+        <Style x:Key="NMLabelMenu" TargetType="TextBlock"
+               BasedOn="{StaticResource NMTextBlockStandard}">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment"   Value="Center"/>
+            <Setter Property="TextWrapping"        Value="NoWrap"/>
+            <Setter Property="Margin"              Value="0,2,6,2"/>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/><!-- 0 : label famille vue -->
-            <RowDefinition Height="Auto"/><!-- 1 : cmbViewFamily -->
-            <RowDefinition Height="8"/>  <!-- 2 : spacer -->
-            <RowDefinition Height="Auto"/><!-- 3 : label type personnalise -->
-            <RowDefinition Height="Auto"/><!-- 4 : cmbVueTypePers -->
-            <RowDefinition Height="10"/> <!-- 5 : spacer -->
-            <RowDefinition Height="Auto"/><!-- 6 : label phases -->
-            <RowDefinition Height="Auto"/><!-- 7 : WrapPanel phases checkboxes -->
-            <RowDefinition Height="10"/> <!-- 8 : spacer -->
-            <RowDefinition Height="Auto"/><!-- 9 : label filtres -->
-            <RowDefinition Height="Auto"/><!-- 10 : WrapPanel filtres checkboxes -->
-            <RowDefinition Height="10"/> <!-- 11 : spacer -->
-            <RowDefinition Height="Auto"/><!-- 12 : label niveaux -->
-            <RowDefinition Height="*"/>  <!-- 13: ListBox niveaux -->
-            <RowDefinition Height="Auto"/><!-- 14: boutons sélection -->
-            <RowDefinition Height="20"/> <!-- 15: spacer -->
-            <RowDefinition Height="Auto"/><!-- 16: boutons Valider/Annuler -->
+            <RowDefinition Height="Auto"/><!-- 0 : menus (libelle + liste) -->
+            <RowDefinition Height="10"/> <!-- 1 : spacer -->
+            <RowDefinition Height="Auto"/><!-- 2 : label filtres -->
+            <RowDefinition Height="Auto"/><!-- 3 : WrapPanel filtres checkboxes -->
+            <RowDefinition Height="10"/> <!-- 4 : spacer -->
+            <RowDefinition Height="Auto"/><!-- 5 : label niveaux -->
+            <RowDefinition Height="*"/>  <!-- 6 : ListBox niveaux -->
+            <RowDefinition Height="Auto"/><!-- 7 : boutons sélection -->
+            <RowDefinition Height="20"/> <!-- 8 : spacer -->
+            <RowDefinition Height="Auto"/><!-- 9 : boutons Valider/Annuler -->
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -48,47 +52,80 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Famille de vue -->
-        <TextBlock Text="Famille de vue :"
-                   Grid.Row="0"
-                   Grid.Column="0" Grid.ColumnSpan="3"/>
+        <!-- CASCADE : Discipline -> Sous-discipline -> Famille de vue ->
+             Type personnalise. Chaque menu ne propose que des valeurs laissant
+             au moins un choix au suivant (voir _maj_* dans script.py).
+             Les disciplines offertes sont celles REELLEMENT employees par les
+             vues personnalisees, pas les ~100 lignes du referentiel de
+             l'onglet « Disciplines ».
+             Ces quatre menus sont editables : la frappe y filtre les valeurs
+             (dialogs/combo_recherche.py). Le cinquieme, « Phase(s) », est une
+             liste a COCHER (dialogs/combo_multi_cases.py) : plusieurs phases a
+             la fois, meme champ de recherche, Ctrl/Maj+Clic pour le cochage en
+             masse.
+             ShowOnDisabled : sans lui, l'infobulle expliquant
+             l'indisponibilite ne s'afficherait justement pas sur un menu
+             grise.
+             Libelle a gauche du menu et non au-dessus : cinq lignes empilees
+             sur deux hauteurs chacune faisaient une fenetre inutilement
+             longue. -->
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/><!-- Discipline -->
+                <RowDefinition Height="Auto"/><!-- Sous-discipline -->
+                <RowDefinition Height="Auto"/><!-- Famille de vue -->
+                <RowDefinition Height="Auto"/><!-- Type personnalisé -->
+                <RowDefinition Height="Auto"/><!-- Phase(s) -->
+            </Grid.RowDefinitions>
 
-        <ComboBox x:Name="cmbViewFamily"
-                  Grid.Row="1"
-                  Grid.Column="0" Grid.ColumnSpan="3"/>
+            <TextBlock Grid.Row="0" Grid.Column="0"
+                       Style="{StaticResource NMLabelMenu}"
+                       Text="Discipline :"/>
+            <ComboBox  Grid.Row="0" Grid.Column="1"
+                       x:Name="cmbDiscipline"
+                       ToolTipService.ShowOnDisabled="True"/>
 
-        <!-- Type personnalise -->
-        <TextBlock Text="Type personnalis&#233; :"
-                   Grid.Row="3"
-                   Grid.Column="0" Grid.ColumnSpan="3"/>
+            <!-- Sous-discipline : bornee a la discipline choisie -->
+            <TextBlock Grid.Row="1" Grid.Column="0"
+                       Style="{StaticResource NMLabelMenu}"
+                       Text="Sous-discipline :"/>
+            <ComboBox  Grid.Row="1" Grid.Column="1"
+                       x:Name="cmbSousDiscipline"
+                       ToolTipService.ShowOnDisabled="True"/>
 
-        <ComboBox x:Name="cmbVueTypePers"
-                  Grid.Row="4"
-                  Grid.Column="0" Grid.ColumnSpan="3"/>
+            <TextBlock Grid.Row="2" Grid.Column="0"
+                       Style="{StaticResource NMLabelMenu}"
+                       Text="Famille de vue :"/>
+            <ComboBox  Grid.Row="2" Grid.Column="1"
+                       x:Name="cmbViewFamily"
+                       ToolTipService.ShowOnDisabled="True"/>
 
-        <!-- Phases -->
-        <TextBlock Text="Cochez au moins une phase de vue &#224; cr&#233;er :"
-                   Grid.Row="6"
-                   Grid.Column="0" Grid.ColumnSpan="3"/>
+            <TextBlock Grid.Row="3" Grid.Column="0"
+                       Style="{StaticResource NMLabelMenu}"
+                       Text="Type personnalis&#233; :"/>
+            <ComboBox  Grid.Row="3" Grid.Column="1"
+                       x:Name="cmbVueTypePers"
+                       ToolTipService.ShowOnDisabled="True"/>
 
-        <Border Grid.Row="7"
-                Grid.Column="0" Grid.ColumnSpan="3"
-                BorderBrush="Gray"
-                BorderThickness="1"
-                CornerRadius="2"
-                Padding="6,4"
-                Margin="0,0,0,0">
-            <WrapPanel x:Name="pnlPhases"
-                       Orientation="Horizontal"/>
-        </Border>
+            <TextBlock Grid.Row="4" Grid.Column="0"
+                       Style="{StaticResource NMLabelMenu}"
+                       Text="Phase(s) :"/>
+            <ComboBox  Grid.Row="4" Grid.Column="1"
+                       x:Name="cmbPhases"
+                       ToolTipService.ShowOnDisabled="True"/>
+        </Grid>
 
         <!-- Filtres par type de niveau -->
         <TextBlock x:Name="txtLabelFiltres"
                    Text="Filtrer par type de niveau :"
-                   Grid.Row="9"
+                   Grid.Row="2"
                    Grid.Column="0" Grid.ColumnSpan="3"/>
 
-        <Border Grid.Row="10"
+        <Border Grid.Row="3"
                 Grid.Column="0" Grid.ColumnSpan="3"
                 BorderBrush="Gray"
                 BorderThickness="1"
@@ -102,14 +139,15 @@
         <!-- Liste des niveaux -->
         <TextBlock x:Name="txtLabelNiveaux"
                    Text="Cochez les niveaux b&#226;timent &#224; traiter :"
-                   Grid.Row="12"
-                   Grid.Column="0" Grid.ColumnSpan="3"/>
+                   Grid.Row="5"
+                   Grid.Column="0" Grid.ColumnSpan="3"
+                   ToolTipService.ShowOnDisabled="True"/>
 
         <ListBox
             x:Name="lstNiveaux"
             SelectionMode="Multiple"
             HorizontalContentAlignment="Stretch"
-            Grid.Row="13"
+            Grid.Row="6"
             Grid.Column="0" Grid.ColumnSpan="3">
 
             <ListBox.ItemTemplate>
@@ -126,21 +164,21 @@
         <!-- Boutons sélection -->
         <Button x:Name="btnSelectAll"
                 Content="S&#233;lectionner tout"
-                Grid.Row="14"
+                Grid.Row="7"
                 Grid.Column="0"/>
 
         <Button x:Name="btnDeselectAll"
                 Content="D&#233;s&#233;lectionner tout"
-                Grid.Row="14"
+                Grid.Row="7"
                 Grid.Column="1"/>
 
         <Button x:Name="btnInvert"
                 Content="Inverser"
-                Grid.Row="14"
+                Grid.Row="7"
                 Grid.Column="2"/>
 
         <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
-        <Grid Grid.Row="16" Grid.Column="0" Grid.ColumnSpan="3">
+        <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>

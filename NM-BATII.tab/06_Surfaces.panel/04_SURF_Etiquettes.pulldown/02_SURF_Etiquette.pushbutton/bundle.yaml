@@ -1,0 +1,23 @@
+title:
+  en_us: "Tag Area"
+  fr_fr: "Étiqueter une surface"
+tooltip:
+  en_us: "Native Revit tool: Tag Area
+         \nTags the selected area.
+         \nOpen an area plan view.
+         \nUse this tool to add tags to selected areas without a tag,
+         \nor use the Tag All tool.
+         \nSelect a tag family using the type selector.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Outil natif Revit : Etiqueter une surface
+         \nÉtiquette la surface sélectionnée.
+         \nOuvrez un plan de surface.
+         \nUtilisez cet outil pour ajouter des étiquettes aux surfaces
+         \nsélectionnées sans étiquette ou utilisez l'outil Tout étiqueter.
+         \nSélectionnez une famille d'étiquettes à l'aide du sélecteur de
+         \ntype.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-area-plan

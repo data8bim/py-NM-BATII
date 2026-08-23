@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pièces -> Objets (sélection)"
+        Width="980" Height="600"
+        MinWidth="760" MinHeight="460"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>  <!-- 0 : Bandeau info -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>  <!-- 2 : Barre d'outils du tableau -->
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>  <!-- 4 : En-tête du tableau -->
+      <RowDefinition Height="*"/>     <!-- 5 : Lignes de mappage -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>  <!-- 7 : Groupes boutons -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>  <!-- 9 : Boutons bas -->
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Bandeau informatif ════════════════════════════════════════════════
+         Explique comment utiliser ce script et pointe vers le script "par
+         catégories" pour créer/enregistrer des configurations.
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <Border Grid.Row="0"
+            Background="#EEF4FB" BorderBrush="#A8C8E8"
+            BorderThickness="1" CornerRadius="3" Padding="8,6">
+      <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#2C5F8A">
+        <Run FontWeight="SemiBold">Mode sélection :</Run>
+        <Run>cliquez sur</Run>
+        <Run FontWeight="SemiBold">⊕ Sélectionner</Run>
+        <Run>pour choisir des objets dans Revit, puis sur</Run>
+        <Run FontWeight="SemiBold">▶ Appliquer</Run>
+        <Run>pour transférer les valeurs. Chaque objet reçoit la valeur de</Run>
+        <Run FontWeight="SemiBold">la pièce qui le contient</Run>
+        <Run>(retrouvée via la propriété Room de l'objet).</Run>
+        <LineBreak/>
+        <Run>Les catégories choisies pour chaque mappage servent de</Run>
+        <Run FontWeight="SemiBold">filtre</Run>
+        <Run>sur les objets sélectionnés (aucune catégorie choisie = ce mappage n'est appliqué à aucun objet).</Run>
+        <Run>Les fichiers de configuration sont compatibles avec le script</Run>
+        <Run FontWeight="SemiBold">« Pièces → Objets par catégories ».</Run>
+      </TextBlock>
+    </Border>
+
+    <!-- ═══ Barre d'outils du tableau ═════════════════════════════════════════ -->
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="16"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnSelectAll" Content="Tout sélectionner"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Activer tous les mappages affichés"/>
+      <Button Grid.Column="2" x:Name="btnDeselectAll" Content="Tout désélectionner"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Désactiver tous les mappages affichés"/>
+      <Button Grid.Column="4" x:Name="btnInvert" Content="Inverser"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Inverser l'état actif/inactif des mappages affichés"/>
+      <Button Grid.Column="6" x:Name="btnResetAllFilters" Content="Réinitialiser tous les filtres"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Réafficher tous les mappages (filtres de colonnes remis à zéro)"/>
+      <TextBlock Grid.Column="8" x:Name="txtCount" VerticalAlignment="Center"
+                 HorizontalAlignment="Right" FontSize="12" Text="(0 / 0 mappage(s) actif(s))"/>
+    </Grid>
+
+    <!-- ═══ En-tête du tableau (rempli par lib/dialogs/mapping_table.py) ══════ -->
+    <Border Grid.Row="4" x:Name="headerHost"
+            Background="#F4F4F4" BorderBrush="Gainsboro"
+            BorderThickness="1" Padding="6,5"/>
+
+    <!-- ═══ Lignes de mappage ═════════════════════════════════════════════════
+         Barre de défilement toujours visible : sans cela son apparition
+         décalerait les lignes de ~17 px par rapport à l'en-tête.
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <ScrollViewer Grid.Row="5"
+                  VerticalScrollBarVisibility="Visible"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel x:Name="mappingsPanel"/>
+    </ScrollViewer>
+
+    <!-- ═══ Groupes de boutons ════════════════════════════════════════════════ -->
+    <Grid Grid.Row="7">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- GroupBox Mappages -->
+      <GroupBox Grid.Column="0" Header="Mappages">
+        <Grid Margin="4,4,4,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button Grid.Column="0" x:Name="btnAdd"
+                  Content="＋  Ajouter un mappage" Height="26"
+                  ToolTip="Ajouter une nouvelle règle de mappage"/>
+          <Button Grid.Column="2" x:Name="btnClearAll"
+                  Content="Supprimer tous les mappages" Height="26"
+                  ToolTip="Supprimer toutes les lignes de mappage"/>
+        </Grid>
+      </GroupBox>
+
+      <!-- GroupBox Configuration -->
+      <GroupBox Grid.Column="2" Header="Configuration">
+        <Grid Margin="4,4,4,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button Grid.Column="0" x:Name="btnLoad"
+                  Content="📂  Charger" Height="26"
+                  ToolTip="Charger un fichier de configuration JSON"/>
+          <Button Grid.Column="2" x:Name="btnSave"
+                  Content="💾  Enregistrer" Height="26"
+                  ToolTip="Enregistrer la configuration dans un fichier JSON"/>
+        </Grid>
+      </GroupBox>
+    </Grid>
+
+    <!-- ═══ Boutons bas ════════════════════════════════════════════════════════ -->
+    <Grid Grid.Row="9">
+      <!-- Pied a 4 elements : l'indicateur et "⊕ Selectionner" restent sur la
+           meme ligne. "▶ Appliquer" garde la largeur elastique de la reference,
+           "Fermer" sa largeur fixe de 130. -->
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>   <!-- 0 : indicateur de selection -->
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>    <!-- 2 : ⊕ Selectionner -->
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>      <!-- 4 : ▶ Appliquer -->
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>    <!-- 6 : Fermer -->
+      </Grid.ColumnDefinitions>
+
+      <!-- Statut de la sélection courante -->
+      <Border Grid.Column="0"
+              Background="#F0F6FF" BorderBrush="#B8D4F0"
+              BorderThickness="1" CornerRadius="3" Padding="8,0"
+              Height="30" VerticalAlignment="Center">
+        <TextBlock x:Name="txtSelCount"
+                   Text="Aucun objet sélectionné"
+                   FontSize="11" Foreground="#2C5F8A"
+                   VerticalAlignment="Center"/>
+      </Border>
+
+      <Button Grid.Column="2" x:Name="btnSelect"
+              Content="⊕  Sélectionner"
+              Style="{DynamicResource NMButtonSecondaire}"
+              VerticalAlignment="Center"
+              ToolTip="Minimise la fenêtre et vous permet de sélectionner des objets dans Revit (Multiple / Terminer / Annuler)"/>
+      <Button Grid.Column="4" x:Name="btnApply"
+              Content="▶  Appliquer"
+              Style="{DynamicResource NMButtonAppliquer}"
+              IsDefault="True"
+              ToolTip="Copier, pour chaque objet sélectionné, la valeur de LA PIECE qui le contient vers son paramètre cible"/>
+      <Button Grid.Column="6" x:Name="btnClose"
+              Content="Fermer"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"
+              VerticalAlignment="Center"/>
+    </Grid>
+
+  </Grid>
+</Window>

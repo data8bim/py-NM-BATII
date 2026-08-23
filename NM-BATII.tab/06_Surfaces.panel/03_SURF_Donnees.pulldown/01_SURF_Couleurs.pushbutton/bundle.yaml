@@ -1,0 +1,27 @@
+title:
+  en_us: "Colours"
+  fr_fr: "Couleurs"
+
+tooltip:
+  en_us: "Writes the project colour fill schemes from the extension reference.
+         \nRevit cannot carry colour scheme entries from one project to another: a view
+         \ntemplate holds the reference to the scheme, but the entries and their colours
+         \nbelong to the document. This button writes them.
+         \n\nColours come from Settings > Areas > Order and colours of styles, « Plan »
+         \ntarget, and are matched on the style key name.
+         \n\nEvery area scheme of the project is processed. Views are left untouched:
+         \nassigning a scheme to a view remains the templates' job.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+  fr_fr: "Écrit les choix de couleurs du projet depuis le référentiel de l'extension.
+         \nRevit ne sait pas transporter les couleurs d'un choix de couleurs d'un projet
+         \nà l'autre : un gabarit porte la référence au schéma, mais les entrées et leurs
+         \ncouleurs appartiennent au document. Ce bouton les écrit.
+         \n\nLes couleurs proviennent de Paramètres > Surfaces > Ordre et couleurs des
+         \nstyles, cible « Plan », et sont rapprochées par nom de clé de style.
+         \n\nTous les schémas de surfaces du projet sont traités. Les vues ne sont pas
+         \nmodifiées : affecter un schéma à une vue reste le rôle des gabarits.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

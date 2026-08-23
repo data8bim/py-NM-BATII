@@ -1,0 +1,20 @@
+title:
+  en_us: "Delete colour legends (bulk)"
+  fr_fr: "Supprimer les légendes de couleurs (en masse)"
+tooltip:
+  en_us: "Deletes the native « Colour Fill Legend » from area plans.
+         \nOnly legend types actually in place are listed.
+         \nScope: every area plan, by area scheme, or by picked views.
+         \nArea plans only: a legend sitting on a floor plan is never touched.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Supprime les « Légendes de motif/couleur » natives de Revit sur les
+         plans de surface.
+         \nSeuls les types de légende réellement en place sont proposés.
+         \nPortée : tous les plans de surface, par schéma de surface, ou par
+         vues sélectionnées.
+         \nPlans de surface uniquement : une légende posée sur un plan d'étage
+         n'est jamais touchée.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

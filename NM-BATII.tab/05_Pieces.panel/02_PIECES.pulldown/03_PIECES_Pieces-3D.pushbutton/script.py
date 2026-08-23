@@ -39,8 +39,8 @@ via le même système de convention de nommage que les scripts "01_Vues_+" et
 "01_Lier_CAO" (table "Nommage des vues", entrée "Vue 3D" ; table "Vues
 personnalisées", "Types de vues" et "Gabarits de vues"), à partir du type
 personnalisé désigné comme "Pièces 3D" dans NM-BATII.tab > 01_Parametres.panel
-> Paramètres > onglet "Vues" > table "Vues personnalisées" > bouton
-"Disponibilite..." > colonne "Pièces 3D".
+> Paramètres > onglet "Vues" > table "Vues personnalisées" > colonne
+"Disponibilité" > case "Pièces 3D".
 
 Si une combinaison de paramètres de pièces a été construite dans
 l'interface, et qu'une couleur a été choisie pour tout ou partie des
@@ -71,10 +71,19 @@ from System.Windows.Forms import ColorDialog, SaveFileDialog, OpenFileDialog, Di
 import System.Windows.Threading as Threading
 
 from dialogs.dialogs_styles_loader import load as _load_styles, show_alert, show_confirm
+import dialogs.selection_liste as _selection_liste_mod
+reload(_selection_liste_mod)
+from dialogs.selection_liste import choisir_dans_liste
 from utils.config_loader import load_config
-from utils.types_vues_personnalises import get_row_by_label, get_template_vars
+from utils.types_vues_personnalises import (get_row_by_label, get_template_vars,
+                                            get_type_for_vue_id)
+# reload() avant le from-import : sans lui, un simple « Recharger » pyRevit
+# laisse la version en cache de sys.modules et une fonction nouvellement
+# ajoutee au module partage reste introuvable (ImportError).
+import utils.vues_creation as _vues_creation_mod
+reload(_vues_creation_mod)
 from utils.vues_creation import (resolve_view_name, prepare_view_creation,
-                                 verifier_template)
+                                 verifier_template, apply_view_template)
 _load_styles()
 
 doc    = revit.doc
@@ -123,8 +132,14 @@ def _get_tvp_row_pieces_3d(cfg):
     """
     Retourne la ligne de types_vues_personnalises désignée comme type
     "Pièces 3D" (case cochée dans Paramètres > onglet Vues > table
-    "Vues personnalisées" > bouton "Disponibilite..." > colonne "Pièces 3D"),
+    "Vues personnalisées" > colonne "Disponibilité" > case "Pièces 3D"),
     ou None si aucune ligne n'est ainsi désignée.
+
+    En pratique c'est toujours la ligne système "PIECES 3D" (Ord. 0) : la
+    case est grisée sur toutes les autres lignes, et 01_Parametres assainit
+    la config au chargement comme à l'enregistrement. La recherche reste
+    faite par la case et non par le label, pour rester tolérante à une
+    config ancienne et ne pas coder le label en dur ici.
     """
     for entry in cfg.get(u'dispo_types_pers_lier_cao', []):
         if entry.get(u'pieces_3d', False):
@@ -156,10 +171,16 @@ def _get_vue_id_pieces_3d(cfg):
 # ─── Utilitaires pièces ──────────────────────────────────────────────────────
 def _elem_name(e):
     """
-    Contournement IronPython : Element.Name est implémenté en interface
-    explicite sur certains types, ce qui fait échouer l'accès direct e.Name.
+    Nom d'un Element Revit (contournement IronPython : Element.Name est
+    implémenté en interface explicite sur certains types, ce qui fait échouer
+    l'accès direct e.Name).
+
+    Délègue à l'implémentation PARTAGÉE. C'est ce même lecteur qui compare les
+    noms de gabarits dans apply_view_template : deux lectures différentes du
+    même nom finiraient par diverger — c'est précisément ce qui avait empêché
+    l'application du gabarit ici.
     """
-    return Element.Name.__get__(e)
+    return _vues_creation_mod.element_name(e)
 
 
 def _is_placed_room(room):
@@ -367,22 +388,41 @@ def trouver_vue_par_nom(doc, nom):
     return None
 
 
-def trouver_gabarit_par_nom(doc, nom):
-    vues = DB.FilteredElementCollector(doc).OfClass(DB.View).ToElements()
-    for v in vues:
-        if v.IsTemplate and _elem_name(v) == nom:
-            return v
-    return None
+# La recherche du gabarit n'est PAS refaite ici : elle passe par
+# utils.vues_creation.apply_view_template, exactement comme « Vues + » et
+# « Lier CAO ». Deux implementations divergentes du meme rapprochement de nom
+# finiraient par se contredire.
 
 
-def obtenir_ou_creer_vue_3d(doc, nom, phase, vft_id):
+def obtenir_ou_creer_vue_3d(doc, nom, phase, vft_id, gabarit_nom):
     """
-    Retourne (vue, creee) : réutilise la vue 3D existante portant ce nom, ou
-    en crée une nouvelle (vue 3D isométrique du type Revit résolu via le
-    système de convention de nommage — cf. utils.vues_creation.
-    prepare_view_creation). Lève une exception si un autre type de vue porte
-    déjà ce nom (noms de vues uniques dans tout le projet Revit). La phase de
-    la vue est réglée sur la phase choisie.
+    Retourne (vue, creee, etat_type, gabarit_applique) : réutilise la vue 3D
+    existante portant ce nom, ou en crée une nouvelle (vue 3D isométrique du
+    type Revit résolu via le système de convention de nommage — cf.
+    utils.vues_creation.prepare_view_creation). Lève une exception si un autre
+    type de vue porte déjà ce nom (noms de vues uniques dans tout le projet
+    Revit).
+
+    Applique, dans le même ordre que create_view_element() utilisé par
+    « Vues + » : la phase choisie, puis le gabarit de vue configuré — via la
+    fonction PARTAGEE utils.vues_creation.apply_view_template, pour que les
+    deux outils se comportent à l'identique.
+
+    etat_type vaut :
+      'cree'        vue neuve, créée directement au type configuré
+      'conforme'    vue réutilisée, déjà au type configuré
+      'reapplique'  vue réutilisée, son type a été corrigé
+      'impossible'  vue réutilisée d'un autre type, que Revit refuse de changer
+
+    Le type de vue configuré n'était appliqué qu'à la CREATION : modifier la
+    colonne « Types de vues » des paramètres restait donc sans effet tant que
+    la vue existait — seul le gabarit suivait. On le réapplique désormais sur
+    une vue réutilisée, et le cas 'impossible' est remonté à l'utilisateur
+    plutôt que d'échouer en silence (Revit n'expose pas de sélecteur de type
+    pour les vues ; la faisabilité dépend de ce qu'autorise IsValidType).
+
+    Le nom, lui, sert de clé de recherche : le changer produit une nouvelle
+    vue, l'ancienne subsiste.
     """
     vue_existante = trouver_vue_par_nom(doc, nom)
     if vue_existante is not None:
@@ -391,16 +431,31 @@ def obtenir_ou_creer_vue_3d(doc, nom, phase, vft_id):
                 u"Une vue non-3D nommée « {} » existe déjà dans le projet.".format(nom))
         vue = vue_existante
         vue_creee = False
+        etat_type = u'conforme'
+        if vft_id is not None and vue.GetTypeId() != vft_id:
+            etat_type = u'impossible'
+            # IsValidType avant ChangeTypeId : sans ce garde-fou, un type
+            # refuse leverait une exception qui ferait perdre tout le reste du
+            # traitement (les volumes sont deja crees a ce stade).
+            try:
+                if vue.IsValidType(vft_id):
+                    vue.ChangeTypeId(vft_id)
+                    etat_type = u'reapplique'
+            except Exception:
+                etat_type = u'impossible'
     else:
         vue = DB.View3D.CreateIsometric(doc, vft_id)
         vue.Name = nom
         vue_creee = True
+        etat_type = u'cree'
 
     p = vue.get_Parameter(DB.BuiltInParameter.VIEW_PHASE)
     if p is not None and not p.IsReadOnly:
         p.Set(phase.Id)
 
-    return vue, vue_creee
+    gabarit_applique = apply_view_template(doc, vue, gabarit_nom)
+
+    return vue, vue_creee, etat_type, gabarit_applique
 
 
 # ─── Colorisation : motif de remplissage plein ──────────────────────────────
@@ -818,9 +873,10 @@ try:
             )
         if tvp_row_p3d is None:
             _manque.append(
-                u"- onglet « Vues » > table « Vues personnalisées » > bouton "
-                u"« Disponibilite... » : cochez la colonne « Pièces 3D » pour "
-                u"le type souhaité."
+                u"- onglet « Vues » > table « Vues personnalisées » > ligne "
+                u"« PIECES 3D » (Ord. 0) > colonne « Disponibilité » : cochez "
+                u"« Pièces 3D ». Cette case est réservée à cette ligne, elle "
+                u"est grisée sur les autres."
             )
         show_alert(
             u"Pièces 3D",
@@ -875,12 +931,79 @@ try:
     # type de vue si celui-ci est absent du projet).
     vft_id_3d, nom_gabarit_3d = prepare_view_creation(
         doc, DB.ViewFamily.ThreeDimensional, tvp_row_p3d, _cfg_init, vue_id=vue_id_p3d)
+    # Nom du type configuré, pour le rapport uniquement.
+    _type_vue_3d_nom = get_type_for_vue_id(_cfg_init, tvp_row_p3d.get(u'label', u''),
+                                           vue_id_p3d)
+
     _vars_p3d = get_template_vars(tvp_row_p3d)
     _vars_p3d[u'phase'] = nom_phase
     nom_vue_3d = resolve_view_name(
         DB.ViewFamily.ThreeDimensional, _vars_p3d, _cfg_init, vue_id=vue_id_p3d).strip()
     if not nom_vue_3d:
         nom_vue_3d = nom_phase
+
+    # Gabarit configuré mais absent du projet : proposer une substitution.
+    # Fait AVANT la Transaction — ouvrir une fenêtre modale alors qu'une
+    # transaction Revit est ouverte laisserait le modèle verrouillé pendant
+    # tout le temps de réflexion de l'utilisateur.
+    _gabarit_substitue = False
+    _gabarit_configure = nom_gabarit_3d
+    if nom_gabarit_3d:
+        _tpls_projet = _vues_creation_mod.get_view_templates(doc)
+        _noms_tpl = [_elem_name(_t) for _t in _tpls_projet]
+        if nom_gabarit_3d not in _noms_tpl:
+            if not _noms_tpl:
+                show_alert(
+                    u"Pièces 3D — gabarit de vue introuvable",
+                    u"Le gabarit « {} » configuré dans 01_Paramètres > Vues > "
+                    u"Vues personnalisées > Gabarits de vues (ligne « Vue 3D ») "
+                    u"n'existe pas dans ce projet, qui ne contient d'ailleurs "
+                    u"aucun gabarit de vue.\n\n"
+                    u"La vue 3D sera créée sans gabarit.".format(nom_gabarit_3d))
+                nom_gabarit_3d = u''
+            else:
+                # Filtre de compatibilité, comme dans « Vues + » et
+                # « Lier CAO » : la comparaison porte sur le NOM
+                # D'ENUMERATION Revit, la traduction française n'intervient
+                # qu'à l'affichage.
+                _vt_attendu = _vues_creation_mod.VUE_ID_TO_VIEWTYPE.get(
+                    vue_id_p3d)
+                _lbl_fam = (_vues_creation_mod.libelle_view_type(
+                    _cfg_init, _vt_attendu) if _vt_attendu else u'')
+                # Libellés français de « Nommage des vues » plutôt que les
+                # noms d'énumération Revit (ThreeD, DraftingView…).
+                _fr = lambda _lst: [
+                    (_elem_name(_t),
+                     _vues_creation_mod.libelle_view_type(
+                         _cfg_init, _t.ViewType.ToString()))
+                    for _t in _lst]
+                _compat = ([_t for _t in _tpls_projet
+                            if _t.ViewType.ToString() == _vt_attendu]
+                           if _vt_attendu else None)
+                _choix_tpl = choisir_dans_liste(
+                    titre=u"Gabarit de vue introuvable — Pièces 3D",
+                    description=(
+                        u"Sélectionnez le gabarit à appliquer à la vue 3D "
+                        u"« {} », ou annulez pour la créer sans gabarit.".format(
+                            nom_vue_3d)),
+                    note=(u"Le gabarit « {} » configuré dans 01_Paramètres > "
+                          u"Vues > Vues personnalisées > Gabarits de vues "
+                          u"(ligne « Vue 3D ») n'existe pas dans ce "
+                          u"projet.".format(nom_gabarit_3d)),
+                    entete_nom=u"Gabarit de vue",
+                    entete_info=u"Type de vue",
+                    items_tous=_fr(_tpls_projet),
+                    items_compat=(_fr(_compat) if _compat is not None
+                                  else None),
+                    libelle_compat=(
+                        u"Uniquement les gabarits compatibles avec "
+                        u"« {} »".format(_lbl_fam)),
+                    valeur_courante=u'')
+                # Substitution valable pour CETTE exécution seulement : la
+                # configuration n'est pas réécrite ici (seul 01_Paramètres
+                # écrit config.json). Le rapport final le rappelle.
+                nom_gabarit_3d = _choix_tpl or u''
+                _gabarit_substitue = bool(_choix_tpl)
 
     n_ok = 0
     n_skip = 0
@@ -892,6 +1015,7 @@ try:
     vue_3d = None
     vue_creee = False
     gabarit_applique = False
+    etat_type = None
     erreur_vue = None
 
     with revit.Transaction(u"NM-BATII : Pièces 3D"):
@@ -918,11 +1042,9 @@ try:
                 pieces_ignorees.append(room_label(room))
 
         try:
-            vue_3d, vue_creee = obtenir_ou_creer_vue_3d(doc, nom_vue_3d, phase, vft_id_3d)
-            gabarit = trouver_gabarit_par_nom(doc, nom_gabarit_3d)
-            if gabarit is not None:
-                vue_3d.ViewTemplateId = gabarit.Id
-                gabarit_applique = True
+            vue_3d, vue_creee, etat_type, gabarit_applique = (
+                obtenir_ou_creer_vue_3d(doc, nom_vue_3d, phase, vft_id_3d,
+                                        nom_gabarit_3d))
         except Exception as e:
             erreur_vue = str(e)
 
@@ -944,6 +1066,45 @@ try:
                 n_colorisees += 1
 
     if vue_3d is not None:
+        # Gabarit de substitution retenu : rappeler que le remplacement ne vaut
+        # que pour cette execution, la configuration n'ayant pas ete reecrite.
+        if _gabarit_substitue and gabarit_applique:
+            show_alert(
+                u"Pièces 3D — gabarit de substitution appliqué",
+                u"Le gabarit « {} » a été appliqué à la vue « {} » à la place "
+                u"de « {} », introuvable dans ce projet.\n\n"
+                u"Ce remplacement vaut pour cette exécution seulement. Pour le "
+                u"rendre permanent, corrigez-le dans 01_Paramètres > Vues > "
+                u"Vues personnalisées > Gabarits de vues, ligne "
+                u"« Vue 3D ».".format(
+                    nom_gabarit_3d, nom_vue_3d, _gabarit_configure))
+        # Gabarit demande mais refuse par Revit (cas residuel : le gabarit
+        # existe mais ne s'applique pas a une vue 3D). Le log est muet quand
+        # activer_logs_scripts est a false, d'ou la boite de message.
+        elif nom_gabarit_3d and not gabarit_applique:
+            show_alert(
+                u"Pièces 3D — gabarit de vue non appliqué",
+                u"Le gabarit « {} » existe dans le projet mais Revit a refusé "
+                u"de l'appliquer à la vue « {} ».\n\n"
+                u"Vérifiez qu'il s'agit bien d'un gabarit de vue 3D : un "
+                u"gabarit ne s'applique qu'aux vues de sa propre famille."
+                .format(nom_gabarit_3d, nom_vue_3d))
+        # Le type configure n'a pas pu etre pose sur la vue existante : c'est
+        # actionnable par l'utilisateur (supprimer la vue), donc visible meme
+        # quand les logs de script sont desactives.
+        if etat_type == u'impossible':
+            show_alert(
+                u"Pièces 3D — type de vue non appliqué",
+                u"La vue « {} » existe déjà et n'est pas du type de vue "
+                u"« {} » configuré dans 01_Paramètres > Vues > Vues "
+                u"personnalisées > Types de vues.\n\n"
+                u"Revit ne permet pas de changer le type d'une vue existante. "
+                u"Supprimez cette vue puis relancez « Pièces 3D » : elle sera "
+                u"recréée au bon type.\n\n"
+                u"Le reste de la configuration (nom, gabarit, phase) a bien "
+                u"été appliqué.".format(
+                    nom_vue_3d,
+                    _type_vue_3d_nom or u"(type par défaut de la famille)"))
         try:
             uidoc.ActiveView = vue_3d
         except Exception:
@@ -978,6 +1139,20 @@ try:
     else:
         _log(u"- Vue « {} » : **{}**".format(
             nom_vue_3d, u"créée" if vue_creee else u"réutilisée"))
+        _nom_type_aff = _type_vue_3d_nom or u"(type par défaut de la famille)"
+        if etat_type == u'cree':
+            _log(u"- Type de vue « {} » appliqué.".format(_nom_type_aff))
+        elif etat_type == u'conforme':
+            _log(u"- Type de vue « {} » : déjà conforme.".format(_nom_type_aff))
+        elif etat_type == u'reapplique':
+            _log(u"- Type de vue « {} » réappliqué à la vue existante.".format(
+                _nom_type_aff))
+        elif etat_type == u'impossible':
+            _log(
+                u"- **Avertissement** : la vue existante n'est pas du type "
+                u"« {} » et Revit refuse d'en changer le type après coup. "
+                u"Supprimez la vue « {} » puis relancez : elle sera recréée "
+                u"au bon type.".format(_nom_type_aff, nom_vue_3d))
         if gabarit_applique:
             _log(u"- Gabarit « {} » appliqué.".format(nom_gabarit_3d))
         elif not nom_gabarit_3d:

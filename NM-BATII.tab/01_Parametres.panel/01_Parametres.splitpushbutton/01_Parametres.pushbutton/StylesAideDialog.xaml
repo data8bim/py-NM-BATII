@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aide de « Styles de surfaces ».
+
+     Fenetre NON MODALE, ouverte au flanc droit du dialogue et possedee par lui
+     (Owner). Deux consequences recherchees :
+       - ShowDialog() desactive les autres fenetres de l'application, mais pas
+         celles ouvertes ensuite ni celles qu'il possede : l'aide reste donc
+         utilisable et toujours au-dessus du dialogue ;
+       - WPF ferme les fenetres possedees avec leur proprietaire, l'aide
+         disparait donc avec le dialogue sans qu'on ait a y penser.
+
+     Le texte vient de _AIDE_ORDRE (script.py) et passe par _set_rich_text :
+     les segments encadres de '**' s'affichent en gras. Il n'est pas ecrit
+     ici — un seul endroit a corriger quand l'aide evolue.
+
+     La hauteur est imposee en Python, calee sur celle du dialogue ; seule la
+     largeur est fixee ici. -->
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Aide — Styles de surfaces"
+  Width="430" Height="820"
+  MinWidth="320" MinHeight="240"
+  ShowInTaskbar="False"
+  WindowStartupLocation="Manual"
+  FontFamily="Segoe UI"
+  FontSize="13">
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Meme encadre bleu que les messages de l'extension (AlertWindow.xaml),
+         pour que l'aide se lise comme une information et non comme un
+         formulaire de plus. -->
+    <Border Grid.Row="0"
+            BorderBrush="DodgerBlue"
+            BorderThickness="1"
+            CornerRadius="4"
+            Padding="14,12">
+      <ScrollViewer VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+        <TextBlock x:Name="txtAide"
+                   TextWrapping="Wrap"
+                   FontSize="13"
+                   Foreground="#333333"
+                   TextAlignment="Left"/>
+      </ScrollViewer>
+    </Border>
+
+    <Button x:Name="btnFermer"
+            Grid.Row="2"
+            Content="Fermer"
+            HorizontalAlignment="Stretch"
+            IsDefault="True"
+            IsCancel="True"
+            Style="{DynamicResource NMButtonAppliquer}"/>
+  </Grid>
+</Window>

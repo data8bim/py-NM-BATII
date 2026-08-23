@@ -34,6 +34,8 @@ toujours par label, jamais par valeur de type.
 """
 
 from Autodesk.Revit.DB import (
+    AreaScheme,
+    Element,
     View,
     View3D,
     ViewPlan,
@@ -255,6 +257,7 @@ def substituer_variables(texte, vars_dict):
 # Utilisé uniquement comme fallback quand vue_id n'est pas fourni explicitement.
 _FAMILY_TEMPLATE_ID = {
     ViewFamily.FloorPlan:      u'vue-plan',
+    ViewFamily.AreaPlan:       u'vue-surface',
     ViewFamily.CeilingPlan:    u'vue-plaf',
     ViewFamily.StructuralPlan: u'vue-structure',
     ViewFamily.Section:        u'vue-coupe',
@@ -267,6 +270,109 @@ if _vf_legend is not None:
 _vf_threed = getattr(ViewFamily, u'ThreeDimensional', None)
 if _vf_threed is not None:
     _FAMILY_TEMPLATE_ID[_vf_threed] = u'vue-3d'
+
+
+# ---------------------------------------------------------------------------
+# Libelles francais des enumerations Revit
+# ---------------------------------------------------------------------------
+# Les enumerations .NET sont en anglais (ViewType.ThreeD, ViewFamily.Drafting).
+# Les afficher telles quelles dans un dialogue jure avec le reste de
+# l'extension. On les traduit via l'identifiant de famille NM-BATII, ce qui
+# fait reprendre LES LIBELLES DE L'UTILISATEUR (table « Nommage des vues ») :
+# renommer une ligne la-bas se repercute ici, sans table de traduction a tenir.
+#
+# Attention aux noms qui different entre les deux enumerations pour une meme
+# famille : Structure = ViewFamily.StructuralPlan mais ViewType.EngineeringPlan,
+# 3D = ThreeDimensional / ThreeD, dessin = Drafting / DraftingView.
+
+VIEWTYPE_TO_VUE_ID = {
+    u'FloorPlan':       u'vue-plan',
+    u'AreaPlan':        u'vue-surface',
+    u'CeilingPlan':     u'vue-plaf',
+    u'EngineeringPlan': u'vue-structure',
+    u'Section':         u'vue-coupe',
+    u'Elevation':       u'vue-elevation',
+    u'ThreeD':          u'vue-3d',
+    u'DraftingView':    u'vue-dessin',
+    u'Legend':          u'vue-legende',
+    u'Schedule':        u'vue-nomenclature',
+}
+
+VIEWFAMILY_TO_VUE_ID = {
+    u'FloorPlan':        u'vue-plan',
+    u'AreaPlan':         u'vue-surface',
+    u'CeilingPlan':      u'vue-plaf',
+    u'StructuralPlan':   u'vue-structure',
+    u'Section':          u'vue-coupe',
+    u'Elevation':        u'vue-elevation',
+    u'ThreeDimensional': u'vue-3d',
+    u'Drafting':         u'vue-dessin',
+    u'Legend':           u'vue-legende',
+    u'Schedule':         u'vue-nomenclature',
+}
+
+# Correspondances inverses : vue_id -> nom d'enumeration. Servent a ne
+# proposer que les gabarits / types applicables a une famille donnee. Derivees
+# des tables ci-dessus (bijectives) plutot que reecrites : deux tables tenues
+# a la main finiraient par diverger.
+VUE_ID_TO_VIEWTYPE   = dict((v, k) for k, v in VIEWTYPE_TO_VUE_ID.items())
+VUE_ID_TO_VIEWFAMILY = dict((v, k) for k, v in VIEWFAMILY_TO_VUE_ID.items())
+
+# Familles sans equivalent dans « Nommage des vues » : un projet peut malgre
+# tout contenir des gabarits pour elles. Traduites en dur plutot que masquees.
+_LIBELLES_HORS_NOMMAGE = {
+    u'DrawingSheet':            u'Feuille',
+    u'Sheet':                   u'Feuille',
+    u'Detail':                  u'Vue de détail',
+    u'Walkthrough':             u'Visite virtuelle',
+    u'Rendering':               u'Rendu',
+    u'ImageView':               u'Image',
+    u'PanelSchedule':           u'Nomenclature de tableau',
+    u'ColumnSchedule':          u'Nomenclature de poteaux',
+    u'GraphicalColumnSchedule': u'Nomenclature de poteaux',
+    u'CostReport':              u'Rapport de coûts',
+    u'LoadsReport':             u'Rapport de charges',
+    u'Undefined':               u'(indéfini)',
+    u'Invalid':                 u'(invalide)',
+    u'Internal':                u'(interne)',
+}
+
+
+def _libelle_depuis_vue_id(cfg, vue_id):
+    """Libelle de la ligne `vue_id` dans conventions_nommage.nommage_vues."""
+    if not vue_id:
+        return u''
+    _nommage = (cfg.get(u'conventions_nommage') or {}).get(u'nommage_vues', [])
+    for _entry in _nommage:
+        if _entry.get(u'id') == vue_id:
+            return _entry.get(u'label', u'') or u''
+    return u''
+
+
+def _libelle_enum(cfg, nom_enum, table):
+    """
+    Traduit un nom d'enumeration Revit. Repli en cascade :
+    libelle utilisateur -> libelle interne -> nom d'origine.
+
+    Ne masque JAMAIS une valeur inconnue : mieux vaut un nom anglais qu'une
+    ligne vide dans une liste de choix.
+    """
+    if not nom_enum:
+        return u''
+    _lib = _libelle_depuis_vue_id(cfg, table.get(nom_enum))
+    if _lib:
+        return _lib
+    return _LIBELLES_HORS_NOMMAGE.get(nom_enum, nom_enum)
+
+
+def libelle_view_type(cfg, nom_enum):
+    """Libelle francais d'un Autodesk.Revit.DB.ViewType (ex. 'ThreeD')."""
+    return _libelle_enum(cfg, nom_enum, VIEWTYPE_TO_VUE_ID)
+
+
+def libelle_view_family(cfg, nom_enum):
+    """Libelle francais d'un Autodesk.Revit.DB.ViewFamily (ex. 'Drafting')."""
+    return _libelle_enum(cfg, nom_enum, VIEWFAMILY_TO_VUE_ID)
 
 
 def resolve_view_name(fam_enum, vars_dict, cfg, vue_id=None):
@@ -321,12 +427,16 @@ def resolve_view_name(fam_enum, vars_dict, cfg, vue_id=None):
     return _SEP.join(_resolved).strip()
 
 
-def _get_gabarit_name(cfg, tvp_row, fam_enum, vue_id=None):
+def get_gabarit_name(cfg, tvp_row, fam_enum, vue_id=None):
     """
     Retourne le nom du gabarit de vue Revit a appliquer, ou '' si aucun.
 
     Recherche par label du tvp_row dans cfg['gabarits_vues'].
     vue_id : identifiant explicite (ex. 'vue-surface'). Prioritaire sur _FAMILY_TEMPLATE_ID.
+
+    Publique : les scripts en ont besoin AVANT d'ouvrir leur transaction, pour
+    verifier que le gabarit existe dans le projet et proposer une substitution
+    le cas echeant.
     """
     tvp_label = (tvp_row or {}).get(u'label', u'')
     if not tvp_label:
@@ -340,24 +450,50 @@ def _get_gabarit_name(cfg, tvp_row, fam_enum, vue_id=None):
     return u''
 
 
-def _apply_view_template(doc, view, template_name):
+def get_view_templates(doc):
+    """Retourne la liste des gabarits de vues du projet, tries par nom."""
+    _tpls = [v for v in FilteredElementCollector(doc).OfClass(View)
+             if v.IsTemplate]
+    return sorted(_tpls, key=lambda _v: (_element_name(_v) or u'').lower())
+
+
+def get_view_template_names(doc):
+    """
+    Noms des gabarits de vues du projet, tries.
+
+    Meme lecture que apply_view_template : un nom propose par le selecteur de
+    01_Parametres ne peut donc pas etre refuse a l'application, et le message
+    d'erreur liste exactement ce que la recherche compare.
+    """
+    return [_element_name(_v) for _v in get_view_templates(doc)]
+
+
+def apply_view_template(doc, view, template_name):
     """
     Applique le gabarit de vue 'template_name' a 'view'.
-    Si le gabarit est introuvable, ne fait rien (pas d'exception).
     Doit etre appele a l'interieur d'une Transaction ouverte.
+
+    Retourne True si le gabarit a ete applique, False sinon (nom vide, gabarit
+    absent du projet, ou refus de Revit). Ne leve jamais.
+
+    Le retour compte : un gabarit mal nomme est sans effet visible sur la vue,
+    l'appelant doit pouvoir le signaler plutot que de laisser croire que tout
+    s'est bien passe.
     """
     if not template_name:
-        return
-    templates = [
-        v for v in FilteredElementCollector(doc).OfClass(View)
-        if v.IsTemplate and v.Name == template_name
-    ]
-    if not templates:
-        return
-    try:
-        view.ViewTemplateId = templates[0].Id
-    except Exception:
-        pass
+        return False
+    for _v in get_view_templates(doc):
+        if _element_name(_v) == template_name:
+            try:
+                view.ViewTemplateId = _v.Id
+                return True
+            except Exception:
+                return False
+    return False
+
+
+# Ancien nom prive, conserve : d'autres scripts peuvent l'importer.
+_apply_view_template = apply_view_template
 
 
 def _apply_view_phase(view, phase):
@@ -387,6 +523,98 @@ def _get_vft_name(vft):
     if p2:
         return p2.AsString()
     return None
+
+
+def element_name(elem):
+    """
+    Nom d'un Element Revit, robuste sous IronPython.
+    Element.Name est implemente en interface explicite sur certains types :
+    l'acces direct elem.Name y leve AttributeError.
+
+    Publique a dessein : c'est ce lecteur que les scripts doivent utiliser pour
+    comparer un nom de gabarit a celui de la configuration. Deux lectures
+    differentes du meme nom finiraient par diverger.
+    """
+    try:
+        return Element.Name.__get__(elem)
+    except Exception:
+        try:
+            return elem.Name
+        except Exception:
+            return u''
+
+
+# Ancien nom prive, conserve pour les appels internes existants.
+_element_name = element_name
+
+
+def get_area_schemes(doc):
+    """Retourne la liste des AreaScheme du projet, triee par nom."""
+    _schemes = list(FilteredElementCollector(doc).OfClass(AreaScheme))
+    return sorted(_schemes, key=lambda _s: (_element_name(_s) or u'').lower())
+
+
+def get_area_scheme_names(doc):
+    """
+    Noms des schemas de surface du projet, tries.
+
+    Destine au selecteur de 01_Parametres (colonne "Types de vues", famille
+    "Plan de surface"). Passe imperativement par ici et non par une lecture
+    maison : c'est le meme _element_name que _get_area_scheme_id utilise pour
+    retrouver le schema a la creation. Les deux ne peuvent donc pas diverger,
+    et le selecteur ne peut pas proposer un nom que la creation refuserait.
+    """
+    return [_element_name(_s) for _s in get_area_schemes(doc)]
+
+
+def _get_area_scheme_id(doc, scheme_name):
+    """
+    Retourne l'ElementId du schema de surface nomme `scheme_name`.
+
+    Un plan de surface Revit n'a pas de ViewFamilyType librement nommable :
+    son type EST son schema de surface, et ViewPlan.CreateAreaPlan prend
+    directement l'ElementId de ce schema. Les schemas se definissent dans
+    Revit > Architecture > Calculs des surfaces et des volumes > Schemas de
+    surface ; ils ne sont JAMAIS crees par les scripts NM-BATII (creer un
+    schema fantome pollue durablement le modele et fausse les nomenclatures).
+
+    Leve RuntimeError, avec la liste des schemas reellement presents, si le nom
+    est vide ou introuvable — l'appelant remonte deja ce message a
+    l'utilisateur (prepare_view_creation).
+    """
+    _schemes = get_area_schemes(doc)
+    _noms    = [_element_name(_s) for _s in _schemes]
+
+    if not _schemes:
+        raise RuntimeError(
+            u"Aucun schema de surface n'existe dans ce projet.\n\n"
+            u"Creez-en un dans Revit : Architecture > Calculs des surfaces et "
+            u"des volumes > Schemas de surface, puis relancez.")
+
+    _dispo = u"\n".join(u"  • {}".format(_n) for _n in _noms)
+
+    if not (scheme_name or u'').strip():
+        raise RuntimeError(
+            u"Aucun schema de surface n'est configure pour la famille "
+            u"« Plan de surface » de ce type personnalise.\n\n"
+            u"Renseignez-le dans 01_Parametres > Vues > table « Vues "
+            u"personnalisees », colonne « Types de vues » > « Plan de "
+            u"surface ».\n\n"
+            u"Schemas disponibles dans ce projet :\n{}".format(_dispo))
+
+    _cible = scheme_name.strip().lower()
+    for _s, _n in zip(_schemes, _noms):
+        if (_n or u'').strip().lower() == _cible:
+            return _s.Id
+
+    raise RuntimeError(
+        u"Le schema de surface « {} » configure pour la famille « Plan de "
+        u"surface » n'existe pas dans ce projet.\n\n"
+        u"Creez-le dans Revit (Architecture > Calculs des surfaces et des "
+        u"volumes > Schemas de surface) ou corrigez le nom dans "
+        u"01_Parametres > Vues > table « Vues personnalisees », colonne "
+        u"« Types de vues ».\n\n"
+        u"Schemas disponibles dans ce projet :\n{}".format(scheme_name, _dispo))
 
 
 def get_or_create_vft(doc, fam_enum, custom_type_name):
@@ -427,6 +655,10 @@ def _get_vft_id_for_candidate(doc, fam_enum, tvp_row, cfg, _vft_cache, vue_id=No
     Retourne l'ElementId du VFT pour la combinaison (tvp_label, fam_enum).
     Utilise un cache dict {type_name: vft_id} pour éviter les doublons.
     vue_id : identifiant explicite (ex. 'vue-surface'). Prioritaire sur _FAMILY_TEMPLATE_ID.
+
+    Cas AreaPlan : retourne l'ElementId du SCHEMA DE SURFACE, seul « type »
+    qu'accepte ViewPlan.CreateAreaPlan (voir _get_area_scheme_id). Le schema
+    n'est jamais cree : un nom absent ou introuvable leve RuntimeError.
     """
     tvp_label = (tvp_row or {}).get(u'label', u'')
     vue_id    = vue_id if vue_id else (_FAMILY_TEMPLATE_ID.get(fam_enum) or u'')
@@ -436,20 +668,29 @@ def _get_vft_id_for_candidate(doc, fam_enum, tvp_row, cfg, _vft_cache, vue_id=No
     if cache_key in _vft_cache:
         return _vft_cache[cache_key]
 
-    vft_id = get_or_create_vft(doc, fam_enum, type_name)
+    if fam_enum == ViewFamily.AreaPlan:
+        vft_id = _get_area_scheme_id(doc, type_name)
+    else:
+        vft_id = get_or_create_vft(doc, fam_enum, type_name)
     _vft_cache[cache_key] = vft_id
     return vft_id
 
 
 def prepare_view_creation(doc, fam_enum, tvp_row, cfg, vue_id=None):
     """
-    Resout le ViewFamilyType et le gabarit pour la creation de vues.
+    Resout le type Revit et le gabarit pour la creation de vues.
     Cree le VFT par duplication si absent du projet.
-    Retourne (vft_id, gabarit_name) ou leve RuntimeError si VFT introuvable.
+    Retourne (type_id, gabarit_name) ou leve RuntimeError si le type est
+    introuvable.
+
+    type_id est l'ElementId a passer tel quel a create_view_element :
+      - ViewFamilyType pour toutes les familles ;
+      - SCHEMA DE SURFACE (AreaScheme) pour ViewFamily.AreaPlan, qui n'a pas
+        de VFT nommable. Aucun schema n'est cree automatiquement.
     """
     _vft_cache = {}
     vft_id = _get_vft_id_for_candidate(doc, fam_enum, tvp_row, cfg, _vft_cache, vue_id=vue_id)
-    gabarit = _get_gabarit_name(cfg, tvp_row, fam_enum, vue_id=vue_id)
+    gabarit = get_gabarit_name(cfg, tvp_row, fam_enum, vue_id=vue_id)
     return vft_id, gabarit
 
 
@@ -459,6 +700,10 @@ def create_view_element(doc, vue_name, lvl_nm, fam_enum, vft_id, levels,
     Cree UNE vue Revit et retourne l'objet View.
     DOIT etre appelee a l'interieur d'une Transaction ouverte.
     Retourne None si impossible (niveau introuvable, legende sans source, etc.).
+
+    vft_id : ElementId retourne par prepare_view_creation. C'est un
+             ViewFamilyType pour toutes les familles, SAUF ViewFamily.AreaPlan
+             ou c'est l'ElementId du schema de surface (voir prepare_view_creation).
 
     phase : DB.Phase optionnel. Si fourni, affecte au parametre Phase de la
             vue creee (BuiltInParameter.VIEW_PHASE). Sans effet sur les
@@ -484,7 +729,13 @@ def create_view_element(doc, vue_name, lvl_nm, fam_enum, vft_id, levels,
         lvl = levels.get(lvl_nm)
         if not lvl:
             return None
-        view = ViewPlan.Create(doc, vft_id, lvl.Id)
+        if fam_enum == ViewFamily.AreaPlan:
+            # Un plan de surface se cree depuis son schema de surface, pas
+            # depuis un ViewFamilyType : ViewPlan.Create() produirait un
+            # PLAN D'ETAGE (cause du bug historique).
+            view = ViewPlan.CreateAreaPlan(doc, vft_id, lvl.Id)
+        else:
+            view = ViewPlan.Create(doc, vft_id, lvl.Id)
     # Nommer la vue — si le nom est deja pris (autre famille), ajouter un suffixe numerote.
     _name_set = False
     for _attempt, _candidate in enumerate(
@@ -502,13 +753,14 @@ def create_view_element(doc, vue_name, lvl_nm, fam_enum, vft_id, levels,
             pass
         return None
     _apply_view_phase(view, phase)
-    _apply_view_template(doc, view, gabarit_name)
+    apply_view_template(doc, view, gabarit_name)
     return view
 
 
 def create_views_from_candidates(doc, candidates, selected_files, levels,
                                   fam_enum, tvp_row, cfg,
-                                  do_vue_niveau=False, vue_id=None, warnings=None):
+                                  do_vue_niveau=False, vue_id=None, warnings=None,
+                                  gabarit_name=None):
     """
     Cree les vues Revit manquantes pour les fichiers candidats selectionnes.
 
@@ -526,9 +778,17 @@ def create_views_from_candidates(doc, candidates, selected_files, levels,
     vue_id         : identifiant de la famille de vue dans nommage_vues (ex. 'vue-surface').
                      Permet de distinguer vue-plan et vue-surface (meme ViewFamily.FloorPlan).
                      Si None, derive depuis _FAMILY_TEMPLATE_ID.
+    gabarit_name   : nom de gabarit a appliquer, imposé par l'appelant.
+                     None = resolution normale depuis cfg. Sert au cas où le
+                     script a déjà proposé une SUBSTITUTION à l'utilisateur
+                     (gabarit configuré absent du projet) : sans cela, la
+                     resolution interne réimposerait le nom erroné.
+                     Chaîne vide = aucun gabarit, explicitement.
 
     Le ViewFamilyType est résolu depuis cfg['types_vues'][label][vue_id].
-    Si absent du projet, il est créé par duplication.
+    Si absent du projet, il est créé par duplication — sauf pour
+    ViewFamily.AreaPlan, où la valeur configurée est un nom de SCHEMA DE
+    SURFACE qui doit déjà exister (aucune création automatique).
     Le gabarit de vue est résolu depuis cfg['gabarits_vues'][label][vue_id].
 
     Retourne la liste des noms de vues effectivement creees.
@@ -558,8 +818,15 @@ def create_views_from_candidates(doc, candidates, selected_files, levels,
     # de creation de vues — Revit interdit les transactions imbriquees.
     try:
         vft_id, _gabarit_name = prepare_view_creation(doc, fam_enum, tvp_row, cfg, vue_id=vue_id)
-    except RuntimeError:
+    except RuntimeError as _e_type:
+        # Ne pas echouer en silence : sans ce message, un schema de surface
+        # absent se traduirait par « 0 vue creee » sans explication.
+        if warnings is not None:
+            warnings.append(unicode(_e_type))
         return []
+    # L'appelant a le dernier mot : il a pu proposer une substitution.
+    if gabarit_name is not None:
+        _gabarit_name = gabarit_name
 
     created = []
     seen    = set()

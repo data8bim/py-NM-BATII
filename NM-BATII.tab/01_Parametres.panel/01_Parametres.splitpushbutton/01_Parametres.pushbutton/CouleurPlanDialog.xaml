@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Édition de l'apparence d'un style dans le choix de couleurs de Revit.
+
+     Ouvert en cliquant la pastille d'une ligne, dans « Styles de
+     surfaces ». Couleur ET motif de remplissage y sont réglés
+     ensemble : c'est le couple que Revit applique à une entrée, les séparer
+     obligerait à passer deux fois sur chaque style.
+
+     Les pastilles de teintes sont créées en Python depuis _PALETTE_COULEURS,
+     et la liste des motifs est lue dans le document ouvert. -->
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Couleur de surface"
+  Width="430" Height="400"
+  ResizeMode="NoResize"
+  WindowStartupLocation="CenterOwner">
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 style concerné -->
+      <RowDefinition Height="Auto"/>   <!-- 1 aperçu -->
+      <RowDefinition Height="Auto"/>   <!-- 2 teintes -->
+      <RowDefinition Height="Auto"/>   <!-- 3 couleur libre / aucune -->
+      <RowDefinition Height="Auto"/>   <!-- 4 motif de remplissage -->
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>   <!-- 6 pied -->
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0" x:Name="txtStyle"
+               FontWeight="SemiBold" TextWrapping="Wrap"
+               Margin="0,0,0,10"/>
+
+    <Border Grid.Row="1" x:Name="brdApercu"
+            Height="44" CornerRadius="4"
+            BorderBrush="#AAAAAA" BorderThickness="1"
+            Margin="0,0,0,10"/>
+
+    <WrapPanel Grid.Row="2" x:Name="pnlCouleurs" Margin="0,0,0,8"/>
+
+    <Grid Grid.Row="3" Margin="0,0,0,12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnAutreCouleur" Content="Autre couleur…"
+              Height="28" Margin="0" MinWidth="0" MinHeight="0"
+              Style="{DynamicResource NMButtonStandard}"/>
+      <Button Grid.Column="2" x:Name="btnSansCouleur" Content="Aucune couleur"
+              Height="28" Margin="0" MinWidth="0" MinHeight="0"
+              Style="{DynamicResource NMButtonStandard}"/>
+    </Grid>
+
+    <!-- Motifs lus dans le document ouvert. Le réglage est enregistré par NOM :
+         un projet qui ne connaît pas ce motif garde simplement le sien. -->
+    <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Motif de remplissage :"
+                 VerticalAlignment="Center" Margin="0,0,8,0"/>
+      <ComboBox Grid.Column="1" x:Name="cboMotif" Padding="6,4"/>
+    </Grid>
+
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+    <Grid Grid.Row="6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnOk" Content="▶  Appliquer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
+  </Grid>
+</Window>

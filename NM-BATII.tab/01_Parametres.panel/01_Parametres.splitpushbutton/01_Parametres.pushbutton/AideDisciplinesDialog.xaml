@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Aide de l'onglet « Disciplines ».
+
+     Sortie des lignes de texte qui occupaient l'onglet et la fenêtre de
+     format : c'est un contenu qu'on lit une fois, il n'a pas à voler de la
+     hauteur utile à chaque session. Le bouton « ? » de la ligne de boutons
+     l'ouvre.
+
+     Le RÉSUMÉ DU FORMAT est en tête, seul bloc qui change d'un référentiel à
+     l'autre : script.py l'écrit dans txtFormat à l'ouverture. Le reste est
+     figé en XAML — c'est la règle du référentiel, pas un état. -->
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Aide — Disciplines"
+  Width="720" Height="620"
+  MinWidth="560" MinHeight="420"
+  WindowStartupLocation="CenterOwner">
+
+  <Window.Resources>
+    <!-- Titre de section. -->
+    <Style x:Key="Titre" TargetType="TextBlock">
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Margin" Value="0,14,0,4"/>
+    </Style>
+    <!-- Paragraphe courant : c'est lui qui porte le retour à la ligne. -->
+    <Style x:Key="Para" TargetType="TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="Margin" Value="0,0,0,6"/>
+    </Style>
+    <!-- Exemple : chasse fixe, pour que les gabarits s'alignent. -->
+    <Style x:Key="Exemple" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="Consolas"/>
+      <Setter Property="Foreground" Value="#1F3864"/>
+      <Setter Property="Margin" Value="14,0,0,6"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 format en vigueur -->
+      <RowDefinition Height="*"/>      <!-- 1 aide -->
+      <RowDefinition Height="Auto"/>   <!-- 2 pied -->
+    </Grid.RowDefinitions>
+
+    <!-- Le seul bloc VARIABLE : ce que vaut le format ici et maintenant. -->
+    <Border Grid.Row="0" Background="#F4F6F9" BorderBrush="#D0D7E2"
+            BorderThickness="1" Padding="10,8" Margin="0,0,0,10">
+      <StackPanel>
+        <TextBlock Text="Format en vigueur" FontWeight="Bold"
+                   Margin="0,0,0,4"/>
+        <TextBlock x:Name="txtFormat" TextWrapping="Wrap"
+                   Foreground="#444444"/>
+        <TextBlock Text="Se règle par « Structure de la table… »."
+                   FontStyle="Italic" FontSize="11" Foreground="#777777"
+                   Margin="0,6,0,0"/>
+      </StackPanel>
+    </Border>
+
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Margin="0,0,10,0">
+
+        <TextBlock Style="{StaticResource Titre}" Margin="0,0,0,4"
+                   Text="Le Code Ouvrage situe la ligne"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="C'est la seule colonne de code qui se saisit : ses chiffres suffisent à placer la ligne dans la hiérarchie, il n'y a pas de niveau à choisir. Une saisie plus courte est complétée par des zéros — taper « 5111 » vaut « 511100 »."/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="Le niveau est le rang de la dernière tranche non nulle, et le Code Discipline en est la troncature aux niveaux de discipline. Les deux se recalculent, ils ne se saisissent pas."/>
+        <TextBlock Style="{StaticResource Exemple}"
+                   Text="500000 → niveau 1     511000 → niveau 3&#10;510000 → niveau 2     511100 → niveau 4"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="Au-delà des niveaux de discipline, la ligne classe un OUVRAGE et passe en orangé. Un ouvrage ne peut venir qu'après le dernier niveau de discipline : sa branche doit descendre jusque-là, sinon la ligne est signalée."/>
+
+        <TextBlock Style="{StaticResource Titre}"
+                   Text="Deux chaînes d'abréviation"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="« Abrév. Discipline » dit de quelle discipline et sous-discipline la ligne relève. « Abrév. Ouvrage » nomme l'ouvrage. Les deux se saisissent sur toutes les lignes, et chacune a sa colonne de résultat, en italique, qui montre ce que le gabarit produit."/>
+
+        <TextBlock Style="{StaticResource Titre}"
+                   Text="Les jetons {sup1}, {sup2}, {sup3}…"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="{}{sup1} vaut l'abréviation résolue du niveau juste au-dessus dans la MÊME chaîne, {sup2} celle d'encore au-dessus, et ainsi de suite sans limite. Laissez le jeton seul pour reprendre cette valeur telle quelle, complétez-le, ou remplacez-le par du texte."/>
+        <TextBlock Style="{StaticResource Exemple}"
+                   Text="niveau 1   GCL           →  GCL&#10;niveau 2   {sup1}-PLS    →  GCL-PLS&#10;niveau 3   {sup1}-PLB    →  GCL-PLS-PLB&#10;niveau 4   {sup2}-ECS    →  GCL-PLS-ECS   (saute un niveau)&#10;niveau 4   PLB           →  PLB           (repart de zéro)"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="Le rang compte les lignes PRÉSENTES au-dessus, pas les niveaux du code : une branche à trous se numérote comme elle s'affiche, et aucun jeton ne peut viser une ligne inexistante. Un rang au-delà de la branche est signalé."/>
+
+        <TextBlock Style="{StaticResource Titre}"
+                   Text="Le jeton {dis}"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="Propre à « Abrév. Ouvrage » : il vaut l'abréviation de discipline résolue de la MÊME ligne. C'est ainsi qu'une chaîne d'ouvrage se raccroche à sa discipline, au départ comme en cours de route. Au niveau 1, « Abrév. Ouvrage » vaut {dis} et rien d'autre : la cellule y est grisée et ne se modifie pas."/>
+
+        <TextBlock Style="{StaticResource Titre}"
+                   Text="Longueur des abréviations"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="Les longueurs réglées dans « Structure de la table… » comptent les seuls caractères significatifs du gabarit : ni les jetons, ni les séparateurs. Un gabarit réduit à un jeton en est donc dispensé. Les deux longueurs se règlent à tous les niveaux."/>
+        <TextBlock Style="{StaticResource Exemple}"
+                   Text="{}{sup1}-PLB   →  3 caractères comptés (PLB)&#10;{sup1}       →  dispensé&#10;{dis}-ECS    →  3 caractères comptés (ECS)"/>
+
+        <TextBlock Style="{StaticResource Titre}"
+                   Text="Libellés et casse"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="« Discipline » est toujours écrite en majuscules, et n'est saisissable qu'au niveau 1 — les lignes en dessous en héritent. « Sous-discipline / Ouvrage » passe en majuscules tant qu'on nomme une discipline ; sur une ligne d'ouvrage, le libellé nomme un ouvrage réel et garde sa casse de saisie."/>
+
+        <TextBlock Style="{StaticResource Titre}"
+                   Text="Table, tri et filtres"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="La table est TOUJOURS triée par Code Ouvrage : une ligne change de place quand on corrige son code, c'est voulu — la hiérarchie se lit de haut en bas, et le dégradé de couleur par niveau la rend lisible d'un coup d'œil. C'est aussi pourquoi les en-têtes n'ont pas de bouton de tri. Les filtres, eux, y sont ; ils agissent sur l'affichage seul, l'enregistrement porte toujours sur la table entière."/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="Les anomalies s'affichent en bas au fil de la saisie plutôt que de bloquer la frappe : corriger un code oblige à passer par des états incohérents. L'enregistrement ne les refuse pas non plus — il demande confirmation et écrit la table telle quelle. Tant qu'une anomalie subsiste, les outils qui relisent le référentiel donnent des résultats faux sur les lignes concernées."/>
+
+        <TextBlock Style="{StaticResource Titre}"
+                   Text="Échange et configuration"/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="« Exporter en .XLSX… » écrit la table entière — filtres ignorés — puis ouvre le fichier dans votre tableur. Il ne contient que les colonnes saisissables : ajoutez, modifiez ou supprimez des lignes, puis réimportez ; le Code Discipline, le niveau et les résultats se recalculent."/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="« Exporter la configuration… » et « Importer une configuration… » portent sur un fichier .NM-DisciplinesConfig, qui contient la table ET la structure. Les deux vont ensemble : recharger la table sans son découpage relirait tous les codes de travers."/>
+        <TextBlock Style="{StaticResource Para}"
+                   Text="Aucune de ces quatre actions n'écrit le référentiel utilisé par les autres outils : elles ne font qu'échanger avec un fichier. Seul « Enregistrer », en bas de la fenêtre des paramètres, met le référentiel à jour — et tant que vous ne l'avez pas fait, la mention « modifications non enregistrées » reste affichée au-dessus de la table."/>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+    <!-- Convention maison du pied à UN SEUL bouton, celle d'AlertWindow :
+         étiré sur toute la largeur, style « Appliquer ». Le pied à deux
+         colonnes et le style « Annuler » appartiennent aux dialogues qui ont
+         quelque chose à abandonner — une page d'aide n'a rien à annuler. -->
+    <Button Grid.Row="2" x:Name="btnClose" Content="Fermer"
+            Margin="0,10,0,0" HorizontalAlignment="Stretch"
+            IsDefault="True" IsCancel="True"
+            Style="{DynamicResource NMButtonAppliquer}"/>
+  </Grid>
+</Window>

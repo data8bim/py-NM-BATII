@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Niveaux -> Objets par niveau"
+        Width="980" Height="580"
+        MinWidth="760" MinHeight="440"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>  <!-- 0 : Barre d'outils du tableau -->
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>  <!-- 2 : En-tête du tableau -->
+      <RowDefinition Height="*"/>     <!-- 3 : Lignes de mappage -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>  <!-- 5 : Groupes boutons -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>  <!-- 7 : Boutons bas -->
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Barre d'outils du tableau ═════════════════════════════════════════ -->
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="16"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnSelectAll" Content="Tout sélectionner"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Activer tous les mappages affichés"/>
+      <Button Grid.Column="2" x:Name="btnDeselectAll" Content="Tout désélectionner"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Désactiver tous les mappages affichés"/>
+      <Button Grid.Column="4" x:Name="btnInvert" Content="Inverser"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Inverser l'état actif/inactif des mappages affichés"/>
+      <Button Grid.Column="6" x:Name="btnResetAllFilters" Content="Réinitialiser tous les filtres"
+              Padding="8,2" Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Réafficher tous les mappages (filtres de colonnes remis à zéro)"/>
+      <TextBlock Grid.Column="8" x:Name="txtCount" VerticalAlignment="Center"
+                 HorizontalAlignment="Right" FontSize="12" Text="(0 / 0 mappage(s) actif(s))"/>
+    </Grid>
+
+    <!-- ═══ En-tête du tableau (rempli par lib/dialogs/mapping_table.py) ══════ -->
+    <Border Grid.Row="2" x:Name="headerHost"
+            Background="#F4F4F4" BorderBrush="Gainsboro"
+            BorderThickness="1" Padding="6,5"/>
+
+    <!-- ═══ Lignes de mappage ═════════════════════════════════════════════════
+         Barre de défilement toujours visible : sans cela son apparition
+         décalerait les lignes de ~17 px par rapport à l'en-tête.
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <ScrollViewer Grid.Row="3"
+                  VerticalScrollBarVisibility="Visible"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel x:Name="mappingsPanel"/>
+    </ScrollViewer>
+
+    <!-- ═══ Groupes de boutons ════════════════════════════════════════════════
+         Deux GroupBox côte à côte de même largeur :
+         [  Mappages  :  + Ajouter  |  Supprimer tous  ]  [  Configuration  :  Charger  |  Enregistrer  ]
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <Grid Grid.Row="5">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- GroupBox Mappages -->
+      <GroupBox Grid.Column="0" Header="Mappages">
+        <Grid Margin="4,4,4,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button Grid.Column="0" x:Name="btnAdd"
+                  Content="＋  Ajouter un mappage" Height="26"
+                  ToolTip="Ajouter une nouvelle règle de mappage"/>
+          <Button Grid.Column="2" x:Name="btnClearAll"
+                  Content="Supprimer tous les mappages" Height="26"
+                  ToolTip="Supprimer toutes les lignes de mappage"/>
+        </Grid>
+      </GroupBox>
+
+      <!-- GroupBox Configuration -->
+      <GroupBox Grid.Column="2" Header="Configuration">
+        <Grid Margin="4,4,4,6">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button Grid.Column="0" x:Name="btnLoad"
+                  Content="📂  Charger" Height="26"
+                  ToolTip="Charger un fichier de configuration JSON"/>
+          <Button Grid.Column="2" x:Name="btnSave"
+                  Content="💾  Enregistrer" Height="26"
+                  ToolTip="Enregistrer la configuration dans un fichier JSON"/>
+        </Grid>
+      </GroupBox>
+    </Grid>
+
+    <!-- ═══ Boutons bas ════════════════════════════════════════════════════════
+         Ordre : [▶ Appliquer (large, mise en avant)] [Fermer]
+         Même hauteur pour les deux.
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <Grid Grid.Row="7">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnApply"
+              Content="▶  Appliquer"
+              Style="{DynamicResource NMButtonAppliquer}"
+              IsDefault="True"
+              ToolTip="Copier les valeurs de chaque niveau vers les paramètres des objets qui lui sont rattachés"/>
+      <Button Grid.Column="2" x:Name="btnClose"
+              Content="Fermer"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"
+              VerticalAlignment="Center"/>
+    </Grid>
+
+  </Grid>
+</Window>

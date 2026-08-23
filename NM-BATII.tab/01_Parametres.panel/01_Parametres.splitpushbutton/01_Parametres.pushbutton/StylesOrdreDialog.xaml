@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Référentiel des styles de surfaces : ordre, repères et couleurs des boutons
+     de la palette « Surfaces » (06_Surfaces.panel/02_SURFACES.splitpushbutton/
+     01_SURF_Surfaces.pushbutton),
+     et, derrière le bouton « Étiquettes… », l'étiquette posée par type de
+     calcul.
+
+     Ces réglages vivent dans config.json, PAS dans la nomenclature Revit :
+     des milliers de projets existants n'ont pas de colonne d'ordre, et leur en
+     ajouter une serait irréaliste. Les styles sont donc identifiés par leur
+     NOM DE CLÉ, ce qui rend un réglage valable pour tous les projets qui
+     suivent la même convention de nommage.
+
+     Pas de binding : la liste est reconstruite en Python à chaque changement
+     (voir _rafraichir_liste dans script.py). Un ObservableCollection aurait
+     imposé une classe INotifyPropertyChanged, et avec elle le piège des
+     delegates multicast IronPython.
+
+     HAUTEUR : calée sur la COLONNE D'ACTIONS de droite, pas sur la liste. Elle
+     empile l'ordre, la palette de 18 pastilles sur trois rangées, la couleur
+     libre, les étiquettes, l'entretien et l'échange de fichiers : c'est le
+     dernier bouton qui fixe le minimum. MinHeight est calé juste en dessous :
+     la fenêtre peut être agrandie, jamais réduite au point de masquer ce
+     bouton. La section « Étiquettes » a ajouté 65 px à la valeur mesurée
+     précédemment. -->
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Styles de surfaces"
+  Width="720" Height="885"
+  MinWidth="620" MinHeight="875"
+  WindowStartupLocation="CenterOwner">
+
+  <Window.Resources>
+    <!-- INFOBULLES REPLIÉES, pour toute la fenêtre.
+         Une chaîne passée à ToolTip s'affiche sur UNE seule ligne, aussi longue
+         que le texte : les explications de ce panneau traversaient l'écran.
+         WPF n'offre pas de largeur maximale sur l'infobulle elle-même — poser
+         MaxWidth ne suffit pas, car le ContentPresenter rend la chaîne dans un
+         TextBlock qui ne se replie pas. Il faut donc lui imposer un
+         ContentTemplate dont le TextBlock, lui, replie.
+
+         Style IMPLICITE (pas de x:Key) : il s'applique aux infobulles posées
+         en XAML comme à celles créées en Python sur les lignes de la liste,
+         sans avoir à y penser. Même largeur que _LARGEUR_INFOBULLE dans la
+         palette « Surfaces », pour que les deux se ressemblent. -->
+    <Style TargetType="ToolTip">
+      <Setter Property="MaxWidth" Value="300"/>
+      <Setter Property="ContentTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 filtre type de calcul -->
+      <RowDefinition Height="Auto"/>   <!-- 1 ce que contient la liste -->
+      <RowDefinition Height="*"/>      <!-- 2 liste + actions -->
+      <RowDefinition Height="Auto"/>   <!-- 3 pied -->
+    </Grid.RowDefinitions>
+
+    <Grid Grid.Row="0" Margin="0,0,0,8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Type de calcul :"
+                 VerticalAlignment="Center" Margin="0,0,8,0"/>
+      <ComboBox Grid.Column="1" x:Name="cboCalcul" Padding="6,4"/>
+    </Grid>
+
+    <!-- Un constat, pas un mode d'emploi : l'explication complète est derrière
+         le bouton d'aide. Placé juste au-dessus de la liste, il porte sur ce
+         qu'elle contient. -->
+    <TextBlock Grid.Row="1"
+               x:Name="txtInfo"
+               TextWrapping="Wrap"
+               HorizontalAlignment="Left"
+               Margin="0,0,0,6"
+               Foreground="#555555"/>
+
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="10"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- Ordre d'affichage dans la palette, de haut en bas. Les styles
+           présents dans la configuration mais absents du projet actif restent
+           listés et signalés : ils servent aux autres projets. -->
+      <Grid Grid.Column="0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Extended : Ctrl+clic et Maj+clic. Monter/Descendre déplacent tout
+             le bloc sélectionné d'un cran, et une couleur s'applique à toute
+             la sélection d'un coup. -->
+        <!-- VIRTUALISATION DÉSACTIVÉE, volontairement. Par défaut la ListBox ne
+             construit que les lignes visibles : les autres n'ont aucune largeur
+             mesurée, et la course de l'ascenseur horizontal, calculée sur
+             l'ensemble, s'arrêtait avant la fin des libellés hors écran.
+             Quelques dizaines de lignes ne justifient pas la virtualisation. -->
+        <ListBox Grid.Row="0"
+                 x:Name="lstStyles"
+                 SelectionMode="Extended"
+                 HorizontalContentAlignment="Stretch"
+                 VirtualizingStackPanel.IsVirtualizing="False"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+
+        <!-- Ascenseur PROPRE AU TEXTE : il décale les seuls libellés, les
+             repères restant collés au bord gauche et les pastilles au bord
+             droit. Un défilement horizontal de la ListBox entière les aurait
+             emportés avec lui, alors que ce sont précisément les deux repères
+             visuels qu'on veut garder sous les yeux.
+             Masqué tant qu'aucun libellé ne dépasse. -->
+        <ScrollBar Grid.Row="1"
+                   x:Name="sbTexte"
+                   Orientation="Horizontal"
+                   Height="16"
+                   Margin="0,2,0,0"
+                   Visibility="Collapsed"/>
+      </Grid>
+
+      <StackPanel Grid.Column="2" Width="190">
+        <!-- L'aide est calée au bord droit de la fenêtre, sur la première ligne
+             du panneau : elle porte sur tout le dialogue, pas sur la section
+             qui la suit. -->
+        <Grid Margin="0,0,0,4">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Text="Ordre d'affichage"
+                     FontWeight="SemiBold" VerticalAlignment="Center"/>
+          <Button Grid.Column="1"
+                  x:Name="btnAide"
+                  Content="?"
+                  Width="26" Height="26"
+                  Margin="0" MinWidth="0" MinHeight="0"
+                  Padding="0"
+                  Style="{DynamicResource NMButtonStandard}"
+                  ToolTip="Comment fonctionne ce réglage ?"/>
+        </Grid>
+        <Button x:Name="btnMonter"   Content="▲  Monter"
+                Height="30" Margin="0,0,0,4" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonStandard}"/>
+        <Button x:Name="btnDescendre" Content="▼  Descendre"
+                Height="30" Margin="0,0,0,4" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonStandard}"/>
+        <Button x:Name="btnAlpha" Content="Trier A → Z"
+                Height="30" Margin="0,0,0,12" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonSecondaire}"
+                ToolTip="Remet les styles du type de calcul affiché dans l'ordre alphabétique."/>
+
+        <!-- DEUX apparences par style, deux usages qui n'ont rien à voir :
+               • le REPÈRE du bouton porte un codage sémantique (compté /
+                 déduit / hors périmètre) — trois teintes suffisent, et se
+                 posent en lot depuis les pastilles ci-dessous ;
+               • la COULEUR DE SURFACE alimente le choix de couleurs Revit, où
+                 chaque style doit au contraire se distinguer de ses voisins,
+                 et où un motif de remplissage entre aussi en jeu. Elle se
+                 règle style par style, en cliquant sa pastille dans la liste. -->
+        <TextBlock Text="Repère du bouton" FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <TextBlock Text="Bande colorée au bord gauche du bouton, dans la palette. S'applique à toute la sélection."
+                   TextWrapping="Wrap" FontSize="11" Foreground="#666666"
+                   Margin="0,0,0,6"/>
+        <!-- Les pastilles sont créées en Python depuis _PALETTE_COULEURS :
+             la liste des teintes reste ainsi définie à un seul endroit. -->
+        <WrapPanel x:Name="pnlCouleurs" Margin="0,0,0,6"/>
+        <Button x:Name="btnAutreCouleur" Content="Autre couleur…"
+                Height="28" Margin="0,0,0,4" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonStandard}"
+                ToolTip="Ouvre le sélecteur de couleur Windows pour une teinte hors palette."/>
+        <Button x:Name="btnSansCouleur" Content="Aucune couleur"
+                Height="28" Margin="0" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonStandard}"/>
+
+        <TextBlock Text="Couleur de surface" FontWeight="SemiBold" Margin="0,14,0,4"/>
+        <TextBlock Text="Cliquez la pastille à droite d'un style pour choisir sa couleur et son motif de remplissage."
+                   TextWrapping="Wrap" FontSize="11" Foreground="#666666"
+                   Margin="0,0,0,6"/>
+        <!-- Agit sur les lignes AFFICHÉES, pas sur la sélection. Filtrer limite
+             donc la portée à un type de calcul ; sans filtre, le regroupement
+             par type de calcul est tout de même conservé, puisque c'est ce qui
+             s'affiche ensemble sur un plan. -->
+        <Button x:Name="btnGenererPlan" Content="Teintes distinctes"
+                Height="28" Margin="0" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonSecondaire}"
+                ToolTip="Répartit des teintes régulièrement espacées sur les styles affichés, type de calcul par type de calcul, et ramène les motifs au remplissage plein."/>
+
+        <!-- Étiquettes : réglées PAR TYPE DE CALCUL et non par clé de style —
+             quatre à six lignes à tenir à jour au lieu d'une cinquantaine, pour
+             un résultat identique, les étiquettes se distinguant par famille
+             réglementaire et non par style. D'où un dialogue séparé plutôt
+             qu'une colonne de plus dans la liste ci-contre, qui est indexée par
+             nom de clé.
+             L'interrupteur marche/arrêt, lui, est dans la palette : la décision
+             d'étiqueter se prend en travaillant, pas dans un référentiel. -->
+        <TextBlock Text="Étiquettes" FontWeight="SemiBold" Margin="0,14,0,4"/>
+        <Button x:Name="btnEtiquettes" Content="Étiquettes…"
+                Height="28" Margin="0" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonSecondaire}"
+                ToolTip="Associe une étiquette de surface à chaque type de calcul réglementaire."/>
+
+        <!-- Entretien : la configuration s'accumule au fil des projets, il faut
+             pouvoir en retirer les styles définitivement abandonnés. Le filtre
+             « Absents du projet actif » ci-dessus les rassemble.
+             Deux sorts selon le style : présent dans le projet, son réglage est
+             effacé mais sa POSITION est conservée — le rang est un classement
+             de travail, pénible à refaire, et il n'a pas à disparaître avec une
+             couleur ; absent du projet, la ligne est retirée pour de bon. -->
+        <TextBlock Text="Entretien" FontWeight="SemiBold" Margin="0,14,0,4"/>
+        <Button x:Name="btnRetirer" Content="Réinitialiser"
+                Height="28" Margin="0" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonSecondaire}"
+                ToolTip="Efface le repère, la couleur de surface et le motif des styles sélectionnés. Un style présent dans le projet garde sa position ; un style absent du projet est retiré de la liste."/>
+
+        <!-- Échange de réglages entre postes ou entre versions. Le fichier
+             porte une extension propre à l'extension et une signature interne :
+             ouvrir n'importe quel .json ici n'aurait aucun sens et produirait
+             des réglages incohérents. -->
+        <TextBlock Text="Fichier" FontWeight="SemiBold" Margin="0,14,0,4"/>
+        <Button x:Name="btnExporter" Content="Exporter les réglages…"
+                Height="28" Margin="0,0,0,4" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonStandard}"
+                ToolTip="Enregistre l'ordre, les repères, les couleurs de surface, les motifs et les étiquettes dans un fichier .NM-Surf-Config."/>
+        <Button x:Name="btnImporter" Content="Importer des réglages…"
+                Height="28" Margin="0" MinWidth="0" MinHeight="0"
+                Style="{DynamicResource NMButtonStandard}"
+                ToolTip="Remplace les réglages courants par ceux d'un fichier .NM-Surf-Config."/>
+      </StackPanel>
+    </Grid>
+
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+    <Grid Grid.Row="3" Margin="0,10,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnOk" Content="▶  Appliquer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
+  </Grid>
+</Window>

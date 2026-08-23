@@ -1,0 +1,25 @@
+title:
+  en_us: "Area (Revit)"
+  fr_fr: "Surface (Revit)"
+tooltip:
+  en_us: "Native Revit tool: Area
+         \nCreates an area bounded by model elements (such as walls)
+         \nand area boundary lines.
+         \nOpen an area plan view.
+         \nArea boundaries are automatically defined by many types of
+         \nmodel elements. You can add area boundary lines to add and
+         \nadjust area boundaries.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Outil natif Revit : Surface
+         \nCrée une surface limitée par des éléments de modèle (tels que
+         \ndes murs) et des lignes de séparation de surface.
+         \nOuvrez un plan de surface.
+         \nLes limites de surfaces sont automatiquement définies par de
+         \nnombreux types d'éléments de modèle. Vous pouvez ajouter des
+         \nlignes de séparation pour l'ajout et le réglage des limites
+         \nde surfaces.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-area-plan

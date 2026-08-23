@@ -1,0 +1,21 @@
+title:
+  en_us: "Colour Fill Legend"
+  fr_fr: "Légende de motif/couleur"
+tooltip:
+  en_us: "Native Revit tool: Colour Fill Legend
+         \nPlaces a legend showing the colour scheme applied to the view.
+         \nOpen a view with a colour scheme, then click to place the legend.
+         \nThe legend lists the values of the scheme and their colour or
+         \nfill pattern.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Outil natif Revit : Légende de motif/couleur
+         \nPlace une légende présentant le jeu de couleurs appliqué à la vue.
+         \nOuvrez une vue dotée d'un jeu de couleurs, puis cliquez pour poser
+         \nla légende.
+         \nLa légende énumère les valeurs du jeu de couleurs avec leur couleur
+         \nou leur motif de remplissage.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-area-plan

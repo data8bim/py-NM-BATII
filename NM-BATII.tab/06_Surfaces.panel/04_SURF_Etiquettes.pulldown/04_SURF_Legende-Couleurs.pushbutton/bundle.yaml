@@ -1,0 +1,24 @@
+title:
+  en_us: "Colour legends (bulk)"
+  fr_fr: "Légendes de couleurs (en masse)"
+tooltip:
+  en_us: "Places the native « Colour Fill Legend » on area plans, at the very
+         position of the legend of a reference view you pick — whatever its
+         area scheme.
+         \nScope: every area plan, by area scheme, or by picked views. The
+         legend type is chosen from a drop-down list.
+         \nA legend already present in a processed view is replaced. The
+         reference view is left untouched.
+         \n\nVersion: {{version}}-[{{date}}.003]"
+  fr_fr: "Pose la « Légende de motif/couleur » native de Revit sur les plans de
+         surface, à la position exacte de celle d'une vue de référence que
+         vous désignez — quel que soit son type de calcul.
+         \nPortée : tous les plans de surface, par schéma de surface, ou par
+         vues sélectionnées. Le type de légende se choisit dans une liste
+         déroulante.
+         \nUne légende déjà présente dans une vue traitée est remplacée. La
+         vue de référence n'est pas touchée.
+         \n\nVersion: {{version}}-[{{date}}.003]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

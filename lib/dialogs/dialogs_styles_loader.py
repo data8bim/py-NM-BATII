@@ -40,6 +40,34 @@ from pyrevit import forms
 
 _ALERT_XAML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "AlertWindow.xaml")
 
+# Marge laissée sous la boîte : barre des tâches déjà déduite par WorkArea, plus
+# de quoi ne pas coller aux bords.
+_MARGE_ECRAN = 80
+
+
+def _borner_hauteur(fenetre):
+    """
+    Rabaisse le plafond de hauteur quand l'écran est plus court que lui.
+
+    Le plafond principal est posé par AlertWindow.xaml, qui est relu à chaque
+    ouverture — donc efficace même quand ce module-ci est encore en cache dans
+    le moteur IronPython. Cette fonction ne fait que le RESSERRER sur les écrans
+    où il ne tiendrait pas : elle ne le relève jamais, sans quoi elle défferait
+    le réglage du XAML sur un grand écran.
+    """
+    try:
+        from System.Windows import SystemParameters
+        dispo = SystemParameters.WorkArea.Height - _MARGE_ECRAN
+        if dispo < 200:
+            return
+        actuel = fenetre.MaxHeight
+        # MaxHeight vaut +infini quand rien n'est posé : la comparaison suffit,
+        # inutile de distinguer le cas.
+        if actuel > dispo:
+            fenetre.MaxHeight = dispo
+    except Exception:
+        pass
+
 
 def _set_rich_text(text_block, message):
     """
@@ -77,6 +105,7 @@ def show_alert(title, message, close_label=None, centrer=False):
     try:
         w = forms.WPFWindow(_ALERT_XAML)
         w.Title = title
+        _borner_hauteur(w)
         _set_rich_text(w.txtMessage, message)
         if close_label:
             w.btnClose.Content = close_label
@@ -114,6 +143,7 @@ def show_confirm(title, message, yes_label=u'Oui', no_label=u'Non',
     try:
         w = forms.WPFWindow(_ALERT_XAML)
         w.Title = title
+        _borner_hauteur(w)
         _set_rich_text(w.txtMessage, message)
 
         btn_grid = Grid()

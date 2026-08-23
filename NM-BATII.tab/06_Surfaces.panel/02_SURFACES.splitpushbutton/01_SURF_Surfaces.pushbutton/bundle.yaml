@@ -1,0 +1,40 @@
+title:
+  en_us: "Areas"
+  fr_fr: "Surfaces"
+
+tooltip:
+  en_us: "Modeless palette assigning the style key to areas.
+         \nStyles come from the project key schedule declared in Settings > Areas.
+         \nA drop-down filters them by regulatory calculation type, a search box by name;
+         \neach button's tooltip shows the comment of the matching row.
+         \nThe drop-down follows the active area plan (area scheme name, then view type name).
+         \n\nAreas selected  -> the style is written to them.
+         \nNothing selected -> the native Revit « Area » tool starts, and every area
+         \nplaced until Esc receives the style. Switching style mid-placement is
+         \nsupported: each area keeps the style it was placed under.
+         \n\n« Area Plan » views only: the palette closes when leaving one.
+         \n\nVersion: {{version}}-[{{date}}.003]"
+
+  fr_fr: "Palette non modale d'attribution de la clé de style aux surfaces.
+         \nLes styles proviennent de la nomenclature de clés du projet, déclarée dans Paramètres > Surfaces.
+         \nUne liste déroulante les filtre par type de calcul réglementaire, un champ de recherche par nom ;
+         \nl'infobulle de chaque bouton affiche le commentaire de la ligne correspondante.
+         \nLa liste se cale sur le plan de surface actif (nom du schéma de surface, sinon du type de vue).
+         \n\nDes surfaces sont sélectionnées -> le style leur est appliqué.
+         \nRien n'est sélectionné -> l'outil natif Revit « Surface » démarre, et toutes
+         \nles surfaces posées jusqu'à Échap reçoivent le style. Changer de style en
+         \ncours de pose est possible : chaque surface garde celui sous lequel elle a
+         \nété placée.
+         \n\nVues « Plan de surface » uniquement : la palette se ferme si vous en sortez.
+         \n\nVersion: {{version}}-[{{date}}.003]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+
+# Bouton grisé hors plan de surface — comportement natif du ruban, résolu par
+# le runtime .NET de pyRevit. « active-area-plan » est plus étroit que
+# « active-plan-view », qui couvrirait aussi les plans d'étage et de plafond :
+# vérifié dans les jetons de contexte de pyRevitLabs.PyRevit.Runtime.2025.dll.
+# La palette double ce garde-fou à l'exécution, et se ferme si l'utilisateur
+# quitte la vue (voir _on_view_activated).
+context: active-area-plan

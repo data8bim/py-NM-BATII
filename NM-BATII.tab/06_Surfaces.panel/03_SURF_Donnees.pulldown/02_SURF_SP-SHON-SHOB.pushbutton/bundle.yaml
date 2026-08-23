@@ -1,0 +1,19 @@
+title:
+  en_us: "SHON-SHOB-SP\n→ Levels"
+  fr_fr: "SHON-SHOB-SP\n→ Niveaux"
+
+tooltip:
+  en_us: "Transfer the results of regulatory surface area calculations to the levels and project information.
+         The surface area values contained in the levels are those that will be taken into account by PLANON.
+         \n\nTwo sources at startup: surfaces calculated in the project (schedules), or surfaces imported from an Excel spreadsheet (.xlsx) exported then filled in outside Revit.
+         \n\nThe company that performed the calculations is recorded in the author parameters, on the modified surfaces only.
+         \n\nVersion: {{version}}-[{{date}}.010]"
+
+  fr_fr: "Transfert les résulats des calculs de surfaces règlemantaires vers les niveaux et les informations projet.
+        Les valeurs des surfaces porté par les niveaux sont celles qui seront prise en compte par PLANON.
+         \n\nDeux sources proposées au lancement : les surfaces calculées dans le projet (nomenclatures), ou les surfaces par imports d'un tableur Excel (.xlsx) exporté puis renseigné hors Revit.
+         \n\nL'entreprise ayant réalisé les calculs est inscrite dans les paramètres auteur, sur les seules surfaces modifiées.
+         \n\nVersion: {{version}}-[{{date}}.010]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

@@ -1,0 +1,26 @@
+title:
+  en_us: "Area separation"
+  fr_fr: "Séparation de surfaces"
+tooltip:
+  en_us: "Native Revit tool: Area Boundary
+         \nCreates an area boundary line to bound areas in places
+         \nwhere no wall or other area-bounding element exists.
+         \nOpen an area plan view to place a boundary line.
+         \nIf the space already contains an area, the area boundaries
+         \nadjust based on the new boundary lines. If the space does
+         \nnot yet contain an area, you can create one.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Outil natif Revit : Limite de surface
+         \nCrée une ligne de séparation pour limiter des surfaces aux
+         \nendroits où aucun mur ni aucun autre élément de délimitation
+         \nde surface n'existe.
+         \nOuvrez un plan de surface pour placer une ligne de séparation.
+         \nSi l'espace contient déjà une surface, les limites de surfaces
+         \ns'ajustent par rapport aux nouvelles lignes de séparation. Si
+         \nl'espace ne contient pas encore de surface, vous pouvez en
+         \ncréer une.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-area-plan

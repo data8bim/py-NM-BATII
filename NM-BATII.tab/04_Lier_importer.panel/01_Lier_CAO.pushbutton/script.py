@@ -73,7 +73,19 @@ if lib_dir not in sys.path:
 
 from utils.config_loader import load_config
 from utils.selection_fichier import pick_file_info
-from utils.types_vues_personnalises import get_types_vues, get_row_by_label, get_template_vars
+import utils.types_vues_personnalises as _tvp_mod
+reload(_tvp_mod)
+from utils.types_vues_personnalises import (get_types_vues, get_row_by_label,
+                                            get_template_vars,
+                                            filtrer_labels_pour_famille,
+                                            filtrer_labels_pour_disciplines,
+                                            get_disciplines_utilisees,
+                                            cle_ordre as _cle_ordre)
+import utils.disciplines as _disc_mod
+reload(_disc_mod)
+import dialogs.combo_recherche as _combo_mod
+reload(_combo_mod)
+from dialogs.combo_recherche import ComboCherchable
 import utils.vues_creation as _vues_creation_mod
 reload(_vues_creation_mod)
 from utils.vues_creation import (
@@ -94,6 +106,9 @@ from utils.extrac_nom_fichier_convention import (
     diagnostiquer_nom_fichier,
 )
 from dialogs.dialogs_styles_loader import load as load_styles, show_alert
+import dialogs.selection_liste as _selection_liste_mod
+reload(_selection_liste_mod)
+from dialogs.selection_liste import choisir_dans_liste
 load_styles(lib_dir=lib_dir)
 
 
@@ -151,6 +166,13 @@ def _phase_name(phase):
     explicite sur certains types, ce qui fait echouer l'acces direct phase.Name.
     """
     return Element.Name.__get__(phase)
+
+
+# Marqueur affiche DANS une liste deroulante que la cascade a videe. Un menu
+# vide et grise ne dit pas s'il n'y a rien ou si le remplissage a echoue ; ce
+# faux item le dit, sans allonger les libelles.
+# Il n'est jamais une valeur : ComboCherchable.valeur() rend None dessus.
+_AUCUNE_VALEUR = u"< Aucune valeur disponible >"
 
 
 # ---------- Utilitaires DWG ----------
@@ -532,7 +554,9 @@ def main():
             u'vue-plaf':      ViewFamily.CeilingPlan,
             u'vue-structure': ViewFamily.StructuralPlan,
             u'vue-dessin':    ViewFamily.Drafting,
-            u'vue-surface':   ViewFamily.FloorPlan,
+            # Plan de surface = AreaPlan, PAS FloorPlan : mappe sur FloorPlan,
+            # ViewPlan.Create() produisait des plans d'etage.
+            u'vue-surface':   ViewFamily.AreaPlan,
         }
         _vf_legend = getattr(ViewFamily, 'Legend', None)
         if _vf_legend is not None:
@@ -545,7 +569,8 @@ def main():
             if _nv.get(u'vues_et_dwg', False):
                 _fam = _VUE_ID_TO_FAMILY.get(_nv.get(u'id', u''))
                 if _fam is not None:
-                    view_options.append((_nv.get(u'label', u''), _fam))
+                    view_options.append((_nv.get(u'label', u''), _fam,
+                                         _nv.get(u'id', u'')))
                 else:
                     # Famille cochee dans les parametres mais non prise en charge
                     # ici : on le signale au lieu de l'ignorer silencieusement.
@@ -560,40 +585,273 @@ def main():
         # Fallback si aucune entree configuree
         if not view_options:
             view_options = [
-                (u"Plan d'etage",           ViewFamily.FloorPlan),
-                (u"Plans de faux-plafonds", ViewFamily.CeilingPlan),
-                (u"Plan de structure",      ViewFamily.StructuralPlan),
-                (u"Vue de dessin",          ViewFamily.Drafting),
+                (u"Plan d'etage",           ViewFamily.FloorPlan,      u'vue-plan'),
+                (u"Plans de faux-plafonds", ViewFamily.CeilingPlan,    u'vue-plaf'),
+                (u"Plan de structure",      ViewFamily.StructuralPlan, u'vue-structure'),
+                (u"Vue de dessin",          ViewFamily.Drafting,       u'vue-dessin'),
             ]
-        view_labels   = [lbl for lbl, _ in view_options]
-        view_families = {lbl: enum for lbl, enum in view_options}
+        view_labels   = [lbl for lbl, _, __ in view_options]
+        view_families = {lbl: enum for lbl, enum, _ in view_options}
+        view_vue_ids  = {lbl: vid for lbl, _, vid in view_options}
 
-        win.cmbViewFamily.ItemsSource   = view_labels
-        win.cmbViewFamily.SelectedIndex = 0
-
-        # Phase de projet : la derniere phase est selectionnee par defaut
-        # (reproduit le comportement par defaut de Revit a la creation d'une vue).
+        # Les menus sont remplis par la cascade, plus bas. Seule la liste brute
+        # des phases est preparee ici.
         _phase_labels = [_phase_name(ph) for ph in phases_projet]
-        win.cmbPhase.ItemsSource   = _phase_labels
-        win.cmbPhase.SelectedIndex = len(_phase_labels) - 1
 
         # Type de vue personnalisé : trié par 'ordre'.
-        # Fallback si 'ordre' absent : Temporaire=1, FM=2 (même logique que Parametres)
-        _TVP_LOCKED_ORD_DWG = {u'Temporaire': 1, u'FM': 2}
+        # Lignes systeme toujours en tete : PIECES 3D=0, TEMPORAIRE=1, FM=2
+        # (meme ordre que 01_Parametres), puis tri par 'ordre' de la config.
+        # « Ord. » est du TEXTE libre depuis qu'il accepte « A1 » ou « 10bis » :
+        # le tri passe par la clé naturelle partagée, sinon « 10 » se rangerait
+        # avant « 2 ». Les lignes système restent en tête (préfixe 0).
+        # Comparaison en MAJUSCULES : les labels le sont depuis que la fenetre
+        # des parametres les normalise, mais une config pas encore
+        # re-enregistree porte encore « Temporaire ». Sans cela cette ligne
+        # perdrait sa place en tete de liste.
+        _TVP_LOCKED_ORD_DWG = {u'PIECES 3D': 0, u'TEMPORAIRE': 1, u'FM': 2}
         def _tvp_ord_key(t):
-            _lbl = t.get(u'label', u'')
+            _lbl = (t.get(u'label', u'') or u'').upper()
             if _lbl in _TVP_LOCKED_ORD_DWG:
-                return _TVP_LOCKED_ORD_DWG[_lbl]
-            return t.get(u'ordre', 999)
+                return (0, _cle_ordre(_TVP_LOCKED_ORD_DWG[_lbl]))
+            return (1, _cle_ordre(t.get(u'ordre', u'')))
         _tvp_list_sorted = sorted(_tvp_list, key=_tvp_ord_key)
         # Filtrer selon la disponibilite configuree dans Parametres → Vues
         _dispo_tpd = {d.get(u'label', u''): d.get(u'lier_cao', True)
                       for d in cfg.get(u'dispo_types_pers_lier_cao', [])}
+        # Disponibilite par SCRIPT (colonne "Lier CAO → Vues"). La
+        # disponibilite par FAMILLE de vue est appliquee ensuite, a chaque
+        # changement du menu "Famille de vue" (voir _maj_types_pers).
         _tvp_labels = [t.get(u'label', u'') for t in _tvp_list_sorted
                        if _dispo_tpd.get(t.get(u'label', u''), True)]
         _tvp_list = _tvp_list_sorted  # garder la référence triée pour _selected_tvp
-        win.cmbVueTypePers.ItemsSource   = _tvp_labels
-        win.cmbVueTypePers.SelectedIndex = 0
+
+        # -- Cascade Discipline -> Sous-discipline -> Famille -> Type -> Phase -
+        # Les cinq menus forment une cascade : chacun ne propose que des
+        # valeurs qui laissent au moins un choix au suivant. Une famille dont
+        # plus aucun type personnalise ne releve pour la discipline courante
+        # n'est donc pas affichee, au lieu de mener a un « Type personnalise »
+        # vide.
+        #
+        # Deux tables portent ces disponibilites, cumulatives :
+        # cfg['dispo_types_pers_familles'] (colonne "Familles de vues" de
+        # 01_Parametres > Vues > Vues personnalisees) et
+        # cfg['dispo_types_pers_disciplines'] (colonne "Discipline").
+        #
+        # Les disciplines proposees sont celles REELLEMENT employees par les
+        # vues personnalisees disponibles ici, et NON les ~100 lignes du
+        # referentiel de l'onglet « Disciplines » : la quasi-totalite n'y
+        # menerait a aucun type, ce qui rendait le menu inutilisable.
+        #
+        # La PHASE n'a pas de table de disponibilite : rien ne restreint la
+        # liste des phases du projet. Elle ferme la cascade — active seulement
+        # une fois les menus au-dessus pourvus (voir _maj_phases).
+        #
+        # Indexe sur les listes de couples, pas sur le libelle affiche : deux
+        # branches distinctes du referentiel peuvent partager un libelle.
+        _TOUTES_DISC = u"Toutes les disciplines"
+        _TOUTES_SOUS = u"Toutes les sous-disciplines"
+
+        _fmt_disc   = _disc_mod.get_format(cfg)
+        _codes_util = get_disciplines_utilisees(cfg, _tvp_labels)
+
+        # Une sous-discipline employee implique sa discipline de tete : sans
+        # cela « ARCHITECTURE » manquerait alors que « SPACE PLANNING » en
+        # releve.
+        _par_code = {}
+        for _e_d in _disc_mod.get_table(cfg):
+            _par_code[_disc_mod.code_ouvrage(_e_d, fmt=_fmt_disc)] = _e_d
+
+        def _racine(code):
+            """Code de la ligne de niveau 1 dont releve `code`."""
+            _anc = _disc_mod.get_ancetres(code, cfg)
+            return (_disc_mod.code_ouvrage(_anc[0], fmt=_fmt_disc)
+                    if _anc else code)
+
+        _disc_racines = []
+        _vus_rac = set()
+        for _c in sorted(_codes_util):
+            if _c not in _par_code:
+                continue          # code obsolete : referentiel modifie depuis
+            _r = _racine(_c)
+            if _r in _vus_rac or _r not in _par_code:
+                continue
+            _vus_rac.add(_r)
+            _disc_racines.append(
+                (_r, (_par_code[_r].get(u'discipline') or u'').strip() or _r))
+
+        _sous_par_racine = {}
+        for _c in sorted(_codes_util):
+            _e = _par_code.get(_c)
+            if _e is None or _disc_mod.get_niveau(_e, fmt=_fmt_disc) <= 1:
+                continue
+            _sous_par_racine.setdefault(_racine(_c), []).append(
+                (_c, (_e.get(u'sous_discipline') or u'').strip() or _c))
+
+        _disc_options = []      # [(code, libelle)] du menu Discipline
+        _sous_options = []      # [(code, libelle)] du menu Sous-discipline
+
+        # Remplir un ItemsSource declenche SelectionChanged : sans ce drapeau,
+        # une mise a jour relancerait la cascade depuis son propre milieu, sur
+        # des listes d'options a demi remplacees.
+        _cascade_en_cours = {u'v': False}
+
+        # L'indisponibilite s'affiche DANS le menu (_AUCUNE_VALEUR), pas dans
+        # le libelle : la colonne des labels est en largeur Auto, une phrase y
+        # decalerait tous les menus. Le detail passe en infobulle — d'ou le
+        # ToolTipService.ShowOnDisabled du XAML, sans quoi elle resterait
+        # invisible sur un menu grise.
+        _AIDE_INDISPO = (
+            u"Aucun type personnalis\xe9 ne correspond \xe0 cette combinaison.\n"
+            u"R\xe9glez les colonnes « Familles de vues », « Discipline » et "
+            u"« Lier CAO → Vues » (colonne « Disponibilit\xe9 ») dans\n"
+            u"01_Param\xe8tres > Vues > Vues personnalis\xe9es.")
+
+        def _code_selectionne(combo_cherchable, options, marqueur):
+            """Code associe au libelle retenu dans un menu, ou '' si neutre."""
+            _v = combo_cherchable.valeur()
+            if _v is None or _v == marqueur:
+                return u''
+            for _code, _lbl in options:
+                if _lbl == _v:
+                    return _code
+            return u''
+
+        def _codes_actifs():
+            """
+            Codes de discipline a tester pour le filtrage des types.
+
+            Sous-discipline choisie -> ce seul code. Discipline seule -> la
+            tete ET toutes ses sous-disciplines employees : choisir une
+            discipline sans preciser doit rendre les types de TOUTE la branche.
+            Rien de choisi -> aucun filtre.
+            """
+            _sc = _code_selectionne(_cmb_sous, _sous_options, _TOUTES_SOUS)
+            if _sc:
+                return [_sc]
+            _dc = _code_selectionne(_cmb_disc, _disc_options, _TOUTES_DISC)
+            if not _dc:
+                return []
+            return [_dc] + [_c for _c, _l in _sous_par_racine.get(_dc, [])]
+
+        def _labels_disponibles():
+            """Types personnalises passant les filtres Discipline + Sous."""
+            return filtrer_labels_pour_disciplines(
+                cfg, _tvp_labels, _codes_actifs())
+
+        def _maj_sous_disciplines():
+            _dc = _code_selectionne(_cmb_disc, _disc_options, _TOUTES_DISC)
+            _opts = [(u'', _TOUTES_SOUS)]
+            if _dc:
+                _opts.extend(_sous_par_racine.get(_dc, []))
+            else:
+                for _r, _lbl_r in _disc_racines:
+                    for _c, _lbl_s in _sous_par_racine.get(_r, []):
+                        _opts.append((_c, u"{} — {}".format(_lbl_r, _lbl_s)))
+            _prec = _code_selectionne(_cmb_sous, _sous_options, _TOUTES_SOUS)
+            _sous_options[:] = _opts
+            _codes = [_c for _c, _l in _opts]
+            _cmb_sous.definir(
+                [_l for _c, _l in _opts],
+                selection=(_opts[_codes.index(_prec)][1]
+                           if _prec in _codes else None))
+            _cmb_sous.combo.IsEnabled = len(_opts) > 1
+            _cmb_sous.combo.ToolTip = (
+                None if len(_opts) > 1 else
+                u"Aucune sous-discipline n'est renseign\xe9e pour cette "
+                u"discipline dans les vues personnalis\xe9es.")
+
+        def _maj_familles():
+            _labels = _labels_disponibles()
+            _opts = [_lbl for _lbl in view_labels
+                     if filtrer_labels_pour_famille(
+                         cfg, _labels, view_vue_ids.get(_lbl, u''))]
+            _prec = _cmb_fam.valeur()
+            _cmb_fam.definir(_opts if _opts else [],
+                             selection=(_prec if _prec in _opts else None))
+            _cmb_fam.combo.IsEnabled = bool(_opts)
+            _cmb_fam.combo.ToolTip   = None if _opts else _AIDE_INDISPO
+
+        def _maj_types_pers():
+            _fam_lbl = _cmb_fam.valeur() or u''
+            _dispo = filtrer_labels_pour_famille(
+                cfg, _labels_disponibles(), view_vue_ids.get(_fam_lbl, u''))
+            _prec = _cmb_type.valeur()
+            _cmb_type.definir(_dispo if _dispo else [],
+                              selection=(_prec if _prec in _dispo else None))
+            _cmb_type.combo.IsEnabled = bool(_dispo)
+            _cmb_type.combo.ToolTip   = None if _dispo else _AIDE_INDISPO
+            _maj_phases()
+
+        def _maj_phases():
+            """
+            Dernier maillon : la phase n'est proposee que si les menus
+            au-dessus portent chacun une valeur reelle.
+
+            Rien ne restreint la liste des phases elle-meme — c'est celle du
+            projet. Ce qui se decide ici, c'est de ne pas faire choisir une
+            phase pour une combinaison qui ne creera aucune vue.
+            """
+            _amont_ok = (_cmb_fam.valeur() is not None
+                         and _cmb_type.valeur() is not None)
+            _prec = _cmb_phase.valeur()
+            if _amont_ok and _phase_labels:
+                # Repli sur la derniere phase, comportement par defaut de Revit
+                # a la creation d'une vue.
+                _cmb_phase.definir(
+                    _phase_labels,
+                    selection=(_prec if _prec in _phase_labels
+                               else _phase_labels[-1]))
+                _cmb_phase.combo.IsEnabled = True
+                _cmb_phase.combo.ToolTip   = None
+            else:
+                _cmb_phase.definir([])
+                _cmb_phase.combo.IsEnabled = False
+                _cmb_phase.combo.ToolTip = (
+                    u"Aucune phase dans ce projet." if not _phase_labels else
+                    u"Renseignez d'abord la discipline, la famille de vue et "
+                    u"le type personnalis\xe9.")
+
+        def _depuis(etage):
+            """Rejoue la cascade a partir de l'etage donne."""
+            if _cascade_en_cours[u'v']:
+                return
+            _cascade_en_cours[u'v'] = True
+            try:
+                if etage <= 2:
+                    _maj_sous_disciplines()
+                if etage <= 3:
+                    _maj_familles()
+                if etage <= 4:
+                    _maj_types_pers()
+                else:
+                    _maj_phases()
+            finally:
+                _cascade_en_cours[u'v'] = False
+
+        _cmb_disc  = ComboCherchable(win.cmbDiscipline,
+                                     on_change=lambda: _depuis(2),
+                                     marqueur_vide=_AUCUNE_VALEUR)
+        _cmb_sous  = ComboCherchable(win.cmbSousDiscipline,
+                                     on_change=lambda: _depuis(3),
+                                     marqueur_vide=_AUCUNE_VALEUR)
+        _cmb_fam   = ComboCherchable(win.cmbViewFamily,
+                                     on_change=lambda: _depuis(4),
+                                     marqueur_vide=_AUCUNE_VALEUR)
+        _cmb_type  = ComboCherchable(win.cmbVueTypePers,
+                                     on_change=lambda: _depuis(5),
+                                     marqueur_vide=_AUCUNE_VALEUR)
+        _cmb_phase = ComboCherchable(win.cmbPhase,
+                                     marqueur_vide=_AUCUNE_VALEUR)
+
+        _disc_options[:] = [(u'', _TOUTES_DISC)] + _disc_racines
+        _cmb_disc.definir([_l for _c, _l in _disc_options])
+        _cascade_en_cours[u'v'] = True
+        try:
+            _maj_sous_disciplines()
+            _maj_familles()
+            _maj_types_pers()
+        finally:
+            _cascade_en_cours[u'v'] = False
 
         win.cmbFileFilter.ItemsSource   = ["dwg", "dxf", "axm", "sat", "dgn",
                                            "obj", "3dm", "skp", "stl", "step", "Tout"]
@@ -617,6 +875,37 @@ def main():
             _filter_checkboxes.append((_fkey, _fcb))
             _fcb.Checked   += _refresh_list
             _fcb.Unchecked += _refresh_list
+
+        # Types de niveaux par defaut, propres au type personnalise : le
+        # reglage n'est plus global, chaque vue personnalisee porte les siens
+        # (01_Parametres > Vues > Vues personnalisees, colonne "Types de
+        # niveaux par défaut"). On reapplique les cases a chaque changement de
+        # type — etat initial, l'utilisateur reste libre de les modifier.
+        _niv_defaut_pers = {}
+        for _nd in cfg.get(u'niveaux_defaut_types_pers', []) or []:
+            _lbl_nd = _nd.get(u'label', u'')
+            if _lbl_nd:
+                _niv_defaut_pers[_lbl_nd] = _nd.get(u'niveaux', {}) or {}
+
+        def _maj_filtres_niveaux(sender=None, args=None):
+            # Les menus etant editables, la valeur se lit sur l'enveloppe
+            # et non sur SelectedItem : ce dernier suit la liste filtree
+            # par la frappe, pas la valeur reellement retenue.
+            _lbl_tvp = _cmb_type.valeur()
+            if _lbl_tvp is None:
+                return
+            # Repli sur l'ancien reglage global tant que ce type n'a pas ete
+            # configure : comportement identique a celui d'avant.
+            _defauts = _niv_defaut_pers.get(_lbl_tvp)
+            if _defauts is None:
+                _defauts = _vm_defaults
+            for _key_f, _cb_f in _filter_checkboxes:
+                _cle_f = _key_f if _key_f is not None else u'autres'
+                _cb_f.IsChecked = bool(
+                    _defauts.get(_cle_f, _cle_f == u'batiment'))
+
+        win.cmbVueTypePers.SelectionChanged += _maj_filtres_niveaux
+        _maj_filtres_niveaux()
 
         _refresh_list()
 
@@ -742,7 +1031,7 @@ def main():
             u'Automatique - Centre a centre',
             u'Automatique - Origine vers origine interne',
         ]
-        _fam_map = {lbl: i for i, (lbl, _) in enumerate(view_options)}
+        _fam_map = {lbl: i for i, (lbl, _, __) in enumerate(view_options)}
 
         # Normalisation sans accents pour le lookup des familles de vues
         # Le suffixe entre parentheses (ex: "(Structure)") est ignore pour la retrocompat
@@ -774,13 +1063,41 @@ def main():
                 win.chkCorrectLines.IsChecked = bool(_opts[u'correct_lines'])
             if u'view_only' in _opts:
                 win.chkViewOnly.IsChecked = bool(_opts[u'view_only'])
+            # Le rappel suit l'ORDRE DE LA CASCADE — discipline, puis famille,
+            # puis type, puis phase. Chaque affectation reconstruit les menus
+            # suivants : dans le desordre, on ecrirait dans des listes que
+            # l'etape d'apres remplacerait aussitot.
+            #
+            # La sous-discipline n'est pas enregistree dans les profils : elle
+            # reste sur « Toutes les sous-disciplines », ce qui laisse la
+            # branche entiere disponible et n'exclut aucun type du profil.
+
+            # Discipline : la cle stockee est le CODE OUVRAGE, pas le libelle,
+            # qui peut etre renomme dans le referentiel sans casser les profils.
+            # Un profil enregistre avant l'ajout de ce reglage n'en a pas : le
+            # menu garde alors « Toutes les disciplines ».
+            _dc = _vues.get(u'discipline', u'')
+            if _dc:
+                for _c_o, _l_o in _disc_options:
+                    if _c_o == _dc:
+                        _cmb_disc.selectionner(_l_o)
+                        break
+
+            # Familles REELLEMENT proposees apres filtrage par la discipline :
+            # se fier a la liste complete donnerait une valeur absente du menu.
             _fam = _vues.get(u'famille', u'')
-            # Recherche exacte d'abord, puis normalisee (sans accents) pour retrocompat
-            _fi = _fam_map.get(_fam, _fam_map_norm.get(_norm_fam(_fam), -1))
-            if _fi >= 0: win.cmbViewFamily.SelectedIndex = _fi
+            for _lbl_o in (_cmb_fam.items() or []):
+                if _lbl_o == _fam or _norm_fam(_lbl_o) == _norm_fam(_fam):
+                    _cmb_fam.selectionner(_lbl_o)
+                    break
+
             _tp = _vues.get(u'type_personnalise', u'')
-            if _tp in _tvp_labels:
-                win.cmbVueTypePers.SelectedIndex = _tvp_labels.index(_tp)
+            _cmb_type.selectionner(_tp)
+
+            # Phase : stockee par NOM. Un projet qui ne connait pas ce nom
+            # garde le repli de _maj_phases (derniere phase du projet).
+            _cmb_phase.selectionner(_vues.get(u'phase', u''))
+
             if u'vue_par_niveau' in _vues:
                 win.chkVueNiveau.IsChecked = bool(_vues[u'vue_par_niveau'])
 
@@ -811,6 +1128,21 @@ def main():
                     u"« Lier CAO ».",
                     close_label=u"Retour")
                 return
+            # Sans type personnalisé disponible pour la famille choisie, le
+            # nommage des vues créées serait incomplet : on bloque ici plutôt
+            # que de produire des vues mal nommées.
+            if _cmb_type.valeur() is None:
+                show_alert(
+                    u"Aucun type personnalisé",
+                    u"Aucun type personnalisé n'est disponible pour la famille "
+                    u"de vue « {} ».\n\n"
+                    u"Cochez cette famille dans 01_Paramètres > Vues > Vues "
+                    u"personnalisées, colonne « Familles de vues » (et "
+                    u"« Lier CAO → Vues » dans la colonne « Disponibilité »), "
+                    u"ou choisissez une autre famille de "
+                    u"vue.".format(_cmb_fam.valeur() or u''),
+                    close_label=u"Retour")
+                return
             win.DialogResult = True
 
         win.btnOk.Click     += _on_lier_cao_click
@@ -821,11 +1153,13 @@ def main():
 
         # 6. Lecture des choix
         selected_files = [item for item in win.lstViews.SelectedItems]
-        chosen_lbl     = win.cmbViewFamily.SelectedItem
+        chosen_lbl     = _cmb_fam.valeur()
         fam_enum       = view_families[chosen_lbl]
-        # Phase de projet choisie pour les vues creees
+        # Phase de projet choisie pour les vues creees. None quand le menu est
+        # grise (voir _maj_phases) : _apply_view_phase(None) ne fait rien et le
+        # template resout un segment vide.
         _phase_map        = {_phase_name(ph): ph for ph in phases_projet}
-        _chosen_phase_lbl = win.cmbPhase.SelectedItem
+        _chosen_phase_lbl = _cmb_phase.valeur()
         _selected_phase   = _phase_map.get(_chosen_phase_lbl)
         # Retrouver le vue_id de l'entree nommage_vues selectionnee (ex. 'vue-surface')
         _chosen_vue_id = None
@@ -892,7 +1226,7 @@ def main():
         do_link_dwg    = True
         do_vue_niveau  = bool(win.chkVueNiveau.IsChecked)
         # Type de vue personnalisé sélectionné
-        _tvp_label_sel  = win.cmbVueTypePers.SelectedItem or u''
+        _tvp_label_sel  = _cmb_type.valeur() or u''
         _selected_tvp   = get_row_by_label(cfg, _tvp_label_sel) or (_tvp_list[0] if _tvp_list else {})
         _vue_suffix = _selected_tvp.get(u'titre', _selected_tvp.get(u'nom', u'FM'))
         # Reconstruire candidates depuis win._candidates (dossier/sous-dossiers eventuels)
@@ -905,10 +1239,73 @@ def main():
             show_alert(u"Aucune selection", u"Aucun fichier selectionne. Operation annulee.")
             return
 
+        # Gabarit configure mais absent du projet : proposer une substitution.
+        # Fait AVANT toute Transaction / TransactionGroup — une fenetre modale
+        # ouverte pendant une transaction Revit laisserait le modele verrouille
+        # tout le temps de la reflexion de l'utilisateur.
+        # Un nom de gabarit errone est sinon sans effet visible : les vues se
+        # creent, sans gabarit, et rien ne le signale.
+        _gabarit_configure = _vues_creation_mod.get_gabarit_name(
+            cfg, _selected_tvp, fam_enum, vue_id=_chosen_vue_id)
+        _gabarit_final     = _gabarit_configure
+        _gabarit_substitue = False
+        if _gabarit_configure:
+            _tpls_projet = _vues_creation_mod.get_view_templates(doc)
+            _noms_tpl = [_vues_creation_mod.element_name(_t) for _t in _tpls_projet]
+            if _gabarit_configure not in _noms_tpl:
+                if not _tpls_projet:
+                    show_alert(
+                        u"Gabarit de vue introuvable",
+                        u"Le gabarit « {} » configuré pour « {} » n'existe pas "
+                        u"dans ce projet, qui ne contient d'ailleurs aucun "
+                        u"gabarit de vue.\n\n"
+                        u"Les vues seront créées sans gabarit.".format(
+                            _gabarit_configure, _tvp_label_sel))
+                    _gabarit_final = u''
+                else:
+                    # Filtre de compatibilite sur le NOM D'ENUMERATION ; la
+                    # traduction francaise n'intervient qu'a l'affichage.
+                    _vt_attendu = _vues_creation_mod.VUE_ID_TO_VIEWTYPE.get(
+                        _chosen_vue_id)
+                    _fr = lambda _lst: [
+                        (_vues_creation_mod.element_name(_t),
+                         _vues_creation_mod.libelle_view_type(
+                             cfg, _t.ViewType.ToString()))
+                        for _t in _lst]
+                    _compat = ([_t for _t in _tpls_projet
+                                if _t.ViewType.ToString() == _vt_attendu]
+                               if _vt_attendu else None)
+                    _choix_tpl = choisir_dans_liste(
+                        titre=u"Gabarit de vue introuvable — Lier CAO",
+                        description=(
+                            u"Sélectionnez le gabarit à appliquer aux vues "
+                            u"« {} » créées, ou annulez pour les créer sans "
+                            u"gabarit.".format(chosen_lbl)),
+                        note=(u"Le gabarit « {} » configuré dans 01_Paramètres "
+                              u"> Vues > Vues personnalisées > Gabarits de "
+                              u"vues (ligne « {} », type « {} ») n'existe pas "
+                              u"dans ce projet.".format(
+                                  _gabarit_configure, chosen_lbl,
+                                  _tvp_label_sel)),
+                        entete_nom=u"Gabarit de vue",
+                        entete_info=u"Type de vue",
+                        items_tous=_fr(_tpls_projet),
+                        items_compat=(_fr(_compat) if _compat is not None
+                                      else None),
+                        libelle_compat=(
+                            u"Uniquement les gabarits compatibles avec "
+                            u"« {} »".format(chosen_lbl)),
+                        valeur_courante=u'')
+                    # Substitution valable pour CETTE execution seulement : la
+                    # configuration n'est pas reecrite ici (seul 01_Parametres
+                    # ecrit config.json).
+                    _gabarit_final     = _choix_tpl or u''
+                    _gabarit_substitue = bool(_choix_tpl)
+
         log(u"---")
         log(u"Fichiers selectionnes : {}".format(len(selected_files)))
         log(u"Famille de vue : `{}`".format(chosen_lbl))
-        log(u"Phase : `{}`".format(_chosen_phase_lbl))
+        log(u"Phase : `{}`".format(_chosen_phase_lbl or u"aucune"))
         log(u"Type personnalise : `{}`  (label `{}`)".format(
             _vue_suffix, _tvp_label_sel))
         log(u"Mode : {}".format(
@@ -947,6 +1344,9 @@ def main():
                 do_vue_niveau=do_vue_niveau,
                 vue_id=_chosen_vue_id,
                 warnings=_vue_warnings,
+                # Gabarit deja resolu plus haut, substitution comprise : sans
+                # cela la resolution interne reimposerait le nom erroné.
+                gabarit_name=_gabarit_final,
             )
             log(u"Vues creees : {}".format(len(created_views)))
             for _w in _vue_warnings:
@@ -1024,6 +1424,7 @@ def main():
             _active_vt = set()
             _VF_TO_VT = {
                 ViewFamily.FloorPlan:      u"FloorPlan",
+                ViewFamily.AreaPlan:       u"AreaPlan",
                 ViewFamily.CeilingPlan:    u"CeilingPlan",
                 ViewFamily.StructuralPlan: u"StructuralPlan",
                 ViewFamily.Drafting:       u"DraftingView",
@@ -1034,7 +1435,7 @@ def main():
                 _VF_TO_VT[_vf_legend] = u"Legend"
             # Section / Elevation restent listees ci-dessus par securite, mais
             # view_options ne peut plus les contenir (voir _VUE_ID_TO_FAMILY).
-            for _, _vf in view_options:
+            for _, _vf, __ in view_options:
                 _vt = _VF_TO_VT.get(_vf)
                 if _vt:
                     _active_vt.add(_vt)
@@ -1074,11 +1475,13 @@ def main():
                 shared_val = getattr(ImportPlacement, shared_name)
                 center_val = getattr(ImportPlacement, center_name)
 
-                # Pre-calcul VFT/gabarit pour la creation eventuelle de vues
+                # Pre-calcul VFT pour la creation eventuelle de vues. Le gabarit
+                # retourne ici est ignore : _gabarit_final a deja ete resolu
+                # plus haut, substitution comprise.
                 _vft_for_creation    = None
-                _gabarit_for_creation = u''
+                _gabarit_for_creation = _gabarit_final
                 try:
-                    _vft_for_creation, _gabarit_for_creation = prepare_view_creation(
+                    _vft_for_creation, _ = prepare_view_creation(
                         doc, fam_enum, _selected_tvp, cfg, vue_id=_chosen_vue_id)
                 except RuntimeError as _e_vft:
                     log(u"Preparation creation vues impossible : {}".format(_e_vft))
@@ -1329,6 +1732,21 @@ def main():
         if failed_create_link:
             lines.append(u"{} fichier(s) non traite(s) : vue non creee, DWG non lie.".format(
                 len(failed_create_link)))
+
+        # Substitution de gabarit : sans ce rappel, rien ne distingue une
+        # execution normale d'une execution ou le reglage etait erroné.
+        if _gabarit_substitue:
+            lines.append(
+                u"Gabarit « {} » appliqué à la place de « {} », introuvable "
+                u"dans ce projet. Remplacement valable pour cette exécution "
+                u"seulement — corrigez-le dans 01_Paramètres > Vues > Vues "
+                u"personnalisées > Gabarits de vues.".format(
+                    _gabarit_final, _gabarit_configure))
+        elif _gabarit_configure and not _gabarit_final:
+            lines.append(
+                u"Gabarit « {} » introuvable dans ce projet et aucun "
+                u"remplacement choisi : vues créées sans gabarit.".format(
+                    _gabarit_configure))
 
         # Tableau vues creees / fichiers CAO lies (DataTable -> DataGrid WPF)
         clr.AddReference("System.Data")

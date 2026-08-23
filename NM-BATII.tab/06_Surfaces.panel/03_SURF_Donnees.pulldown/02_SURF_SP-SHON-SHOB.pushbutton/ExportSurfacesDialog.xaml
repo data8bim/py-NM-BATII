@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ExportSurfacesDialog.xaml — Choix des niveaux a exporter vers .xlsx depuis
+  le tableau « Surfaces du projet » de 21_MAPP_SP-SHON-SHOB.
+
+  La liste (filtre texte + filtres par type de niveau + cases a cocher)
+  reprend le modele de 01_Lier_CAO. Seuls les niveaux coches partent dans le
+  tableur ; les cellules deja calculees par une nomenclature y sont exportees
+  en lecture seule (cf. ecrire_tableur / cellules_verrouillees).
+
+  Le dialogue ne fait que preparer l'export : c'est « Exporter » qui valide et
+  ferme, d'ou un pied standard Appliquer / Annuler.
+-->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Exporter les surfaces vers un tableur"
+        Width="600"
+        MinWidth="600"
+        Height="600"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI"
+        FontSize="13">
+
+  <Window.Resources>
+    <Style TargetType="TextBox"  BasedOn="{StaticResource NMTextBoxStandard}"/>
+    <Style TargetType="ListBox"  BasedOn="{StaticResource NMListBoxStandard}"/>
+    <Style TargetType="CheckBox" BasedOn="{StaticResource NMCheckBoxStandard}">
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>      <!-- 0 : niveaux a exporter -->
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>   <!-- 2 : pied -->
+    </Grid.RowDefinitions>
+
+    <GroupBox Grid.Row="0" Header="Niveaux à exporter">
+      <Grid Margin="4">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>   <!-- 0 : filtre texte -->
+          <RowDefinition Height="6"/>
+          <RowDefinition Height="Auto"/>   <!-- 2 : filtres types -->
+          <RowDefinition Height="4"/>
+          <RowDefinition Height="*"/>      <!-- 4 : liste -->
+          <RowDefinition Height="Auto"/>   <!-- 5 : boutons selection -->
+        </Grid.RowDefinitions>
+
+        <!-- Filtre texte -->
+        <Grid Grid.Row="0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="Filtre :" VerticalAlignment="Center"
+                     Grid.Column="0" Margin="0,0,6,0" Foreground="#333333"/>
+          <TextBox x:Name="txtListFilter"
+                   Grid.Column="1" VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Filtres types de niveaux -->
+        <WrapPanel x:Name="pnlFiltresTypes"
+                   Grid.Row="2"
+                   VerticalAlignment="Center"
+                   Orientation="Horizontal"/>
+
+        <!-- Liste des niveaux -->
+        <ListBox x:Name="lstNiveaux"
+                 SelectionMode="Extended"
+                 HorizontalContentAlignment="Stretch"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 Grid.Row="4">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding IsSelected,
+                              RelativeSource={RelativeSource AncestorType=ListBoxItem},
+                              Mode=TwoWay}"
+                          VerticalAlignment="Center" Margin="0,0,4,0"/>
+                <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- Boutons de selection -->
+        <Grid Grid.Row="5" Margin="0,4,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Button x:Name="btnSelectAll"   Content="Sélectionner tout"
+                  Grid.Column="0" Margin="0"
+                  Style="{DynamicResource NMButtonStandard}"/>
+          <Button x:Name="btnDeselectAll" Content="Désélectionner tout"
+                  Grid.Column="2" Margin="0"
+                  Style="{DynamicResource NMButtonStandard}"/>
+          <Button x:Name="btnInvert"      Content="Inverser"
+                  Grid.Column="4" Margin="0"
+                  Style="{DynamicResource NMButtonStandard}"/>
+        </Grid>
+
+      </Grid>
+    </GroupBox>
+
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button x:Name="btnOk"
+              Grid.Column="0"
+              Content="&#x25B6;  Exporter le tableur (.xlsx)"
+              HorizontalAlignment="Stretch"
+              IsDefault="True"
+              Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button x:Name="btnCancel"
+              Grid.Column="2"
+              Content="Annuler"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"
+              VerticalAlignment="Center"/>
+    </Grid>
+
+  </Grid>
+</Window>

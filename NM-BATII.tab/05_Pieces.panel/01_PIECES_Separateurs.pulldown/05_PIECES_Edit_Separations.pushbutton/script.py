@@ -184,6 +184,11 @@ class FenetreMode(forms.WPFWindow):
         self._timer_attente      = None
         self._cache_ui           = {}      # AutomationElement par option
 
+        # Etat de la case « Verrouiller aussi les pièces », CAPTURE au moment
+        # d'armer le mode et non relu pendant l'epinglage : c'est le reglage en
+        # vigueur a l'activation qui doit valoir.
+        self._verrouiller_pieces = True
+
         # Logs pyRevit — convention de l'extension : rien ne s'affiche si
         # « Activer les logs des scripts » est decoche dans 01_Parametres.
         # Resolus ICI (globals encore vivants) et portes par l'instance, les
@@ -720,6 +725,9 @@ class FenetreMode(forms.WPFWindow):
                 self._appliquer_style(self.btn_bascule, u'NMButtonAppliquer')
 
             self.btn_bascule.IsEnabled = True
+            # L'option ne se change qu'a froid : une fois le mode arme, la
+            # decocher ne depinglerait rien et laisserait croire le contraire.
+            self.chk_pieces.IsEnabled = not self._actif
             self._afficher()
         except Exception:
             pass
@@ -784,6 +792,10 @@ class FenetreMode(forms.WPFWindow):
         u"À la désactivation, tout revient à l'état d'origine. Seuls les "
         u"éléments épinglés par le script sont dépinglés : vos propres "
         u"épinglages sont préservés.\n\n"
+        u"« Verrouiller aussi les pièces » commande le sort des pièces "
+        u"elles-mêmes : cochée, elles sont épinglées comme le reste ; décochée, "
+        u"elles restent sélectionnables, pour ajuster un contour et sa pièce "
+        u"dans la même passe. L'option se règle avant d'activer le mode.\n\n"
         u"Le bouton à l'icône lance l'outil natif Revit « Séparateur de "
         u"pièces » pour tracer de nouveaux séparateurs."
     )
@@ -823,6 +835,14 @@ class FenetreMode(forms.WPFWindow):
                     _self[0]._rafraichir_etat()
         else:
             self._etat_texte = u"Activation en cours…"
+
+            # Lu ICI, sur le fil WPF, et pas dans _activer : celui-ci s'execute
+            # sur le fil Revit via l'ExternalEvent, et le reglage qui compte est
+            # celui en vigueur au moment ou l'on arme.
+            try:
+                self._verrouiller_pieces = bool(self.chk_pieces.IsChecked)
+            except Exception:
+                self._verrouiller_pieces = True
 
             def _action():
                 _self[0]._action_en_attente = False
@@ -1004,6 +1024,7 @@ class FenetreMode(forms.WPFWindow):
             from Autodesk.Revit.DB import (
                 FilteredElementCollector as _Collector,
                 ElementCategoryFilter    as _CatFilter,
+                LogicalAndFilter         as _AndFilter,
                 BuiltInCategory          as _BIC,
                 Transaction              as _Transaction,
                 ViewPlan                 as _ViewPlan,
@@ -1029,8 +1050,29 @@ class FenetreMode(forms.WPFWindow):
         # Le tri par categorie est fait par le FILTRE NATIF (inverted=True) et
         # non dans une boucle Python : sur une vue chargee cela evite 3 appels
         # interop par element (.Category, .Id, .IntegerValue).
+        #
+        # Categories laissees modifiables : les separateurs de piece, et selon
+        # l'option de la palette les pieces elles-memes — pour ajuster un
+        # contour et sa piece dans la meme passe. getattr plutot qu'un acces
+        # direct : une categorie absente de l'enumeration ne doit pas faire
+        # echouer toute la collecte.
+        _exclues = [c for c in (getattr(_BIC, 'OST_RoomSeparationLines', None),)
+                    if c is not None]
+        if not self._verrouiller_pieces:
+            _pieces = getattr(_BIC, 'OST_Rooms', None)
+            if _pieces is not None:
+                _exclues.append(_pieces)
+        if not _exclues:
+            self._echec(u"✖ Catégorie des séparateurs de pièces introuvable.")
+            return
+
         try:
-            filtre = _CatFilter(_BIC.OST_RoomSeparationLines, True)
+            # NOT(a OU b) s'ecrit comme l'ET de deux filtres de categorie
+            # INVERSES : ElementFilter n'expose pas d'operateur de negation, mais
+            # ElementCategoryFilter(cat, True) en est deja un.
+            filtre = _CatFilter(_exclues[0], True)
+            for _cat in _exclues[1:]:
+                filtre = _AndFilter(filtre, _CatFilter(_cat, True))
             elements = list(
                 _Collector(doc, vue.Id)
                 .WhereElementIsNotElementType()

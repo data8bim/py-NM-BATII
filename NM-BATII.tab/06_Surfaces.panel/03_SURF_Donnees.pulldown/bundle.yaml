@@ -1,0 +1,9 @@
+title:
+  en_us: "Area\ndata"
+  fr_fr: "Données\ndes surfaces"
+# Ce qui ALIMENTE les surfaces en donnees, une fois les styles poses : les
+# couleurs du projet, puis les totalisations reglementaires vers les niveaux.
+# Pendant du pulldown « Donnees des pieces » du panneau Pieces.
+layout:
+  - 01_SURF_Couleurs                   # Couleurs
+  - 02_SURF_SP-SHON-SHOB               # SHON-SHOB-SP → Niveaux

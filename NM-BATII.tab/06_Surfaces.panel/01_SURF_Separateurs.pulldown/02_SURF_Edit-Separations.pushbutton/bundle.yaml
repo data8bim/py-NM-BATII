@@ -1,0 +1,37 @@
+title:
+  en_us: "Edit area\nboundaries"
+  fr_fr: "Edition séparateurs\nde surfaces"
+tooltip:
+  en_us: "Edit mode for area boundary lines.
+         \nPins every other element of the active view and turns off selection
+         \nof pinned elements: they stay VISIBLE (context kept for alignment)
+         \nbut become neither selectable nor editable.
+         \nView switching is blocked while active — the mode only protects the
+         \nview it was armed on.
+         \nOnly what the script pinned is unpinned on exit; your own pinned
+         \nelements are preserved.
+         \nRe-running the button (or its keyboard shortcut) toggles the mode.
+         \nA checkbox decides whether the areas themselves are locked too; set
+         \nit before arming the mode.
+         \n\n« Area Plan » views only: areas exist nowhere else.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+  fr_fr: "Mode édition des séparateurs de surfaces.
+         \nÉpingle tous les autres éléments de la vue active et coupe la
+         \nsélection des éléments épinglés : ils restent VISIBLES (contexte
+         \nconservé pour l'alignement) mais ne sont ni sélectionnables ni
+         \nmodifiables.
+         \nLe changement de vue est bloqué pendant le mode — celui-ci ne
+         \nprotège que la vue où il a été armé.
+         \nÀ la sortie, seuls les éléments épinglés par le script sont
+         \ndépinglés ; vos propres épinglages sont préservés.
+         \nRelancer le bouton (ou son raccourci clavier) bascule le mode.
+         \nUne case décide si les surfaces elles-mêmes sont verrouillées ; elle
+         \nse règle avant d'activer le mode.
+         \n\nPlans de surface uniquement : les surfaces n'existent nulle part
+         \nailleurs.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'
+context: active-area-plan

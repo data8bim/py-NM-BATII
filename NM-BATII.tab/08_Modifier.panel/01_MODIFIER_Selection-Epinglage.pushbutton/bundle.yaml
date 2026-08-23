@@ -1,0 +1,30 @@
+title:
+  en_us: "Select\n/ Pin"
+  fr_fr: "Sélectionner\n/ Épingler"
+tooltip:
+  en_us: "Lists the model elements in a table (category, family, type, level,
+         pinned state, parameters). Filter and sort each column, pick which
+         parameters are shown as columns, reorder columns by dragging their
+         headers, then select, pin or unpin the checked elements.
+         \n\nChecking rows: click anywhere in a row to toggle it. Shift+click
+         applies the clicked row's new state to the whole range from the last
+         row clicked without Shift. Ctrl+Shift+click checks that range without
+         unchecking anything. Ctrl+click toggles a single row.
+         \n\nSettings (scope, columns, order, widths, sort) are restored on
+         next run.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Présente les éléments du modèle dans une table (catégorie, famille,
+         type, niveau, état d'épinglage, paramètres). Filtres et tri par
+         colonne, choix des paramètres affichés en colonnes, réorganisation
+         des colonnes par glissé des en-têtes, puis sélection, épinglage ou
+         désépinglage des éléments cochés.
+         \n\nCocher les lignes : un clic n'importe où dans la ligne la bascule.
+         MAJ+clic applique l'état de la ligne cliquée à toute la plage depuis
+         la dernière ligne cliquée sans MAJ. CTRL+MAJ+clic coche cette plage
+         sans rien décocher. CTRL+clic bascule une ligne isolée.
+         \n\nLes derniers réglages (portée, colonnes, ordre, largeurs, tri)
+         sont rechargés au lancement suivant.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

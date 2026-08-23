@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Légendes de motif/couleur des surfaces"
+        Width="440"
+        MinWidth="415"
+        SizeToContent="Height"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Window.Resources>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}"/>
+    <Style TargetType="ComboBox"  BasedOn="{StaticResource NMComboBoxStandard}"/>
+    <Style TargetType="Button"    BasedOn="{StaticResource NMButtonStandard}"/>
+    <Style TargetType="CheckBox"  BasedOn="{StaticResource NMCheckBoxStandard}">
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+  </Window.Resources>
+
+  <!-- LARGEUR : c'est la ligne la plus large du groupe « Portée » qui fixe le
+       plancher, aujourd'hui « Par schéma de surface » + son bouton + son
+       compteur, mesurée à 363 px (Segoe UI 14 pour l'option, 12 pour le reste,
+       bouton borné à MinWidth 120 par NMButtonStandard). Avec les marges du
+       groupe, celles de la grille et le cadre de fenêtre, il faut 411 px :
+       d'où MinWidth 415 et une largeur nominale de 440.
+
+       Les libellés d'options et les compteurs ont été raccourcis exprès pour
+       atteindre cette largeur ; le sens complet est passé en infobulle. Les
+       rallonger repousse le plancher d'autant et tronquera la ligne.
+
+       Toutes les rangées en Auto, et SizeToContent="Height" sur la fenêtre :
+       la hauteur épouse le contenu. Une rangée en "*" faisait s'étirer le
+       groupe « Portée du traitement » jusqu'au bas de la fenêtre, laissant un
+       vide sous la dernière option, à l'intérieur du cadre du groupe.
+       Rien ne change de taille après l'ouverture — la liste déroulante est
+       remplie avant Show() — donc la fenêtre ne bougera plus ensuite. -->
+  <Grid Margin="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="10"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="12"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Rappel du comportement : il vaut mieux le dire ici que de laisser
+         découvrir après coup qu'une légende en place a été remplacée. -->
+    <StackPanel Grid.Row="0">
+      <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#555555"
+                 Text="La légende est posée à la même position que celle d'une vue de référence, quel que soit le type de calcul. Une légende déjà présente dans une vue traitée est remplacée ; la vue de référence, elle, n'est pas touchée."/>
+      <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+        <Button x:Name="btnSelectRefView" Content="Vue de référence..."
+                Padding="8,2"
+                ToolTip="Choisir la vue dont la légende donne la position à recopier."/>
+        <TextBlock x:Name="txtRefView" Margin="8,0,0,0"
+                   VerticalAlignment="Center" FontSize="12"
+                   TextTrimming="CharacterEllipsis"
+                   Text="(aucune)"/>
+      </StackPanel>
+      <!-- Grid et non StackPanel horizontal : la liste déroulante s'étire
+           jusqu'au bord droit au lieu d'avoir une largeur figée, de sorte que
+           le bord de la fenêtre tombe juste après elle quelle que soit la
+           largeur choisie ici ou par l'utilisateur. -->
+      <Grid Margin="0,8,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="8"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="Type de légende" VerticalAlignment="Center"/>
+        <ComboBox Grid.Column="2" x:Name="cboTypeLegende"/>
+      </Grid>
+    </StackPanel>
+
+    <!-- ═══ Portée du traitement ═══════════════════════════════════════════ -->
+    <GroupBox Grid.Row="2" Header="Portée du traitement">
+      <StackPanel Margin="4,4,4,6">
+        <RadioButton x:Name="rbToutes"
+                     GroupName="portee" Margin="0,4" IsChecked="True"
+                     Content="Tous les plans de surface"
+                     ToolTip="Tous les plans de surface du projet, hors gabarits."/>
+        <StackPanel Orientation="Horizontal" Margin="0,4">
+          <RadioButton x:Name="rbSchemas"
+                       GroupName="portee" VerticalAlignment="Center"
+                       Content="Par schéma de surface"
+                       ToolTip="Les plans de surface des schémas cochés (SHON/SHOB, Surface Plancher...)."/>
+          <Button x:Name="btnSelectSchemas" Content="Choisir les schémas..."
+                  Margin="8,0,0,0" Padding="8,2"/>
+          <TextBlock x:Name="txtSchemasCount" Margin="8,0,0,0"
+                     VerticalAlignment="Center" FontSize="12"
+                     Text="(0 schéma)"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0,4">
+          <RadioButton x:Name="rbVues"
+                       GroupName="portee" VerticalAlignment="Center"
+                       Content="Par vues sélectionnées"
+                       ToolTip="Les seuls plans de surface cochés dans le tableau."/>
+          <Button x:Name="btnSelectViews" Content="Choisir les vues..."
+                  Margin="8,0,0,0" Padding="8,2"/>
+          <TextBlock x:Name="txtViewsCount" Margin="8,0,0,0"
+                     VerticalAlignment="Center" FontSize="12"
+                     Text="(0 vue)"/>
+        </StackPanel>
+      </StackPanel>
+    </GroupBox>
+
+    <!-- ═══ Boutons d'action ═══════════════════════════════════════════════ -->
+    <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnOK"
+              Content="▶  Poser les légendes"
+              Style="{DynamicResource NMButtonAppliquer}"
+              IsDefault="True"/>
+      <Button Grid.Column="2" x:Name="btnCancel"
+              Content="Annuler"
+              Style="{DynamicResource NMButtonAnnuler}"
+              IsCancel="True"/>
+    </Grid>
+  </Grid>
+</Window>

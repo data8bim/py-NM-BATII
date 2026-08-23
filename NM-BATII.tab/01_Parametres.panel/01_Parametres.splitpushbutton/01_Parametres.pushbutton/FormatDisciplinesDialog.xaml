@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Structure de la table du référentiel des disciplines : profondeur,
+     découpage du code et longueur des abréviations.
+
+     Sorti de l'onglet « Disciplines » : c'est un réglage de structure, qu'on
+     fixe une fois et qu'on ne touche plus, alors que la table en dessous se
+     modifie tous les jours. Le laisser à demeure au-dessus de la table lui
+     volait la moitié de la hauteur utile.
+
+     DEUX LONGUEURS, pas une : le CODE DISCIPLINE identifie une discipline ou
+     une sous-discipline ; au-delà de ses niveaux, les mêmes chiffres
+     continuent de descendre mais classent des OUVRAGES sous la dernière
+     sous-discipline — c'est le CODE OUVRAGE. « Niveaux du Code Discipline »
+     marque la frontière, et la colonne « Portée » la rend visible ligne par
+     ligne.
+
+     Changer une largeur REINTERPRETE tous les codes déjà saisis : élargir une
+     tranche décale les niveaux de toutes les lignes. D'où le rappel chiffré en
+     bas de fenêtre. -->
+<Window
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Structure de la table"
+  Width="740" Height="520"
+  MinWidth="660" MinHeight="460"
+  WindowStartupLocation="CenterOwner">
+
+  <Window.Resources>
+    <Style TargetType="GroupBox">
+      <Setter Property="HeaderTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" FontWeight="Bold"/>
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <!-- Infobulles repliées : sans ContentTemplate, une chaîne s'affiche sur
+         une seule ligne aussi longue que le texte. -->
+    <Style TargetType="ToolTip">
+      <Setter Property="MaxWidth" Value="320"/>
+      <Setter Property="ContentTemplate">
+        <Setter.Value>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+          </DataTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 profondeur -->
+      <RowDefinition Height="*"/>      <!-- 1 table par niveau -->
+      <RowDefinition Height="Auto"/>   <!-- 2 acronymes -->
+      <RowDefinition Height="Auto"/>   <!-- 3 exemple + alerte -->
+      <RowDefinition Height="Auto"/>   <!-- 4 pied -->
+    </Grid.RowDefinitions>
+
+    <!-- Profondeur totale et frontière du Code Discipline, sur UNE ligne : deux
+         nombres courts n'ont pas besoin de deux rangées, et la table en dessous
+         récupère la hauteur. Les niveaux d'ouvrage sont ce qui reste — la
+         colonne « Portée » de la table le montre ligne par ligne, il n'y a rien
+         à redire ici.
+         Colonnes en Auto : les champs restent collés à leur libellé. -->
+    <GroupBox Grid.Row="0" Header="Profondeur" Margin="0,0,0,8">
+      <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0" Margin="0,4,8,4"
+                   VerticalAlignment="Center"
+                   Text="Nbr Niveaux total"
+                   ToolTip="Profondeur totale de la hiérarchie. Ajouter un niveau ajoute une ligne à la table ci-dessous ; en retirer un supprime la dernière."/>
+        <TextBox   Grid.Column="1" x:Name="txtNivTotal"
+                   Margin="0,2" Width="50" HorizontalAlignment="Left"/>
+
+        <TextBlock Grid.Column="2" Margin="24,4,8,4"
+                   VerticalAlignment="Center"
+                   Text="Nbr Niveaux Discipline"
+                   ToolTip="Combien de niveaux de tête forment le Code Discipline : la discipline et ses sous-disciplines. Les niveaux suivants classent des ouvrages."/>
+        <TextBox   Grid.Column="3" x:Name="txtNivDiscipline"
+                   Margin="0,2" Width="50" HorizontalAlignment="Left"/>
+      </Grid>
+    </GroupBox>
+
+    <!-- Le format se règle NIVEAU PAR NIVEAU, dans une table plutôt que par des
+         champs figés : le nombre de niveaux étant lui-même réglable, des champs
+         fixes en XAML auraient imposé un plafond de plus, et laissé des cases
+         mortes dès qu'on descend à deux niveaux. -->
+    <!-- La règle de comptage des longueurs est passée derrière le bouton « ? »
+         de l'onglet : un pavé sous la table volait de la hauteur à chaque
+         ouverture pour un contenu qu'on lit une fois. -->
+    <GroupBox Grid.Row="1" Header="Largeur par niveau" Margin="0,0,0,8">
+      <DockPanel Margin="5">
+      <DataGrid x:Name="dgFormat"
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                CanUserSortColumns="False"
+                CanUserReorderColumns="False"
+                HeadersVisibility="Column">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Niveau" Binding="{Binding niveau}" Width="60"
+                              IsReadOnly="True">
+            <DataGridTextColumn.CellStyle>
+              <Style TargetType="DataGridCell">
+                <Setter Property="Background" Value="#F0F0F0"/>
+                <Setter Property="Foreground" Value="#555555"/>
+              </Style>
+            </DataGridTextColumn.CellStyle>
+          </DataGridTextColumn>
+          <!-- Calculée depuis « Niveaux du Code Discipline » : la frontière se
+               voit ligne par ligne, pas seulement dans un chiffre au-dessus.
+               Bleu et orange comme dans la table du référentiel. -->
+          <DataGridTextColumn Header="Portée" Binding="{Binding portee}" Width="150"
+                              IsReadOnly="True">
+            <DataGridTextColumn.CellStyle>
+              <Style TargetType="DataGridCell">
+                <Setter Property="Background" Value="#F0F0F0"/>
+                <Setter Property="Foreground" Value="#555555"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding portee}" Value="Code Discipline">
+                    <Setter Property="Background" Value="#DDEBF7"/>
+                    <Setter Property="Foreground" Value="#1F3864"/>
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding portee}" Value="Code Ouvrage">
+                    <Setter Property="Background" Value="#FDE9D9"/>
+                    <Setter Property="Foreground" Value="#843C0C"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </DataGridTextColumn.CellStyle>
+          </DataGridTextColumn>
+          <DataGridTextColumn Header="Chiffres du code" Binding="{Binding digits}" Width="100"/>
+
+          <!-- DEUX chaînes d'abréviation, DEUX longueurs, réglables l'une
+               comme l'autre à TOUS les niveaux : les deux colonnes de gabarit
+               se saisissent sur toutes les lignes du référentiel, il n'y a
+               donc aucun niveau où l'une des deux n'aurait rien à calibrer.
+               Longueur des caractères SIGNIFIANTS du gabarit : ni les jetons,
+               ni les séparateurs n'y comptent.
+               TROIS écritures acceptées — « 0 » interdit tout caractère
+               propre et ne laisse que les jetons, un nombre fixe la longueur,
+               « mini;maxi » la borne. Elles se saisissent en texte : « 2;5 »
+               n'est pas un nombre, d'où une colonne de texte et non un
+               champ numérique. -->
+          <DataGridTextColumn Header="Long. abrév. Disciplines" Binding="{Binding long_disc}" Width="*">
+            <DataGridTextColumn.ElementStyle>
+              <Style TargetType="TextBlock">
+                <Setter Property="ToolTip" Value="0 = aucune abréviation propre, seuls les jetons {supN} et {dis}.&#10;Un nombre = longueur fixe.&#10;2;5 = entre 2 et 5 caractères, le mini pouvant valoir 0.&#10;Jetons et séparateurs ne comptent jamais."/>
+              </Style>
+            </DataGridTextColumn.ElementStyle>
+          </DataGridTextColumn>
+          <DataGridTextColumn Header="Long. abrév. Ouvrages" Binding="{Binding long_ouv}" Width="*">
+            <DataGridTextColumn.ElementStyle>
+              <Style TargetType="TextBlock">
+                <Setter Property="ToolTip" Value="0 = aucune abréviation propre, seuls les jetons {supN} et {dis}.&#10;Un nombre = longueur fixe.&#10;2;5 = entre 2 et 5 caractères, le mini pouvant valoir 0.&#10;Jetons et séparateurs ne comptent jamais."/>
+              </Style>
+            </DataGridTextColumn.ElementStyle>
+          </DataGridTextColumn>
+        </DataGrid.Columns>
+      </DataGrid>
+      </DockPanel>
+    </GroupBox>
+
+    <!-- Le groupe des abréviations, et à sa droite le MÊME bouton d'aide que
+         l'onglet « Disciplines » : les jetons se règlent ici mais s'écrivent
+         là-bas, la même page les explique. Aligné sur le bas du groupe, comme
+         dans l'onglet. -->
+    <Grid Grid.Row="2" Margin="0,0,0,8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- Deux réglages courts sur UNE ligne : chacun sur sa rangée laissait
+           une bande vide à droite, pour deux champs qui tiennent en trois
+           centimètres. -->
+      <GroupBox Grid.Column="0" Header="Abréviations">
+        <Grid Margin="5">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Margin="0,4,8,4"
+                     VerticalAlignment="Center"
+                     Text="Séparateur"
+                     ToolTip="Inséré entre les segments d'abréviation des différents niveaux. Laisser vide pour les coller (MEXSTR)."/>
+          <TextBox   Grid.Column="1" x:Name="txtSep"
+                     Margin="0,2" Width="50" HorizontalAlignment="Left"/>
+          <!-- Le libellé est le CONTENU de la case, pas un TextBlock à côté :
+               séparés, le lecteur d'écran annonçait « case à cocher » sans
+               nom, et cliquer le mot ne cochait rien. -->
+          <CheckBox  Grid.Column="2" x:Name="chkMajuscules"
+                     Margin="24,6,0,6" VerticalAlignment="Center"
+                     HorizontalAlignment="Left"
+                     Content="Forcer les majuscules"
+                     ToolTip="Les abréviations saisies passent en capitales. Les jetons {sup1} et {dis} gardent leur casse : ce sont des jetons, pas du texte."/>
+        </Grid>
+      </GroupBox>
+
+      <!-- Marge basse de 12 et non 6 : un GroupBox décale son contenu de 6 px
+           de plus que le bas de sa bordure, écart mesuré. -->
+      <Button Grid.Column="2" x:Name="btnAide" Content="?"
+              Width="30" Height="30" MinWidth="0" MinHeight="0"
+              Padding="0" FontWeight="Bold"
+              VerticalAlignment="Bottom" Margin="0,0,0,12"
+              Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Comment lire et remplir la table des disciplines : codes, niveaux, jetons d'abréviation, et le format en vigueur."/>
+    </Grid>
+
+    <!-- Seule l'ALERTE reste : elle ne décrit pas le réglage, elle prévient
+         que le valider va réinterpréter des codes déjà saisis. -->
+    <TextBlock Grid.Row="3" x:Name="txtAlerte" TextWrapping="Wrap"
+               Foreground="#C00000" Margin="0,0,0,4"
+               Visibility="Collapsed"/>
+
+    <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
+    <Grid Grid.Row="4" Margin="0,10,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnOk" Content="▶  Appliquer"
+              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
+              IsCancel="True" VerticalAlignment="Center"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
+  </Grid>
+</Window>

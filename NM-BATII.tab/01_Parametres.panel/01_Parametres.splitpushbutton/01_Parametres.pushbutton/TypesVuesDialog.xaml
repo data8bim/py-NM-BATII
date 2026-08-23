@@ -1,35 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Une ligne par famille de vues, remplie par _open_valeurs_par_famille dans
+     script.py : libellé, valeur saisissable, bouton de sélection dans le
+     projet, bouton d'effacement. Même structure que GabaritsDialog.xaml. -->
 <Window
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   Title="Types de vues"
-  Width="880" Height="280"
-  MinWidth="500" MinHeight="220"
+  Width="820" Height="540"
+  MinWidth="560" MinHeight="340"
   ResizeMode="CanResize"
   WindowStartupLocation="CenterOwner">
 
   <Grid Margin="10">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>  <!-- 0 description -->
+      <RowDefinition Height="Auto"/>  <!-- 1 note lignes verrouillées -->
+      <RowDefinition Height="Auto"/>  <!-- 2 barre "valeurs par défaut" -->
+      <RowDefinition Height="*"/>     <!-- 3 lignes -->
+      <RowDefinition Height="Auto"/>  <!-- 4 pied -->
     </Grid.RowDefinitions>
 
     <TextBlock Grid.Row="0" Margin="0,0,0,8"
-               Text="Renseignez le nom exact du type de vue Revit à appliquer (ou à créer s'il est absent) pour chaque type de nommage. Laisser vide pour utiliser le type par défaut de la famille."
+               Text="Type de vue Revit à appliquer aux vues créées, pour chaque famille de vues. Utilisez « Choisir… » pour le sélectionner parmi ceux du projet ouvert. Un type absent du projet est créé par duplication ; la saisie manuelle reste donc possible pour préparer une configuration à l'avance. Laisser vide pour utiliser le type par défaut de la famille. EXCEPTION — ligne « Plan de surface » : un plan de surface n'a pas de type de vue nommable, sa valeur est le nom d'un SCHÉMA DE SURFACE (Revit : Architecture ▸ Calculs des surfaces et des volumes ▸ Schémas de surface). Celui-ci n'est JAMAIS créé automatiquement et la ligne ne peut pas rester vide si vous créez des plans de surface : sélectionnez-le avec « Choisir… »."
                FontStyle="Italic" Foreground="Gray" FontSize="11"
                TextWrapping="Wrap"/>
 
-    <DataGrid x:Name="dgTypesVues"
-              Grid.Row="1"
-              AutoGenerateColumns="False"
-              CanUserAddRows="False"
-              CanUserDeleteRows="False"
-              HeadersVisibility="Column"
-              Margin="0,0,0,8"/>
+    <!-- Lignes verrouillées : rempli par le code, masqué si tout est ouvert -->
+    <TextBlock x:Name="txtNoteFamilles"
+               Grid.Row="1" Margin="0,0,0,8"
+               Visibility="Collapsed"
+               Foreground="#B35C00" FontSize="11"
+               TextWrapping="Wrap"/>
+
+    <!-- Valeurs par defaut. MASQUEE (Collapsed) par le code quand ce meme
+         dialogue sert justement a REGLER ces valeurs par defaut : il n'y a
+         alors pas de defaut au-dessus a rappeler, et le bouton rouvrirait le
+         dialogue sur lui-meme. -->
+    <Grid x:Name="pnlDefauts" Grid.Row="2" Margin="0,0,0,8">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnDefautsReglages"
+              Content="Réglages par défaut…"
+              Height="26" MinWidth="0" Padding="4,0"
+              Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Ouvre les valeurs par défaut des types de vues : celles que reprend toute nouvelle vue personnalisée, et que les boutons « Défauts » rappellent ligne par ligne."/>
+      <Button Grid.Column="2" x:Name="btnDefautsTout"
+              Content="Tout aux valeurs par défaut"
+              Height="26" MinWidth="0" Padding="4,0"
+              Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Remplace la valeur de toutes les lignes modifiables par leur valeur par défaut. Les lignes verrouillées ne bougent pas."/>
+    </Grid>
+
+    <Border Grid.Row="3" BorderBrush="#CCCCCC" BorderThickness="1"
+            Margin="0,0,0,8">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel x:Name="pnlLignes" Margin="8"/>
+      </ScrollViewer>
+    </Border>
 
     <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
-    <Grid Grid.Row="2">
+    <Grid Grid.Row="4">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="8"/>

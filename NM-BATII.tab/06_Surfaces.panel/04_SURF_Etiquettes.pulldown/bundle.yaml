@@ -1,0 +1,17 @@
+title:
+  en_us: Area tags
+  fr_fr: Étiquettes
+# Trois groupes, separes dans le menu : poser des etiquettes, poser des
+# legendes, supprimer.
+#
+# La numerotation des dossiers suit cet ordre. Le « layout » reste neanmoins
+# necessaire : sans lui, pas de separateurs.
+layout:
+  - 01_SURF_Etiquette-Masse            # Étiqueter en masse
+  - 02_SURF_Etiquette                  # Étiqueter une surface
+  - ---
+  - 03_SURF_Legende                    # Légende de motif/couleur
+  - 04_SURF_Legende-Couleurs           # Légendes de couleurs (en masse)
+  - ---
+  - 05_SURF_Etiquette-Suppression      # Supprimer les étiquettes de surface
+  - 06_SURF_Legende-Suppression        # Supprimer les légendes de couleurs

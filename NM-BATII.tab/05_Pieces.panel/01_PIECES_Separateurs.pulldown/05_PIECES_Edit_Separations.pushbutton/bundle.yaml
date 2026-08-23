@@ -11,7 +11,9 @@ tooltip:
          \nOnly what the script pinned is unpinned on exit; your own pinned
          \nelements are preserved.
          \nRe-running the button (or its keyboard shortcut) toggles the mode.
-         \n\nVersion: {{version}}-[{{date}}.009]"
+         \nA checkbox decides whether the rooms themselves are locked too; set
+         \nit before arming the mode.
+         \n\nVersion: {{version}}-[{{date}}.010]"
 
   fr_fr: "Mode édition des séparateurs de pièces.
          \nÉpingle tous les autres éléments de la vue active et coupe la
@@ -23,7 +25,9 @@ tooltip:
          \nÀ la sortie, seuls les éléments épinglés par le script sont
          \ndépinglés ; vos propres épinglages sont préservés.
          \nRelancer le bouton (ou son raccourci clavier) bascule le mode.
-         \n\nVersion: {{version}}-[{{date}}.009]"
+         \nUne case décide si les pièces elles-mêmes sont verrouillées ; elle
+         \nse règle avant d'activer le mode.
+         \n\nVersion: {{version}}-[{{date}}.010]"
 
 help_url: 'https://d8b.fr/'
 author: '{{author}}'

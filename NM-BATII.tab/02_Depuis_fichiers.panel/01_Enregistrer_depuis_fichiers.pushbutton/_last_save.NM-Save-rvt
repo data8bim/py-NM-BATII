@@ -1,7 +1,7 @@
 {
+  "producteur": true, 
   "nom_site_court": true, 
   "__bim2d__": true, 
-  "producteur": true, 
-  "rest_nom": false, 
-  "specialite": true
+  "specialite": true, 
+  "rest_nom": true
 }

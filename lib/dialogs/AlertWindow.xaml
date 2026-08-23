@@ -4,6 +4,21 @@
   Utilisation via show_alert() dans dialogs_styles_loader.py :
       from dialogs.dialogs_styles_loader import load, show_alert
       show_alert(u"Titre", u"Message à afficher.")
+
+  HAUTEUR PLAFONNÉE ICI, dans le XAML, et pas seulement en Python. La fenêtre
+  est en SizeToContent : elle grandit avec le message, et un compte rendu un peu
+  long la faisait passer sous le bas de l'écran, bouton « Fermer » compris.
+  show_alert rabaisse encore ce plafond quand l'écran est court, mais ce module
+  Python est mis en CACHE par le moteur IronPython : tant que Revit n'a pas
+  redémarré, son correctif reste sans effet. Le XAML, lui, est relu à chaque
+  ouverture — d'où le plafond ici, qui protège dès le premier lancement.
+
+  560 px : la boîte fait au plus 600 de large, au-delà elle occupe l'écran sans
+  rien apporter. Un plafond calé sur la hauteur de l'écran a été essayé, il
+  donnait une fenêtre pleine hauteur — bien trop pour un message.
+
+  CanResize plutôt que NoResize : sur un compte rendu long, pouvoir agrandir
+  vaut mieux que de tout lire à travers une barre de défilement.
 -->
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -11,14 +26,26 @@
         SizeToContent="WidthAndHeight"
         MinWidth="380"
         MaxWidth="600"
-        ResizeMode="NoResize"
+        MaxHeight="560"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI"
         FontSize="13">
 
+  <!-- Ligne du message en ÉTOILE et non en Auto, alors que la fenêtre est en
+       SizeToContent. Les deux se complètent :
+         - sans contrainte, la ligne étoile prend la taille désirée du contenu,
+           donc SizeToContent dimensionne la boîte au message, comme avant ;
+         - dès que MaxHeight borne la fenêtre (posé par show_alert d'après la
+           zone de travail de l'écran), la ligne étoile absorbe la réduction et
+           le ScrollViewer se met à défiler.
+       En Auto, la ligne aurait gardé la hauteur du texte : la fenêtre passait
+       sous le bas de l'écran, avec le bouton « Fermer » hors de portée — c'est
+       ce qui arrivait aux comptes rendus longs, celui du bouton « Couleurs »
+       en tête. -->
   <Grid Margin="10">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
       <RowDefinition Height="8"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
@@ -28,12 +55,14 @@
             BorderThickness="1"
             CornerRadius="4"
             Padding="14,12">
-      <TextBlock x:Name="txtMessage"
-                 TextWrapping="Wrap"
-                 FontSize="13"
-                 Foreground="#333333"
-                 TextAlignment="Left"
-                 VerticalAlignment="Center"/>
+      <ScrollViewer VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+        <TextBlock x:Name="txtMessage"
+                   TextWrapping="Wrap"
+                   FontSize="13"
+                   Foreground="#333333"
+                   TextAlignment="Left"/>
+      </ScrollViewer>
     </Border>
 
     <!-- Fenetre a bouton unique : "Fermer" prend le style Appliquer sur toute

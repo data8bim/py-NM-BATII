@@ -1,0 +1,17 @@
+title:
+  en_us: "Delete area tags (bulk)"
+  fr_fr: "Supprimer les étiquettes de surface (en masse)"
+tooltip:
+  en_us: "Deletes multiple area tags at once. Choose a scope (all area plans or
+         the active view, all tags or only tags of selected areas).
+         \nOnly tag types actually used in the project are listed.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+  fr_fr: "Supprime plusieurs étiquettes de surfaces en une seule opération.
+         Choisir une portée (tous les plans de surface ou la vue active, toutes
+         les étiquettes ou uniquement celles des surfaces sélectionnées).
+         \nSeuls les types d'étiquette réellement utilisés dans le projet sont
+         proposés.
+         \n\nVersion: {{version}}-[{{date}}.001]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

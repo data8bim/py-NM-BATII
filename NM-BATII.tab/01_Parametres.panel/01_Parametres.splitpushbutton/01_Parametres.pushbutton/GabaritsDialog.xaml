@@ -1,35 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Une ligne par famille de vues, remplie par _open_valeurs_par_famille dans
+     script.py : libellé, valeur saisissable, bouton de sélection dans le
+     projet, bouton d'effacement. La disposition verticale remplace l'ancienne
+     grille 1 ligne × N colonnes : les noms de gabarits Revit sont longs et
+     chaque ligne porte désormais ses propres boutons.
+     Même structure que TypesVuesDialog.xaml. -->
 <Window
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   Title="Gabarits de vues"
-  Width="880" Height="280"
-  MinWidth="500" MinHeight="220"
+  Width="820" Height="520"
+  MinWidth="560" MinHeight="320"
   ResizeMode="CanResize"
   WindowStartupLocation="CenterOwner">
 
   <Grid Margin="10">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
     <TextBlock Grid.Row="0" Margin="0,0,0,8"
-               Text="Renseignez le nom exact du gabarit de vue Revit à appliquer pour chaque type de vue. Laisser vide pour ne pas appliquer de gabarit."
+               Text="Gabarit de vue Revit à appliquer aux vues créées, pour chaque famille de vues. Utilisez « Choisir… » pour le sélectionner parmi les gabarits du projet ouvert — plus sûr qu'une saisie manuelle, un nom erroné étant ignoré sans message. Laisser vide pour n'appliquer aucun gabarit."
                FontStyle="Italic" Foreground="Gray" FontSize="11"
                TextWrapping="Wrap"/>
 
-    <DataGrid x:Name="dgGabarits"
-              Grid.Row="1"
-              AutoGenerateColumns="False"
-              CanUserAddRows="False"
-              CanUserDeleteRows="False"
-              HeadersVisibility="Column"
-              Margin="0,0,0,8"/>
+    <!-- Colonnes verrouillées : rempli par le code, masqué si tout est ouvert -->
+    <TextBlock x:Name="txtNoteFamilles"
+               Grid.Row="1" Margin="0,0,0,8"
+               Visibility="Collapsed"
+               Foreground="#B35C00" FontSize="11"
+               TextWrapping="Wrap"/>
+
+    <Border Grid.Row="2" BorderBrush="#CCCCCC" BorderThickness="1"
+            Margin="0,0,0,8">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel x:Name="pnlLignes" Margin="8"/>
+      </ScrollViewer>
+    </Border>
 
     <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130 -->
-    <Grid Grid.Row="2">
+    <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="8"/>

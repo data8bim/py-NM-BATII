@@ -1,0 +1,21 @@
+title:
+  en_us: "Tag areas (bulk)"
+  fr_fr: "Étiqueter en masse"
+tooltip:
+  en_us: "Tags multiple areas at once. Choose an area tag type and a scope
+         (all area plans or the active view, all areas or only untagged ones).
+         \nAreas only exist in area plans: the view picker offers nothing else.
+         \nTags land on the area insertion point, like « Tag All », and never
+         carry a leader.
+         \n\nVersion: {{version}}-[{{date}}.004]"
+  fr_fr: "Étiquette plusieurs surfaces en une seule opération. Choisir un type
+         d'étiquette de surface et une portée (tous les plans de surface ou la
+         vue active, toutes les surfaces ou uniquement celles sans étiquette).
+         \nLes surfaces n'existent que dans les plans de surface : le choix des
+         vues ne propose rien d'autre.
+         \nL'étiquette est posée sur le point d'insertion de la surface, comme
+         « Tout étiqueter », et jamais avec une ligne de repère.
+         \n\nVersion: {{version}}-[{{date}}.004]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

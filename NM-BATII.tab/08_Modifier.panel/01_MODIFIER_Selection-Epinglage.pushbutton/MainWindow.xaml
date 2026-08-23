@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Sélectionner / Épingler les éléments"
+        Width="1280" Height="760"
+        MinWidth="780" MinHeight="440"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Window.Resources>
+    <Style TargetType="TextBlock" BasedOn="{StaticResource NMTextBlockStandard}"/>
+    <Style TargetType="Button"    BasedOn="{StaticResource NMButtonStandard}"/>
+    <Style TargetType="ComboBox"  BasedOn="{StaticResource NMComboBoxStandard}"/>
+    <Style TargetType="CheckBox"  BasedOn="{StaticResource NMCheckBoxStandard}">
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="10">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 : portée + colonnes -->
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>   <!-- 2 : outils de sélection -->
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="*"/>      <!-- 4 : tableau -->
+      <RowDefinition Height="10"/>
+      <RowDefinition Height="Auto"/>   <!-- 6 : actions + sortie -->
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Portée du chargement et choix des colonnes ═════════════════════ -->
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>   <!-- 0  libellé portée -->
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="240"/>    <!-- 2  combo portée -->
+        <ColumnDefinition Width="12"/>
+        <ColumnDefinition Width="Auto"/>   <!-- 4  annotations -->
+        <ColumnDefinition Width="12"/>
+        <ColumnDefinition Width="Auto"/>   <!-- 6  recharger -->
+        <ColumnDefinition Width="*"/>      <!-- 7  ressort -->
+        <ColumnDefinition Width="Auto"/>   <!-- 8  colonnes... -->
+        <ColumnDefinition Width="6"/>
+        <ColumnDefinition Width="Auto"/>   <!-- 10 réinitialiser colonnes -->
+      </Grid.ColumnDefinitions>
+
+      <TextBlock Grid.Column="0" Text="Portée :" VerticalAlignment="Center"/>
+      <ComboBox Grid.Column="2" x:Name="cboScope" VerticalAlignment="Center">
+        <ComboBoxItem Content="Projet entier"/>
+        <ComboBoxItem Content="Vue active"/>
+        <ComboBoxItem Content="Sélection courante dans Revit"/>
+      </ComboBox>
+      <CheckBox Grid.Column="4" x:Name="chkAnnotations" VerticalAlignment="Center"
+                Content="Inclure les annotations"
+                ToolTip="Étiquettes, cotes, textes, lignes de détail... (les quadrillages, niveaux, plans de référence et zones de définition sont toujours listés)"/>
+      <Button Grid.Column="6" x:Name="btnReload" Content="↻  Recharger la liste" Padding="8,2"/>
+      <Button Grid.Column="8" x:Name="btnColumns" Content="Colonnes (paramètres)..." Padding="8,2"/>
+      <Button Grid.Column="10" x:Name="btnResetColumns" Content="Réinitialiser les colonnes" Padding="8,2"
+              ToolTip="Rétablit l'ordre et les largeurs de colonnes d'origine"/>
+    </Grid>
+
+    <!-- ═══ Outils de sélection du tableau ═════════════════════════════════ -->
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="16"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="btnSelectAll"       Content="Tout sélectionner"   Padding="8,2"/>
+      <Button Grid.Column="2" x:Name="btnDeselectAll"     Content="Tout désélectionner" Padding="8,2"/>
+      <Button Grid.Column="4" x:Name="btnInvert"          Content="Inverser"            Padding="8,2"/>
+      <Button Grid.Column="6" x:Name="btnResetAllFilters" Content="Réinitialiser tous les filtres" Padding="8,2"/>
+      <TextBlock Grid.Column="8" x:Name="txtCount" VerticalAlignment="Center"
+                 HorizontalAlignment="Right" FontSize="12" Text="(0 élément coché)"/>
+    </Grid>
+
+    <!-- ═══ Tableau des éléments ═══════════════════════════════════════════ -->
+    <DataGrid x:Name="dataGrid" Grid.Row="4"
+              AutoGenerateColumns="False"
+              CanUserAddRows="False"
+              CanUserDeleteRows="False"
+              CanUserSortColumns="False"
+              CanUserReorderColumns="True"
+              CanUserResizeColumns="True"
+              SelectionMode="Extended"
+              SelectionUnit="FullRow"
+              HeadersVisibility="Column"
+              GridLinesVisibility="All"
+              RowHeaderWidth="0"
+              FrozenColumnCount="1"
+              EnableRowVirtualization="True"
+              EnableColumnVirtualization="True"
+              VirtualizingPanel.IsVirtualizing="True"
+              VirtualizingPanel.VirtualizationMode="Recycling"
+              HorizontalScrollBarVisibility="Auto"
+              VerticalScrollBarVisibility="Auto"
+              FontSize="12"/>
+
+    <!-- ═══ Actions et sortie ══════════════════════════════════════════════ -->
+    <Grid Grid.Row="6">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="130"/>
+      </Grid.ColumnDefinitions>
+      <!-- Pas d'IsDefault : la fenêtre est une palette non modale et
+           l'épinglage est immédiat — la touche Entrée frappée dans le tableau
+           déclencherait l'action sans intention. -->
+      <Button Grid.Column="0" x:Name="btnPin"
+              Content="▶  Épingler"
+              Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="2" x:Name="btnUnpin"
+              Content="▶  Désépingler"
+              Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="4" x:Name="btnSelectInRevit"
+              Content="▶  Sélectionner dans Revit"
+              Style="{DynamicResource NMButtonAppliquer}"/>
+      <Button Grid.Column="6" x:Name="btnClose"
+              Content="Fermer"
+              Style="{DynamicResource NMButtonAnnuler}"/>
+    </Grid>
+  </Grid>
+</Window>

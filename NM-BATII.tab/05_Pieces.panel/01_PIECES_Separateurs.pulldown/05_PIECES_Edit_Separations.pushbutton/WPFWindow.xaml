@@ -13,7 +13,7 @@
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="NM-BATII — Édition des séparateurs"
-        Width="260" Height="196"
+        Width="260" Height="232"
         ResizeMode="NoResize"
         WindowStartupLocation="Manual"
         ShowInTaskbar="False">
@@ -27,7 +27,9 @@
       <RowDefinition Height="6"/>
       <RowDefinition Height="Auto"/>   <!-- 2 etat du mode + aide -->
       <RowDefinition Height="6"/>
-      <RowDefinition Height="*"/>      <!-- 4 separateur de pieces -->
+      <RowDefinition Height="Auto"/>   <!-- 4 option pieces -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="*"/>      <!-- 6 separateur de pieces -->
     </Grid.RowDefinitions>
 
     <!-- ═══ Bascule ═══════════════════════════════════════════════════════════ -->
@@ -109,6 +111,29 @@
               ToolTip="Que fait ce mode ?"/>
     </Grid>
 
+    <!-- ═══ Option : les pieces suivent-elles le verrou ? ═════════════════════ -->
+    <!-- Cochee par defaut : le mode protege tout sauf les separateurs, et une
+         piece deplacee par megarde est aussi couteuse a rattraper qu'un mur.
+         La decocher laisse les pieces selectionnables, pour ajuster un contour
+         et sa piece dans la meme passe.
+
+         Le libelle passe par un TextBlock et non par un Content texte : sans
+         lui il ne se replierait pas et serait tronque par la largeur de la
+         palette, calculee sur le libelle du bouton bascule.
+
+         IsEnabled est pilote par le script : l'option est figee tant que le
+         mode est arme, la changer alors n'aurait aucun effet avant la
+         prochaine activation. -->
+    <CheckBox Grid.Row="4"
+              x:Name="chk_pieces"
+              IsChecked="True"
+              VerticalContentAlignment="Center"
+              ToolTip="Décoché : les pièces restent sélectionnables et modifiables pendant le mode.">
+      <TextBlock Text="Verrouiller aussi les pièces"
+                 TextWrapping="Wrap"
+                 FontSize="12"/>
+    </CheckBox>
+
     <!-- ═══ Séparateur de pièces ══════════════════════════════════════════════ -->
     <!-- Grand carre centre : cible de clic confortable pour l'outil le plus
          utilise du mode. Width = Height, sinon il cesse d'etre carre. -->
@@ -120,7 +145,7 @@
          ContentPresenter. A 10, l'icone n'aurait eu que 44 px de large dans un
          bouton de 64, sans pouvoir occuper la meme proportion que sur le
          bouton du ruban. -->
-    <Button Grid.Row="4"
+    <Button Grid.Row="6"
             x:Name="btn_separateur"
             Width="64" Height="64"
             Padding="2"

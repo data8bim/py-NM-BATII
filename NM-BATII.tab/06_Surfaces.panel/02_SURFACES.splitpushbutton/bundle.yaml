@@ -1,0 +1,9 @@
+title:
+  en_us: Area
+  fr_fr: Surfaces
+# Ordre du layout = ordre du menu, et sur un splitpushbutton le PREMIER est
+# aussi le bouton par défaut, celui qui reste affiché sur le ruban. La palette
+# « Surfaces » est donc en tête, devant l'outil natif.
+layout:
+  - 01_SURF_Surfaces                   # Surfaces (palette de styles)
+  - 02_SURF_Surface-seule              # Surface (Revit)

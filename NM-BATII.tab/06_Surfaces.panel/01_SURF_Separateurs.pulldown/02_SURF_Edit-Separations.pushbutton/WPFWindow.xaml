@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Palette compacte, ouverte en permanence par-dessus la vue : elle ne doit
+     ni manger la zone de dessin, ni bouger sous les yeux de l'utilisateur.
+
+     DIMENSIONS FIXES, volontairement. Une version precedente utilisait
+     SizeToContent : la fenetre se redimensionnait a chaque changement d'etat,
+     les libelles « Activer edition » et « Desactiver edition » n'ayant pas la
+     meme largeur. Tout est donc fige ici, et les controles s'etirent a
+     l'interieur.
+
+     ResizeMode="NoResize" : seule valeur qui retire A LA FOIS les boutons
+     Reduire et Agrandir de la barre de titre. -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Édition des séparateurs de surfaces"
+        Width="260" Height="232"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        ShowInTaskbar="False">
+
+  <!-- Marge volontairement serree : la palette doit rester discrete. Elle est
+       LUE a l'execution par _ajuster_largeur (jamais codee en dur cote script),
+       donc la modifier ici suffit. -->
+  <Grid Margin="6">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- 0 bascule -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>   <!-- 2 etat du mode + aide -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="Auto"/>   <!-- 4 option surfaces -->
+      <RowDefinition Height="6"/>
+      <RowDefinition Height="*"/>      <!-- 6 limite de surface -->
+    </Grid.RowDefinitions>
+
+    <!-- ═══ Bascule ═══════════════════════════════════════════════════════════ -->
+    <!-- Stretch : le bouton occupe toute la largeur, d'un bord a l'autre.
+         C'est la FENETRE qui est calee au plus juste, sur le plus long des
+         deux libelles, une fois au chargement (voir _ajuster_largeur).
+
+         Faire l'inverse — bouton en largeur automatique — obligeait soit a
+         redimensionner la fenetre a chaque bascule, soit a tronquer le libelle
+         le plus long. Ici la largeur est calculee une fois, plus rien ne bouge
+         et rien n'est coupe.
+
+         Margin, MinWidth ET MinHeight remis a zero : le style NMButtonValide,
+         applique quand le mode est actif, impose Margin="4", MinWidth="120" et
+         MinHeight="40". MinHeight bornait la hauteur finale par le bas — un
+         Height="38" local ne pouvait pas gagner —, d'ou un bouton de 38 px
+         inactif et 40 px actif, qui decalait toute la palette a chaque
+         bascule.
+
+         POLICE FIGEE LOCALEMENT (14 px SemiBold, celle de NMButtonAppliquer) :
+         les deux styles ne s'accordent pas — NMButtonValide est en 16 px
+         Normal. Le libelle changeait donc d'aspect a chaque bascule, et la
+         largeur calculee au chargement (mesuree en 14 px) etait fausse pour
+         l'etat actif, d'ou le texte tronque. Une valeur locale prime sur le
+         setter de style, l'aspect reste identique dans les deux etats. -->
+    <Button Grid.Row="0"
+            x:Name="btn_bascule"
+            Content="Activer édition"
+            Height="38"
+            Margin="0"
+            MinWidth="0"
+            MinHeight="0"
+            Padding="14,0"
+            FontFamily="Segoe UI"
+            FontSize="14"
+            FontWeight="SemiBold"
+            HorizontalAlignment="Stretch"
+            Style="{DynamicResource NMButtonAppliquer}"/>
+
+    <!-- ═══ État du mode + aide ═══════════════════════════════════════════════ -->
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>     <!-- message : occupe tout le reste -->
+        <ColumnDefinition Width="Auto"/>  <!-- aide, calee au bord droit -->
+      </Grid.ColumnDefinitions>
+
+      <!-- Pas de ScrollViewer : le contenu tient sur une ligne (les erreurs
+           partent dans les logs pyRevit), et sa barre de defilement
+           apparaissait comme un carre gris parasite. -->
+      <!-- Bordure gris tres clair : delimite le champ sans l'alourdir. Le
+           Padding fixe la hauteur de la rangee — donc aussi la taille du
+           bouton d'aide, cale dessus. -->
+      <Border Grid.Column="0"
+              BorderBrush="#E6E6E6" BorderThickness="1" CornerRadius="3"
+              Padding="8,6">
+        <TextBlock x:Name="txtStatut"
+                   TextWrapping="NoWrap"
+                   FontSize="12"
+                   Foreground="#555555"
+                   TextAlignment="Center"
+                   VerticalAlignment="Center"
+                   Text="Mode inactif"/>
+      </Border>
+
+      <!-- Bouton discret : NMButtonStandard (fond gris clair, bordure gris
+           plus soutenu) plutot que le bleu des actions.
+           PAS de Height : Stretch le cale sur la hauteur du cadre de message.
+           La largeur SUIT cette hauteur via un binding sur ActualHeight —
+           seul moyen de garder un carre alors que la hauteur n'est connue
+           qu'a l'execution. Margin explicite, le style en impose 4. -->
+      <Button Grid.Column="1"
+              x:Name="btn_aide"
+              Content="?"
+              Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+              Margin="6,0,0,0"
+              VerticalAlignment="Stretch"
+              FontSize="13"
+              Style="{DynamicResource NMButtonStandard}"
+              ToolTip="Que fait ce mode ?"/>
+    </Grid>
+
+    <!-- ═══ Option : les surfaces suivent-elles le verrou ? ═══════════════════ -->
+    <!-- Cochee par defaut : le mode protege tout sauf les separateurs, et une
+         surface deplacee par megarde est aussi couteuse a rattraper qu'un mur.
+         La decocher laisse les surfaces selectionnables, pour ajuster un
+         contour et sa surface dans la meme passe.
+
+         Le libelle passe par un TextBlock et non par un Content texte : sans
+         lui il ne se replierait pas et serait tronque par la largeur de la
+         palette, calculee sur le libelle du bouton bascule.
+
+         IsEnabled est pilote par le script : l'option est figee tant que le
+         mode est arme, la changer alors n'aurait aucun effet avant la
+         prochaine activation. -->
+    <CheckBox Grid.Row="4"
+              x:Name="chk_surfaces"
+              IsChecked="True"
+              VerticalContentAlignment="Center"
+              ToolTip="Décoché : les surfaces restent sélectionnables et modifiables pendant le mode.">
+      <TextBlock Text="Verrouiller aussi les surfaces"
+                 TextWrapping="Wrap"
+                 FontSize="12"/>
+    </CheckBox>
+
+    <!-- ═══ Limite de surface ═════════════════════════════════════════════════ -->
+    <!-- Grand carre centre : cible de clic confortable pour l'outil le plus
+         utilise du mode. Width = Height, sinon il cesse d'etre carre. -->
+    <!-- NMButtonAppliquer : meme bleu #1E90FF que « Activer édition », survol
+         et appui compris. Ses setters Height="40" et Padding="10,0" sont
+         neutralises par les valeurs locales ci-dessous.
+
+         Padding local a 2 : le template applique le Padding en Margin du
+         ContentPresenter. A 10, l'icone n'aurait eu que 44 px de large dans un
+         bouton de 64, sans pouvoir occuper la meme proportion que sur le
+         bouton du ruban. -->
+    <Button Grid.Row="6"
+            x:Name="btn_separateur"
+            Width="64" Height="64"
+            Padding="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Style="{DynamicResource NMButtonAppliquer}"
+            ToolTip="Limite de surface"/>
+  </Grid>
+</Window>

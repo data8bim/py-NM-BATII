@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Window
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:sys="clr-namespace:System;assembly=mscorlib"
   Title="Paramètres"
   Width="780" Height="660"
-  MinWidth="600" MinHeight="500"
+  MinWidth="680" MinHeight="500"
   ResizeMode="CanResize"
   WindowStartupLocation="CenterScreen">
 
@@ -19,6 +19,26 @@
         </Setter.Value>
       </Setter>
     </Style>
+
+    <!-- Cellule de texte d'une colonne à largeur FIXE. Sans ces deux réglages,
+         un libellé trop long est coupé net au milieu d'un glyphe : rien ne dit
+         qu'il manque quelque chose, et rien ne permet de le lire.
+         L'infobulle se désactive sur une cellule vide — une bulle vide au
+         survol de chaque case blanche serait pire que pas d'infobulle. -->
+    <Style x:Key="DiscCelluleTexte" TargetType="TextBlock">
+      <!-- Poser un ElementStyle REMPLACE celui de DataGridTextColumn, dont la
+           marge de 2 px cale le texte. Sans la reprendre, les colonnes stylées
+           se décalent de 2 px vers la gauche par rapport aux autres. -->
+      <Setter Property="Margin" Value="2,0,2,0"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+      <Setter Property="ToolTip"
+              Value="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+      <Style.Triggers>
+        <Trigger Property="Text" Value="">
+          <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
   </Window.Resources>
 
   <Grid Margin="10">
@@ -27,7 +47,7 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
-    <TabControl Grid.Row="0">
+    <TabControl x:Name="tabPrincipal" Grid.Row="0">
 
       <!-- ═══════════════════════════════════════════════════════ -->
       <!-- Emplacements                                           -->
@@ -516,35 +536,75 @@
       <!-- ═══════════════════════════════════════════════════════ -->
       <!-- Vues                                                   -->
       <!-- ═══════════════════════════════════════════════════════ -->
-      <TabItem Header="Vues">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
-          <StackPanel Margin="5">
+      <TabItem x:Name="tabVues" Header="Vues">
+        <!-- Même disposition que l'onglet « Disciplines » : une Grid dont la
+             table prend TOUTE la hauteur restante (rangée « * »), et non un
+             StackPanel dans un ScrollViewer où elle gardait une hauteur fixe
+             de 60 px en laissant le reste vide. Recherche au-dessus, boutons
+             en dessous, comme là-bas. -->
+        <Grid Margin="10">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- 0 titre -->
+            <RowDefinition Height="Auto"/>   <!-- 1 recherche -->
+            <RowDefinition Height="*"/>      <!-- 2 table -->
+            <RowDefinition Height="Auto"/>   <!-- 3 boutons -->
+          </Grid.RowDefinitions>
 
             <!-- Vues personnalisées -->
-            <Grid Margin="0,0,0,4">
+            <!-- Les 6 dernières colonnes ouvrent chacune un dialogue pour la
+                 ligne cliquée : où la vue personnalisée s'applique
+                 (Familles de vues, Discipline), avec quels réglages Revit
+                 (Types de vues, Gabarits de vues), quels niveaux par défaut,
+                 et dans quels outils (Disponibilité). -->
+            <TextBlock Grid.Row="0"
+                       Text="Vues personnalisées (Identifiant : vue-pers-*)"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Margin="0,0,0,4"/>
+
+            <!-- La recherche porte sur TOUTE la table, colonnes « Configurer… »
+                 comprises : leurs valeurs sont recopiées en texte dans des
+                 colonnes dérivées, un bouton n'ayant rien à fouiller. -->
+            <Grid Grid.Row="1" Margin="0,0,0,6">
               <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
               </Grid.ColumnDefinitions>
-              <TextBlock Text="Vues personnalisées (Identifiant : vue-pers-*)"
-                         FontWeight="Bold"
-                         VerticalAlignment="Center"
-                         Grid.Column="0"/>
-              <Button x:Name="btnTypesPersDispo"
-                      Content="Disponibilite..."
-                      Grid.Column="1"
-                      Padding="6,2"
-                      Height="22"
-                      FontSize="11"
-                      VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="0" Text="Rechercher :"
+                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+              <TextBox Grid.Column="1" x:Name="tvp_filtre" MinWidth="140"
+                       Margin="0,0,10,0"
+                       ToolTip="Filtre sur toutes les colonnes : Ord., Label, Titre, Valeurs, Usage, et le contenu réglé derrière chaque bouton « Configurer… »."/>
+              <TextBlock Grid.Column="2" x:Name="tvp_compte"
+                         VerticalAlignment="Center" Foreground="#666666"/>
+              <!-- Un seul geste pour tout remettre à plat : sans lui il
+                   faudrait rouvrir chaque en-tête filtré un par un, sans
+                   même savoir lesquels le sont. Grisé quand il n'y a rien
+                   à effacer, ce qui répond aussi à la question. -->
+              <Button Grid.Column="3" x:Name="btnTvpResetFiltres"
+                      Content="Supprimer les filtres"
+                      Height="24" MinWidth="0" Padding="10,0" Margin="12,0,0,0"
+                      Style="{DynamicResource NMButtonStandard}"
+                      ToolTip="Vide la recherche et retire tous les filtres de colonnes."/>
             </Grid>
-            <DataGrid x:Name="dgTypesVues"
+
+            <!-- CanUserAddRows="False" : pas de ligne vierge en pied de table.
+                 Elle n'apportait rien ici — l'ajout passe par « + Ajouter » ou
+                 par le menu contextuel, qui posent l'Ord. suivant et le reste
+                 des valeurs par defaut, ce que la ligne vierge ne fait pas.
+                 Elle obligeait en plus chaque lecture de la table a ecarter une
+                 ligne dont toutes les cellules sont DBNull. -->
+            <DataGrid Grid.Row="2" x:Name="dgTypesVues"
                       AutoGenerateColumns="False"
-                      CanUserAddRows="True"
+                      CanUserAddRows="False"
                       CanUserDeleteRows="True"
+                      CanUserSortColumns="False"
                       HeadersVisibility="Column"
+                      FrozenColumnCount="3"
                       MinHeight="60"
-                      Margin="0,0,0,12">
+                      Margin="0,0,0,6">
               <DataGrid.ContextMenu>
                 <ContextMenu>
                   <MenuItem Header="Nouvelle"/>
@@ -554,16 +614,25 @@
                 </ContextMenu>
               </DataGrid.ContextMenu>
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Ord." Binding="{Binding ordre}" Width="45"/>
+                <!-- 95 px et non 45 : l'en-tête porte les trois boutons
+                     (trier, filtrer, réinitialiser) du standard maison, qui
+                     en demandent ~86. À 45 le dernier était rogné, et le
+                     bouton de réinitialisation du filtre paraissait absent
+                     alors qu'il était simplement hors champ. -->
+                <DataGridTextColumn Header="Ord." Binding="{Binding ordre}" Width="95"/>
                 <DataGridTextColumn Header="Label" Binding="{Binding label}" Width="120">
                   <DataGridTextColumn.CellStyle>
                     <Style TargetType="DataGridCell">
                       <Style.Triggers>
-                        <DataTrigger Binding="{Binding label}" Value="Temporaire">
+                        <DataTrigger Binding="{Binding label}" Value="TEMPORAIRE">
                           <Setter Property="Background" Value="#F0F0F0"/>
                           <Setter Property="Foreground" Value="#555555"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding label}" Value="FM">
+                          <Setter Property="Background" Value="#F0F0F0"/>
+                          <Setter Property="Foreground" Value="#555555"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding label}" Value="PIECES 3D">
                           <Setter Property="Background" Value="#F0F0F0"/>
                           <Setter Property="Foreground" Value="#555555"/>
                         </DataTrigger>
@@ -602,6 +671,25 @@
                     </Style>
                   </DataGridComboBoxColumn.EditingElementStyle>
                 </DataGridComboBoxColumn>
+                <DataGridTemplateColumn Header="Familles de vues" Width="130">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Content="Configurer..." Tag="familles" Padding="4,1" Margin="2"
+                              ToolTip="Familles de vues sur lesquelles cette vue personnalisée peut être utilisée."/>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!-- Meme priorite de filtrage que "Vues +" / "Lier CAO" : Famille de
+                     vue, Discipline, Type personnalise — cette colonne suit donc
+                     immediatement "Familles de vues", avant "Types de vues". -->
+                <DataGridTemplateColumn Header="Discipline" Width="130">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Content="Configurer..." Tag="discipline" Padding="4,1" Margin="2"
+                              ToolTip="Disciplines (référentiel de l'onglet « Disciplines ») sur lesquelles cette vue personnalisée peut être utilisée."/>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Types de vues" Width="130">
                   <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
@@ -616,40 +704,98 @@
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <!-- Abrégé : le libellé complet passait sur deux lignes dans
+                     l'en-tête, qui porte déjà ses trois boutons. -->
+                <DataGridTemplateColumn Header="Types niv. par défaut" Width="150">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Content="Configurer..." Tag="niveaux" Padding="4,1" Margin="2"
+                              ToolTip="Types de niveaux cochés par défaut dans les outils NM-BATII quand cette vue personnalisée est choisie."/>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Disponibilité" Width="130">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Content="Configurer..." Tag="dispo" Padding="4,1" Margin="2"
+                              ToolTip="Outils NM-BATII créant des vues dans lesquels cette vue personnalisée est proposée."/>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
               </DataGrid.Columns>
             </DataGrid>
 
-            <GroupBox Header="Cr&#233;er des vues" Margin="0,0,0,0">
-              <StackPanel Margin="5">
+            <!-- Même barre que l'onglet « Disciplines », même disposition :
+                 à GAUCHE l'action de cadre (le fichier de configuration,
+                 replié derrière « Fichier »), à DROITE les deux actions du
+                 quotidien, seul l'ajout étant accentué — la suppression
+                 reste disponible, elle n'invite pas.
+                 Touches d'accès identiques à celles de « Disciplines »
+                 (Alt+F, Alt+A, Alt+P) : les deux onglets ne sont jamais
+                 affichés en même temps, un TabItem non sélectionné n'étant
+                 pas réalisé, il n'y a donc pas de collision. -->
+            <Grid Grid.Row="3">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
 
-                <GroupBox Header="Types de niveaux par d&#233;faut" Margin="0,0,0,0"
-                          ToolTip="D&#233;finit quels types de niveaux sont coch&#233;s par d&#233;faut dans le bouton &#171;&#160;Vues en masse&#160;&#187;.">
-                  <StackPanel Margin="5" Orientation="Vertical">
+              <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button x:Name="btnTvpFichier" Content="_Fichier  ▾"
+                        Height="30" Margin="0,0,8,0"
+                        MinWidth="0" MinHeight="0" Padding="12,0"
+                        Style="{DynamicResource NMButtonStandard}"
+                        ToolTip="Échanger les vues personnalisées et tous leurs réglages avec un fichier de configuration.">
+                  <Button.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem x:Name="miTvpCfgExport" Header="_Exporter la configuration…"/>
+                      <MenuItem x:Name="miTvpCfgImport" Header="_Importer une configuration…"/>
+                    </ContextMenu>
+                  </Button.ContextMenu>
+                </Button>
 
-                    <CheckBox x:Name="vm_batiment"
-                              Content="Batiment"
-                              Margin="0,3"/>
-                    <CheckBox x:Name="vm_toiture"
-                              Content="Toiture"
-                              Margin="0,3"/>
-                    <CheckBox x:Name="vm_fondations"
-                              Content="Fondations"
-                              Margin="0,3"/>
-                    <CheckBox x:Name="vm_origine"
-                              Content="Origine"
-                              Margin="0,3"/>
-                    <CheckBox x:Name="vm_autres"
-                              Content="Autres"
-                              Margin="0,3"/>
-
-                  </StackPanel>
-                </GroupBox>
-
+                <!-- Carré sans libellé, rattaché au groupe « comprendre et
+                     régler » plutôt que flottant : même bouton que dans
+                     l'onglet « Disciplines ». -->
+                <Button x:Name="btnTvpAide" Content="?"
+                        Width="30" Height="30" MinWidth="0" MinHeight="0"
+                        Padding="0" FontWeight="Bold"
+                        AutomationProperties.Name="Aide sur les vues personnalisées"
+                        Style="{DynamicResource NMButtonStandard}"
+                        ToolTip="Comment lire et remplir cette table : rôle de chaque colonne, lignes système, et ce que règle chaque bouton « Configurer… »."/>
               </StackPanel>
-            </GroupBox>
 
-          </StackPanel>
-        </ScrollViewer>
+              <!-- Les trois actions du quotidien, à largeur IDENTIQUE : sans
+                   Width commune chacune prendrait celle de son propre texte et
+                   elles ne se liraient plus comme un groupe. 152 px = largeur
+                   mesurée du plus long des trois libellés. Seul l'ajout est
+                   accentué ; dupliquer et supprimer restent disponibles sans
+                   inviter. -->
+              <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button x:Name="btnTvpAjout" Content="+  _Ajouter une ligne"
+                        Width="152" Height="30" Margin="0,0,8,0"
+                        MinWidth="0" MinHeight="0" Padding="12,0"
+                        Style="{DynamicResource NMButtonSecondaire}"
+                        ToolTip="Ajoute une vue personnalisée vide. Renseignez son Label : c'est lui qui l'identifie partout ailleurs."/>
+                <Button x:Name="btnTvpDupliquer" Content="+  D_upliquer"
+                        Width="152" Height="30" Margin="0,0,8,0"
+                        MinWidth="0" MinHeight="0" Padding="12,0"
+                        Style="{DynamicResource NMButtonSecondaire}"
+                        ToolTip="Copie la vue personnalisée sélectionnée AVEC tous ses réglages (familles, disciplines, types, gabarits, niveaux, disponibilité), sous un nouveau label."/>
+                <Button x:Name="btnTvpSupprimer" Content="−  Su_pprimer"
+                        Width="152" Height="30" MinWidth="0" MinHeight="0"
+                        Padding="12,0"
+                        Style="{DynamicResource NMButtonStandard}"
+                        ToolTip="Supprime les vues personnalisées sélectionnées et tous leurs réglages, après une seule confirmation. Les lignes système ne sont jamais supprimables."/>
+              </StackPanel>
+            </Grid>
+
+            <!-- Les « Types de niveaux par défaut » ne sont plus un réglage
+                 global : ils se configurent par vue personnalisée, via la
+                 colonne du même nom de la table ci-dessus. -->
+
+        </Grid>
       </TabItem>
 
       <!-- ═══════════════════════════════════════════════════════ -->
@@ -873,8 +1019,13 @@
                       </DataGridTextColumn.CellStyle>
                     </DataGridTextColumn>
 
+                    <!-- Les deux colonnes de boutons partagent a EGALITE la
+                         largeur restante (deux fois Width="*") : elles portent
+                         le meme bouton « Configurer... », une largeur fixe d'un
+                         cote et etoile de l'autre les rendait dissemblables. -->
+
                     <!-- Bouton Options de liaisons -->
-                    <DataGridTemplateColumn Header="Options de liaisons" Width="160">
+                    <DataGridTemplateColumn Header="Options de liaisons" Width="*">
                       <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                           <Button Content="Configurer..." Tag="options" Margin="2,1"/>
@@ -907,6 +1058,76 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
           <StackPanel Margin="5">
 
+            <!-- Table de style des surfaces : nomenclature de clés (Key
+                 Schedule) dont chaque ligne est un style applicable à une
+                 surface. Lue par 13_SURF_Styles (palette d'attribution).
+                 « Paramètre de clé » est le paramètre porté par les surfaces
+                 qui pointe vers la ligne de la table ; « Colonne calcul »
+                 range chaque style sous un type de calcul réglementaire
+                 (SP, SHON/SHOB, CBS…), et sert de filtre dans la palette ;
+                 « Colonne commentaire » alimente l'infobulle des boutons. -->
+            <GroupBox Header="Table de style des surfaces" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Nomenclature de clés"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_table_styles" Margin="2,2"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,4" Text="Param. clé de style"/>
+                <TextBox   Grid.Row="1" Grid.Column="1" x:Name="sf_param_style" Margin="2,2"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Colonne type de calcul"/>
+                <TextBox   Grid.Row="2" Grid.Column="1" x:Name="sf_col_calcul_style" Margin="2,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Colonne commentaire"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="sf_col_commentaire_style" Margin="2,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" Margin="2,4,2,0"
+                           TextWrapping="Wrap"
+                           Foreground="#666666"
+                           Text="Utilisés par la palette « Surfaces » : la liste déroulante reprend les valeurs de la colonne type de calcul, et chaque bouton correspond à un nom de clé de la table."/>
+              </Grid>
+            </GroupBox>
+
+            <!-- Tout ce qui se règle STYLE PAR STYLE vit derrière ce bouton, et
+                 non ici : ordre des boutons de la palette, repères, couleurs de
+                 surface, motifs et étiquettes. Ces réglages sont enregistrés
+                 dans l'extension et non dans la nomenclature, pour s'appliquer
+                 aux projets existants sans avoir à leur ajouter une colonne.
+                 Ce groupe n'a qu'un bouton, volontairement : il marque la
+                 frontière entre les NOMS lus dans le projet, au-dessus, et le
+                 référentiel de l'extension, en dessous. -->
+            <GroupBox Header="Gestion des styles de surfaces" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="1" Margin="2,0,2,0"
+                           TextWrapping="Wrap"
+                           Foreground="#666666"
+                           Text="Ordre des boutons de la palette, repères, couleurs de surface, motifs de remplissage et étiquettes — style par style, et par type de calcul pour les étiquettes."/>
+                <Button Grid.Row="1" Grid.Column="1"
+                        x:Name="btnStylesOrdre"
+                        Content="Gestion de types de calculs"
+                        Height="30" Margin="2,8,2,0"
+                        MinWidth="0" MinHeight="0"
+                        HorizontalAlignment="Left"
+                        Padding="12,0"
+                        Style="{DynamicResource NMButtonSecondaire}"
+                        ToolTip="Ouvre le référentiel des styles de surfaces : ordre, repères, couleurs, motifs et étiquettes."/>
+              </Grid>
+            </GroupBox>
+
             <GroupBox Header="SHON/SHOB" Margin="0,0,0,8">
               <Grid Margin="5">
                 <Grid.ColumnDefinitions>
@@ -919,6 +1140,8 @@
                   <RowDefinition Height="Auto"/>
                   <RowDefinition Height="Auto"/>
                   <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4" Text="Nomenclature SHON/SHOB"/>
                 <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_default_shon" Margin="2,2"/>
@@ -926,20 +1149,28 @@
                 <TextBox   Grid.Row="1" Grid.Column="1" x:Name="sf_col_shon" Margin="2,2"/>
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Param. SHON"/>
                 <TextBox   Grid.Row="2" Grid.Column="1" x:Name="sf_param_shon" Margin="2,2"/>
-                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Colonne SHOB"/>
-                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="sf_col_shob" Margin="2,2"/>
-                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Param. SHOB"/>
-                <TextBox   Grid.Row="4" Grid.Column="1" x:Name="sf_param_shob" Margin="2,2"/>
+                <!-- Auteur des calculs : paramètre texte porté par les niveaux
+                     ET par les informations projet. Renseigné par
+                     02_SURF_SP-SHON-SHOB (« ENTREPRISE - qualification »). -->
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Param. SHON - Auteur"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="sf_param_shon_auteur" Margin="2,2"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,4" Text="Colonne SHOB"/>
+                <TextBox   Grid.Row="4" Grid.Column="1" x:Name="sf_col_shob" Margin="2,2"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,4" Text="Param. SHOB"/>
+                <TextBox   Grid.Row="5" Grid.Column="1" x:Name="sf_param_shob" Margin="2,2"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,4" Text="Param. SHOB - Auteur"/>
+                <TextBox   Grid.Row="6" Grid.Column="1" x:Name="sf_param_shob_auteur" Margin="2,2"/>
               </Grid>
             </GroupBox>
 
-            <GroupBox Header="SDP" Margin="0,0,0,8">
+            <GroupBox Header="SURFACE PLANCHER" Margin="0,0,0,8">
               <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="220"/>
                   <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
                   <RowDefinition Height="Auto"/>
                   <RowDefinition Height="Auto"/>
                   <RowDefinition Height="Auto"/>
@@ -950,6 +1181,37 @@
                 <TextBox   Grid.Row="1" Grid.Column="1" x:Name="sf_col_plancher" Margin="2,2"/>
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4" Text="Param. Surface Plancher"/>
                 <TextBox   Grid.Row="2" Grid.Column="1" x:Name="sf_param_s_plancher" Margin="2,2"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,4" Text="Param. Surface Plancher - Auteur"/>
+                <TextBox   Grid.Row="3" Grid.Column="1" x:Name="sf_param_s_plancher_auteur" Margin="2,2"/>
+              </Grid>
+            </GroupBox>
+
+            <!-- Qualifications proposées dans la liste déroulante « Auteur des
+                 calculs de surfaces » de 02_SURF_SP-SHON-SHOB. Une par ligne :
+                 ajouter une ligne ajoute un choix. -->
+            <GroupBox Header="Auteur des calculs — qualifications proposées" Margin="0,0,0,8">
+              <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="220"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4"
+                           Text="Qualifications (une par ligne)"
+                           VerticalAlignment="Top"/>
+                <TextBox   Grid.Row="0" Grid.Column="1" x:Name="sf_qualifications"
+                           Margin="2,2" Height="110"
+                           AcceptsReturn="True"
+                           TextWrapping="NoWrap"
+                           VerticalScrollBarVisibility="Auto"
+                           HorizontalScrollBarVisibility="Auto"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Margin="2,2,2,0"
+                           TextWrapping="Wrap"
+                           Foreground="#666666"
+                           Text="Proposées à l'utilisateur au moment d'écrire les surfaces. La valeur retenue est concaténée au nom de l'entreprise : « ENTREPRISE - qualification »."/>
               </Grid>
             </GroupBox>
 
@@ -969,6 +1231,483 @@
 
           </StackPanel>
         </ScrollViewer>
+      </TabItem>
+
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Disciplines                                            -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- Référentiel hiérarchique, destiné aux scripts de l'extension via
+           lib/utils/disciplines.py.
+
+           TROIS RÈGLES portent tout l'onglet, et expliquent pourquoi la moitié
+           des colonnes ne se saisit pas :
+
+             • le CODE est découpé en TRANCHES, une par niveau, dont la largeur
+               est réglée derrière « Structure de la table… ». Une tranche à zéro
+               ferme la descente : 500 est un niveau 1, 510 un niveau 2, 511 un
+               niveau 3. Le rattachement se lit donc dans le code seul, il n'a
+               pas à être saisi, et reste vrai quel que soit l'ordre des lignes ;
+
+             • au-delà des niveaux du Code, les mêmes chiffres continuent de
+               descendre mais classent des OUVRAGES sous la dernière
+               sous-discipline. Taper plus de chiffres que n'en compte le Code
+               crée donc une ligne d'ouvrage, signalée par un fond orangé. Le
+               CODE OUVRAGE est ce code complété par des zéros : c'est lui qui
+               identifie la ligne, le Code seul étant partagé par toute la
+               branche ;
+
+             • DEUX chaînes d'ABRÉVIATION, sur toutes les lignes, sur le même
+               principe de GABARIT : {sup1} y vaut l'abréviation résolue du
+               niveau juste au-dessus DE LA MÊME CHAÎNE, {sup2} celle d'encore
+               au-dessus, et ainsi de suite — le rang compte les ancêtres
+               PRÉSENTS dans la table, pas les niveaux du code, si bien qu'une
+               branche à trous se numérote comme elle s'affiche. Prendre {sup2}
+               plutôt que {sup1} revient donc à SAUTER un niveau en reprenant
+               tout ce qui le domine. On laisse le jeton seul pour reprendre sa
+               valeur telle quelle, on le complète ({sup1}-PLB), ou on le
+               remplace (PLB). Les colonnes « Rés. » montrent ce que le gabarit
+               produit. Rien n'est implicite : ce qui est écrit dans la cellule
+               est ce qui sort.
+               « Abrév. Ouvrage » accepte en plus le jeton {dis}, qui vaut
+               l'abréviation de discipline résolue de la MÊME ligne. Au
+               niveau 1 elle vaut {dis} et rien d'autre : une chaîne
+               d'abréviation d'ouvrage part toujours de sa discipline.
+
+           La table est TOUJOURS triée par Code Ouvrage (DefaultView.Sort dans
+           script.py) : une ligne change donc de place quand on corrige son
+           code, c'est voulu — la hiérarchie se lit de haut en bas, et le
+           dégradé de couleur par niveau la rend lisible d'un coup d'œil.
+           C'est aussi pourquoi les en-têtes de colonnes n'ont PAS de bouton de
+           tri, à la différence des autres tables de l'extension : réordonner
+           casserait la lecture de la hiérarchie. Les filtres, eux, y sont.
+
+           PAS DE ScrollViewer autour de cet onglet, contrairement aux autres :
+           la table doit défiler dans SON cadre, en gardant la ligne de boutons
+           et le bandeau d'anomalies visibles. D'où une grille, dont seule la
+           rangée de la table est extensible. -->
+      <TabItem x:Name="tabDisciplines" Header="Disciplines">
+        <Grid Margin="10">
+          <!-- Aucune ligne d'aide ni de résumé du format ici : tout ce qui
+               s'expliquait à demeure au-dessus de la table est passé derrière
+               le bouton « ? » de la ligne de boutons. Un pavé de texte permanent
+               vole de la hauteur utile à chaque session pour un contenu qu'on
+               lit une fois. -->
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- 0 recherche et repli -->
+            <RowDefinition Height="*"/>      <!-- 1 table -->
+            <RowDefinition Height="Auto"/>   <!-- 2 boutons -->
+            <RowDefinition Height="Auto"/>   <!-- 3 anomalies -->
+          </Grid.RowDefinitions>
+
+          <!-- Un référentiel complet dépasse vite les quelques centaines de
+               lignes : sans recherche ni repli, la table devient un mur. Les
+               deux agissent sur l'AFFICHAGE seul — rien n'est retiré du
+               référentiel, et l'enregistrement porte toujours sur la table
+               entière, filtrée ou non. -->
+          <!-- Deux rangees, pas une colonne de plus : mesure reelle (rendu WPF
+               hors ecran) — avec les deux temoins d'etat ci-dessous dans LA
+               MEME rangee que la recherche, disc_filtre tombait a 0,00px des
+               que anomalies ET modifications etaient visibles a la fois,
+               meme a 780px de large. Les temoins n'ont rien a voir avec la
+               recherche ; leur propre rangee ne dispute plus sa largeur. -->
+          <Grid Grid.Row="0" Margin="0,0,0,6">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" Text="Rechercher :"
+                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+              <!-- MinWidth : un plancher, pas une garantie de confort — sans
+                   lui, la colonne * peut retomber a 0 sur une fenetre etroite
+                   avec un libelle de niveau long. -->
+              <TextBox   Grid.Column="1" x:Name="disc_filtre" MinWidth="140"
+                         Margin="0,0,10,0"
+                         ToolTip="Filtre sur le code, le libellé ou l'abréviation. Les lignes parentes d'un résultat restent affichées, pour garder la hiérarchie lisible."/>
+              <TextBlock Grid.Column="2" Text="Niveau max :"
+                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+              <ComboBox  Grid.Column="3" x:Name="disc_niveau_max" Width="90"/>
+              <TextBlock Grid.Column="4" x:Name="disc_compte"
+                         VerticalAlignment="Center" Margin="10,0,0,0"
+                         Foreground="#666666"/>
+            </Grid>
+
+            <!-- Le référentiel réellement lu par les autres scripts n'est écrit
+                 que par « Enregistrer », au pied de la fenêtre. Rien à l'écran
+                 ne disait qu'un travail en cours n'y était pas encore : on
+                 pouvait exporter un fichier, lire « écrites dans C:\… », fermer
+                 par « Annuler » et tout perdre en croyant avoir enregistré.
+                 Masqué tant que rien n'a changé — un témoin toujours visible
+                 ne se remarque plus.
+                 Une ligne fautive sans Code Ouvrage n'est atteignable ni par la
+                 recherche ni par un message : ce filtre est le seul moyen de la
+                 retrouver. Masqué tant que la table est saine.
+                 Rangee Auto : sans contenu visible (les deux Collapsed), elle
+                 ne prend aucune hauteur — pas de bande vide entre recherche et
+                 table le reste du temps. -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal"
+                        HorizontalAlignment="Right" Margin="0,4,0,0">
+              <CheckBox x:Name="disc_anomalies_seules"
+                        VerticalAlignment="Center"
+                        Foreground="#C00000"
+                        Visibility="Collapsed"
+                        Content="Anomalies seules"
+                        ToolTip="N'affiche que les lignes en anomalie, y compris celles qu'aucune recherche ne peut atteindre faute de code."/>
+              <TextBlock x:Name="disc_modifie"
+                         VerticalAlignment="Center" Margin="14,0,0,0"
+                         Foreground="#843C0C" FontWeight="SemiBold"
+                         Visibility="Collapsed"
+                         Text="● modifications non enregistrées"
+                         ToolTip="Ces modifications ne seront écrites qu'avec « Enregistrer », en bas de la fenêtre. Fermer par « Annuler » les perdrait."/>
+            </StackPanel>
+          </Grid>
+
+          <!-- CanUserAddRows=False, volontairement : la ligne d'ajout intégrée
+               du DataGrid ne passe pas par la colonne `visible` dont dépend le
+               filtre, et la ligne disparaîtrait à sa validation. Le bouton
+               ci-dessous fait le même travail.
+               Les en-têtes sont remplacés depuis script.py par ceux de
+               dialogs.filtres_colonnes (bouton de filtre + réinitialisation,
+               sans tri) ; les libellés ci-dessous servent de repli. -->
+          <!-- TOUTES les colonnes en largeur FIXE, aucune en « * » : neuf
+               colonnes qui se partagent la fenêtre deviennent illisibles dès
+               qu'on la rétrécit, et le référentiel se lit de gauche à droite
+               comme une fiche, pas comme un tableau à étirer. Ce qui dépasse
+               se rejoint à l'ascenseur horizontal. -->
+          <!-- CanUserDeleteRows=False, volontairement : la suppression native
+               du DataGrid efface la ligne SANS sa descendance et sans
+               confirmation, laissant une branche entière orpheline en
+               silence. La touche Suppr est réacheminée dans script.py vers le
+               même chemin que le bouton et le menu contextuel. -->
+          <DataGrid Grid.Row="1" x:Name="dgDisciplines"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    CanUserDeleteRows="False"
+                    CanUserSortColumns="False"
+                    CanUserReorderColumns="False"
+                    HeadersVisibility="Column"
+                    ColumnWidth="Auto"
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Auto"
+                    Margin="0,0,0,6">
+
+            <!-- Même clic droit que dgTypesVues, dgProfilsLiaison et
+                 dgTypesNomenclatures : cette grille était la seule des quatre
+                 à en être privée. « Dupliquer » est ce qui manquait pour
+                 saisir une série d'ouvrages sous la même sous-discipline. -->
+            <DataGrid.ContextMenu>
+              <ContextMenu>
+                <MenuItem Header="Nouvelle ligne"/>
+                <MenuItem Header="Dupliquer"/>
+                <Separator/>
+                <MenuItem Header="Supprimer"/>
+              </ContextMenu>
+            </DataGrid.ContextMenu>
+
+
+            <!-- Dégradé par niveau : bleu tant qu'on est dans le Code, orange
+                 dès qu'on classe des ouvrages, les deux familles reprises de la
+                 mise en forme conditionnelle du classeur de référence.
+                 La frontière Code / ouvrage étant RÉGLABLE, la teinte d'un
+                 niveau ne peut pas être figée en DataTrigger : elle est
+                 calculée en Python (_disc_couleur_niveau) et posée dans la
+                 ligne sous forme de pinceau, que ce binding se contente de
+                 lire. La couleur du texte suit le contraste WCAG du fond,
+                 calculé lui aussi.
+                 Porté par la LIGNE et non par les cellules : une couleur posée
+                 cellule par cellule empêcherait la sélection de se voir, le
+                 DataGridCell peignant par-dessus. -->
+            <DataGrid.RowStyle>
+              <Style TargetType="DataGridRow">
+                <Setter Property="Background" Value="{Binding brosse_fond}"/>
+                <Setter Property="Foreground" Value="{Binding brosse_texte}"/>
+              </Style>
+            </DataGrid.RowStyle>
+
+            <DataGrid.Columns>
+              <!-- LA colonne de saisie : le Code Ouvrage porte toute la
+                   profondeur et identifie la ligne à lui seul. Une saisie plus
+                   courte est complétée par des zéros.
+                   Le décalage par niveau rend la hiérarchie lisible d'un coup
+                   d'œil dans une table à plat, sans arborescence à déplier. La
+                   marge est CALCULEE en Python et posée dans la ligne, comme
+                   les pinceaux de couleur — un DataTrigger par niveau aurait
+                   fixé un plafond au nombre de niveaux, ce qui n'a rien à faire
+                   dans un réglage de mise en forme. -->
+              <DataGridTextColumn Header="Code Ouv." Binding="{Binding code_ouvrage}" Width="95">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Padding" Value="{Binding marge}"/>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+
+              <!-- Simple troncature du Code Ouvrage à la frontière : il est
+                   partagé par toute une branche (211 couvre 27 lignes dans le
+                   référentiel de référence), il ne peut donc pas servir de clé
+                   ni de saisie. Calculé, jamais saisi. -->
+              <DataGridTextColumn Header="Code Dis." Binding="{Binding code}" Width="95"
+                                  IsReadOnly="True">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Setter Property="FontStyle" Value="Italic"/>
+                    <Setter Property="Opacity" Value="0.8"/>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+
+              <DataGridTextColumn Header="Niv." Binding="{Binding niveau}" Width="62"
+                                  IsReadOnly="True">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Setter Property="FontStyle" Value="Italic"/>
+                    <Setter Property="Opacity" Value="0.8"/>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+
+              <!-- Seul le niveau 1 porte le nom de la discipline ; les niveaux
+                   suivants en héritent, d'où l'italique partout sauf au
+                   niveau 1. -->
+              <DataGridTextColumn Header="Discipline" Binding="{Binding discipline}" Width="160" ElementStyle="{StaticResource DiscCelluleTexte}">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Setter Property="FontStyle" Value="Italic"/>
+                    <Setter Property="Opacity" Value="0.8"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding niveau}" Value="1">
+                        <Setter Property="FontStyle" Value="Normal"/>
+                        <Setter Property="Opacity" Value="1"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+
+              <!-- Un seul libellé pour deux rôles, selon le côté de la
+                   frontière : sous-discipline tant qu'on est dans le Code,
+                   nom d'ouvrage au-delà. -->
+              <DataGridTextColumn Header="Sous-discipline / Ouvrage" Binding="{Binding sous_discipline}" Width="160" ElementStyle="{StaticResource DiscCelluleTexte}">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding niveau}" Value="1">
+                        <Setter Property="Opacity" Value="0.4"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+
+              <!-- DEUX chaînes d'abréviation, chacune avec son gabarit et son
+                   résultat — d'où les colonnes par paires. Toutes deux se
+                   saisissent sur TOUTES les lignes, et comme un GABARIT :
+                   {sup1} y vaut l'abréviation résolue du niveau juste
+                   au-dessus de la MÊME chaîne, {sup2} celle d'encore au-dessus
+                   — et ainsi de suite, sans limite de rang. Le jeton se
+                   complète librement ({sup1}-PLB) ou se remplace entièrement
+                   (PLB).
+                     • ABRÉV. DISCIPLINE — de quelle discipline et
+                       sous-discipline la ligne relève. Racine : le niveau 1.
+                     • ABRÉV. OUVRAGE — nomme l'ouvrage. Elle accepte en plus
+                       le jeton {dis}, qui vaut l'abréviation de discipline
+                       résolue de la MÊME ligne. Au niveau 1 elle vaut {dis} et
+                       rien d'autre — une chaîne d'ouvrage part toujours de sa
+                       discipline : grisée, et script.py en bloque la saisie.
+                   Pas de ToolTip sur les colonnes : DataGridColumn n'en porte
+                   pas, ce n'est pas un FrameworkElement. -->
+              <DataGridTextColumn Header="Abrév. Discipline" Binding="{Binding abrev_discipline}" Width="105" ElementStyle="{StaticResource DiscCelluleTexte}"/>
+
+              <!-- Le gabarit une fois ses jetons remplacés. Sans cette colonne
+                   on ne verrait jamais ce qu'il produit ; c'est elle que
+                   lisent les scripts. -->
+              <DataGridTextColumn Header="Rés. Discipline" Binding="{Binding abrev_resolue}" Width="120" ElementStyle="{StaticResource DiscCelluleTexte}"
+                                  IsReadOnly="True">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Setter Property="FontStyle" Value="Italic"/>
+                    <Setter Property="Opacity" Value="0.8"/>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+
+              <DataGridTextColumn Header="Abrév. Ouvrage" Binding="{Binding abrev_ouvrage}" Width="105" ElementStyle="{StaticResource DiscCelluleTexte}">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                      <!-- Niveau 1 : valeur imposée, {dis} et rien d'autre. -->
+                      <DataTrigger Binding="{Binding niveau}" Value="1">
+                        <Setter Property="FontStyle" Value="Italic"/>
+                        <Setter Property="Opacity" Value="0.8"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+
+              <DataGridTextColumn Header="Rés. Ouvrage" Binding="{Binding abrev_ouvrage_resolue}" Width="120" ElementStyle="{StaticResource DiscCelluleTexte}"
+                                  IsReadOnly="True">
+                <DataGridTextColumn.CellStyle>
+                  <Style TargetType="DataGridCell">
+                    <Setter Property="FontStyle" Value="Italic"/>
+                    <Setter Property="Opacity" Value="0.8"/>
+                  </Style>
+                </DataGridTextColumn.CellStyle>
+              </DataGridTextColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+
+          <!-- Ligne de boutons ordonnée de la portée la plus large à la plus
+               étroite, de gauche à droite :
+                 • à GAUCHE, les actions de CADRE, rares : le fichier de
+                   référentiel et l'export tableur repliés derrière « Fichier »,
+                   la structure des codes, l'aide.
+                 • à DROITE, les deux actions du QUOTIDIEN, seules accentuées.
+                   Un seul bouton d'ajout : le niveau se lit dans le code, il
+                   n'y a rien à choisir au moment de créer la ligne — deux
+                   boutons « Discipline » / « Sous-discipline » laissaient
+                   croire à une décision qui n'existe pas.
+               PAS de GroupBox : à cinq contrôles l'encadrement ne porte plus
+               d'information, il ne faisait que rattraper une barre trop
+               peuplée. Sans lui, plus besoin non plus de caler les boutons de
+               droite sur le décalage interne d'un groupe.
+               Largeur mesurée : 546 px pour 719,6 px utiles à l'ouverture de
+               la fenêtre. Les huit boutons précédents en demandaient 1169 et
+               trois d'entre eux étaient hors champ.
+               Touches d'accès : Alt+F, Alt+T, Alt+A, Alt+P. Aucune autre du
+               fenêtre n'en déclarait, il n'y a donc pas de collision. -->
+          <Grid Grid.Row="2" Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+              <!-- Les quatre actions de fichier tiennent derrière ce bouton.
+                   Un ContextMenu ouvert au clic gauche plutôt qu'un Popup :
+                   c'est le vocabulaire MenuItem déjà câblé sur les trois
+                   autres grilles de cette fenêtre, donc rien de neuf à
+                   apprendre ni à styler.
+                   AUCUNE de ces quatre entrées ne dit « Enregistrer » : ce
+                   verbe appartient au bouton du pied de fenêtre, seul à écrire
+                   le référentiel que les autres scripts liront. Les quatre
+                   d'ici écrivent ou lisent un FICHIER — d'où « Exporter » et
+                   « Importer » des deux côtés du séparateur, dans le même
+                   ordre.
+                   Pas d'icône : elle n'était portée que par deux entrées sur
+                   quatre, et quatre verbes explicites n'en ont pas besoin. -->
+              <Button x:Name="btnDiscFichier" Content="_Fichier  ▾"
+                      Height="30" Margin="0,0,8,0" MinWidth="0" MinHeight="0"
+                      Padding="12,0"
+                      Style="{DynamicResource NMButtonStandard}"
+                      ToolTip="Échanger le référentiel avec un fichier : configuration complète, ou tableur .XLSX.">
+                <Button.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem x:Name="miDiscCfgEnregistrer" Header="_Exporter la configuration…"/>
+                    <MenuItem x:Name="miDiscCfgCharger" Header="_Importer une configuration…"/>
+                    <Separator/>
+                    <MenuItem x:Name="miDiscExport" Header="Exporter en ._XLSX…"/>
+                    <MenuItem x:Name="miDiscImport" Header="Importer un .X_LSX…"/>
+                  </ContextMenu>
+                </Button.ContextMenu>
+              </Button>
+
+              <!-- Hors du menu « Fichier » : ce n'est pas une action de
+                   fichier mais le réglage qui réinterprète tous les codes.
+                   L'y glisser le ferait passer pour un import. -->
+              <Button x:Name="btnDiscFormat" Content="Structure de la _table…"
+                      Height="30" Margin="0,0,8,0" MinWidth="0" MinHeight="0"
+                      Padding="12,0"
+                      Style="{DynamicResource NMButtonStandard}"
+                      ToolTip="Nombre de niveaux de discipline et d'ouvrage, largeur du code et longueur d'abréviation niveau par niveau, séparateur, majuscules."/>
+
+              <!-- Toute l'aide de l'onglet tient derrière ce bouton : le
+                   format courant, la lecture des codes et les jetons
+                   d'abréviation. Un carré, sans libellé, rattaché au groupe
+                   « comprendre et régler » plutôt que flottant au milieu. -->
+              <Button x:Name="btnDiscAide" Content="?"
+                      Width="30" Height="30" MinWidth="0" MinHeight="0"
+                      Padding="0" FontWeight="Bold"
+                      AutomationProperties.Name="Aide sur la table des disciplines"
+                      Style="{DynamicResource NMButtonStandard}"
+                      ToolTip="Comment lire et remplir cette table : codes, niveaux, jetons d'abréviation, et le format en vigueur."/>
+            </StackPanel>
+
+            <!-- Les deux actions qu'on répète des dizaines de fois par
+                 session. Elles doublent le clic droit de la grille : le menu
+                 sert l'habitué, les boutons servent celui qui ne le devine
+                 pas.
+                 UNE SEULE des deux est accentuée. L'ajout est le geste qu'on
+                 encourage ; la suppression emporte toute une branche et n'a
+                 rien à faire dans le même aplat bleu — elle reste disponible,
+                 elle n'invite pas. -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+              <!-- Meme largeur pour les deux : mesuree sur le rendu reel de
+                   "+  Ajouter une ligne" (le plus long des deux textes),
+                   151,43px, arrondie a 152. Sans elle, "− Supprimer" restait
+                   visiblement plus etroit et les deux actions jumelees ne se
+                   lisaient plus comme une paire. -->
+              <Button x:Name="btnDiscAjout" Content="+  _Ajouter une ligne"
+                      Width="152" Height="30" Margin="0,0,8,0"
+                      MinWidth="0" MinHeight="0"
+                      Padding="12,0"
+                      Style="{DynamicResource NMButtonSecondaire}"
+                      ToolTip="Ajoute une ligne vide. Saisissez son Code Ouvrage : ses chiffres suffisent à la situer dans la hiérarchie."/>
+              <Button x:Name="btnDiscSupprimer" Content="−  Su_pprimer"
+                      Width="152" Height="30" MinWidth="0" MinHeight="0"
+                      Padding="12,0"
+                      Style="{DynamicResource NMButtonStandard}"
+                      ToolTip="Supprime les lignes sélectionnées et toute leur descendance, après une seule confirmation. La touche Suppr fait la même chose. Ctrl+Z reprend la dernière suppression."/>
+            </StackPanel>
+          </Grid>
+
+          <!-- Anomalies listées en direct plutôt que refusées à la frappe :
+               corriger un code oblige à passer par des états incohérents (deux
+               lignes au même code le temps de saisir la seconde). Ce bandeau
+               reste donc informatif tant qu'on travaille, et l'enregistrement
+               se contente d'avertir : refuser laissait sans issue celui dont
+               un changement de structure vient d'invalider toute la table.
+               Une LISTE et non un bloc de texte : chaque entrée désigne une
+               ligne, la sélectionner y emmène. Un TextBlock ne se clique pas,
+               et en WPF ne se sélectionne même pas — on ne pouvait donc pas
+               copier un code fautif pour aller le chercher. Sur plusieurs
+               centaines de lignes, réparer devenait un exercice de patience.
+               Hauteur plafonnée : sur un référentiel dont le format vient de
+               changer, la liste ferait sinon disparaître la table sous elle. -->
+          <Grid Grid.Row="3" x:Name="disc_anomalies_cadre"
+                Visibility="Collapsed">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" x:Name="disc_anomalies_titre"
+                       Foreground="#C00000" FontWeight="SemiBold"
+                       Margin="0,0,0,3"/>
+            <ListBox Grid.Row="1" x:Name="disc_anomalies"
+                     MaxHeight="96" BorderThickness="0"
+                     Background="Transparent"
+                     Foreground="#C00000"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ToolTip="Sélectionnez une anomalie pour aller à la ligne concernée.">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+        </Grid>
       </TabItem>
 
       <!-- ═══════════════════════════════════════════════════════ -->
@@ -1137,18 +1876,42 @@
 
     <!-- Boutons bas -->
     <!-- Pied de dialogue standard NM-BATII : proportions * | 8 | 130.
-         Le verbe reste "Enregistrer" : l'action ecrit reellement dans config.json. -->
+         "Enregistrer" ecrit config.json et LAISSE LA FENETRE OUVERTE : une
+         session de reglages se mene en plusieurs passes, et devoir rouvrir
+         les Parametres apres chaque ecriture faisait perdre l'onglet, le
+         defilement et les filtres en cours. "Fermer" (et non "Annuler") dit
+         ce qu'il fait : il ne defait rien de ce qui a deja ete enregistre,
+         il abandonne seulement ce qui ne l'a pas ete — le garde-fou de
+         Closing s'en charge. -->
     <Grid Grid.Row="1" Margin="0,8,0,0">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/>
-        <ColumnDefinition Width="8"/>
-        <ColumnDefinition Width="130"/>
-      </Grid.ColumnDefinitions>
-      <Button Grid.Column="0" x:Name="btnSave" Content="▶  Enregistrer"
-              IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"/>
-      <Button Grid.Column="2" x:Name="btnCancel" Content="Annuler"
-              IsCancel="True" VerticalAlignment="Center"
-              Style="{DynamicResource NMButtonAnnuler}"/>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+
+      <!-- Temoin d'enregistrement : le SEUL retour visible, la fenetre ne se
+           fermant plus et save_config n'affichant plus de boite. D'ou le vert
+           et la coche plutot qu'un gris discret — il doit se remarquer sans
+           demander un clic. Vide tant qu'on n'a rien enregistre. -->
+      <TextBlock x:Name="txtEtatEnregistrement" Grid.Row="0"
+                 Margin="0,0,2,4" HorizontalAlignment="Right"
+                 FontSize="11" FontWeight="SemiBold"
+                 Foreground="#2E7D32" Text=""/>
+
+      <Grid Grid.Row="1">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="8"/>
+          <ColumnDefinition Width="130"/>
+        </Grid.ColumnDefinitions>
+        <Button Grid.Column="0" x:Name="btnSave" Content="▶  Enregistrer"
+                IsDefault="True" Style="{DynamicResource NMButtonAppliquer}"
+                ToolTip="Écrit tous les onglets dans config.json. La fenêtre reste ouverte."/>
+        <Button Grid.Column="2" x:Name="btnCancel" Content="Fermer"
+                IsCancel="True" VerticalAlignment="Center"
+                Style="{DynamicResource NMButtonAnnuler}"
+                ToolTip="Ferme la fenêtre. Ce qui n'a pas été enregistré est signalé avant de sortir."/>
+      </Grid>
     </Grid>
 
   </Grid>
