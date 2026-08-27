@@ -48,6 +48,7 @@ from pyrevit.forms import WPFWindow
 from Autodesk.Revit.DB import (
     FilteredElementCollector,
     BuiltInCategory,
+    BuiltInParameter,
     StorageType,
     TextNote,
     XYZ,
@@ -85,8 +86,17 @@ if not level:
     show_alert(u"Information", "Impossible de récupérer le niveau associé à la vue.")
     script.exit()
 
-# On ajoute un petit déport en Z pour s'assurer d'être à l'intérieur de la pièce
-view_level = level.Elevation + 0.1
+# ProjectElevation = Z interne Revit (repère origine projet). NE PAS utiliser
+# level.Elevation : c'est la valeur UI, relative à la base d'élévation du niveau
+# (point de base projet / point topo). Dès qu'elle est non nulle, le point de
+# sonde tombe hors de toutes les pièces et GetRoomAtPoint renvoie None partout.
+# +0.1 ft : petit déport vers le haut pour être franchement dans le volume.
+view_level = level.ProjectElevation + 0.1
+
+# Phase de la vue active : GetRoomAtPoint sans phase utilise la dernière phase du
+# projet, ce qui rate les pièces d'une autre phase.
+_php = view.get_Parameter(BuiltInParameter.VIEW_PHASE)
+view_phase_id = _php.AsElementId() if _php else None
 
 
 # -----------------------------------------------------------------------------
@@ -223,6 +233,7 @@ class ParamDialog(WPFWindow):
         self._doc            = doc
         self._uidoc          = uidoc
         self._view_level     = view_level
+        self._view_phase_id  = view_phase_id
         self._MARKER         = MARKER
         self._settings_file  = settings_file
         self._action_handler = _action_handler
@@ -283,6 +294,13 @@ class ParamDialog(WPFWindow):
         view_level = self._view_level
         MARKER     = self._MARKER
 
+        phase = None
+        if self._view_phase_id:
+            try:
+                phase = doc.GetElement(self._view_phase_id)
+            except Exception:
+                phase = None
+
         try:
             # B) Sélection des notes textuelles
             try:
@@ -304,7 +322,8 @@ class ParamDialog(WPFWindow):
                 note = doc.GetElement(reference)
                 pt2d = note.Coord
                 pt3d = XYZ(pt2d.X, pt2d.Y, view_level)
-                room = doc.GetRoomAtPoint(pt3d)
+                room = (doc.GetRoomAtPoint(pt3d, phase) if phase
+                        else doc.GetRoomAtPoint(pt3d))
                 if room:
                     room_to_notes.setdefault(room.Id, []).append(note)
 

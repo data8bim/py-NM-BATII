@@ -1,11 +1,102 @@
 {
-  "activer_logs_scripts": false, 
-  "contraintes_hauteur_pieces": {
-    "decalage_inferieur": 0.0, 
-    "decalage_limite": 0.0, 
-    "nb_niveaux": 1
-  }, 
   "conventions_nommage": {
+    "nommage_presentations": [
+      {
+        "id": "present-plan", 
+        "label": "Présentation", 
+        "template": "{construction} - {specialite} - {niveau}"
+      }
+    ], 
+    "nommage_vues": [
+      {
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "label": "Plan d'étage", 
+        "id": "vue-plan", 
+        "vues_et_dwg": true, 
+        "pieces_3d": false, 
+        "vues_plus": true
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "label": "Plan de faux plafond", 
+        "id": "vue-plaf", 
+        "vues_et_dwg": true, 
+        "pieces_3d": false, 
+        "vues_plus": true
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "label": "Vue en plan (Structure)", 
+        "id": "vue-structure", 
+        "vues_et_dwg": true, 
+        "pieces_3d": false, 
+        "vues_plus": true
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
+        "label": "Plan de surface", 
+        "id": "vue-surface", 
+        "vues_et_dwg": true, 
+        "pieces_3d": false, 
+        "vues_plus": true
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - COUPE - {phase:val}", 
+        "label": "Coupe", 
+        "id": "vue-coupe", 
+        "vues_et_dwg": false, 
+        "pieces_3d": false, 
+        "vues_plus": false
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - ELEVATION - {phase:val}", 
+        "label": "Élévation", 
+        "id": "vue-elevation", 
+        "vues_et_dwg": false, 
+        "pieces_3d": false, 
+        "vues_plus": false
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - 3D - {phase:val}", 
+        "label": "Vue 3D", 
+        "id": "vue-3d", 
+        "vues_et_dwg": false, 
+        "pieces_3d": true, 
+        "vues_plus": true
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - {niveau} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val} - {phase:val}", 
+        "label": "Vue de dessin", 
+        "id": "vue-dessin", 
+        "vues_et_dwg": true, 
+        "pieces_3d": false, 
+        "vues_plus": true
+      }, 
+      {
+        "template": "{vue-pers-titre:val} - {niveau} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val} - {phase:val}", 
+        "label": "Légende", 
+        "id": "vue-legende", 
+        "vues_et_dwg": true, 
+        "pieces_3d": false, 
+        "vues_plus": true
+      }, 
+      {
+        "template": "{CATEGORIE} - {PHASE} - {type-nomenclature:val}", 
+        "label": "Nomenclature", 
+        "id": "vue-nomenclature", 
+        "vues_et_dwg": false, 
+        "pieces_3d": false, 
+        "vues_plus": false
+      }
+    ], 
+    "templates": [
+      {
+        "id": "fichiers", 
+        "label": "Fichiers", 
+        "template": "{site}_{construction}_{niveau-code}_{demi-niv}_{producteur}_{specialite}_{nom-site-court}_{rest-nom}", 
+        "systeme": true
+      }
+    ], 
     "nommage_niveaux": [
       {
         "id": "niveau-revit", 
@@ -19,155 +110,436 @@
         "label": "Niveau (code)", 
         "template": "{pref-niv}{sens-niv}{num-niv}"
       }
-    ], 
-    "nommage_presentations": [
-      {
-        "id": "present-plan", 
-        "label": "Présentation", 
-        "template": "{construction} - {specialite} - {niveau}"
-      }
-    ], 
-    "nommage_vues": [
-      {
-        "id": "vue-plan", 
-        "label": "Plan d'étage", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
-        "vues_et_dwg": true, 
-        "vues_plus": true
-      }, 
-      {
-        "id": "vue-plaf", 
-        "label": "Plan de faux plafond", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
-        "vues_et_dwg": true, 
-        "vues_plus": true
-      }, 
-      {
-        "id": "vue-structure", 
-        "label": "Vue en plan (Structure)", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
-        "vues_et_dwg": true, 
-        "vues_plus": true
-      }, 
-      {
-        "id": "vue-surface", 
-        "label": "Plan de surface", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - {niveau} - {phase:val}", 
-        "vues_et_dwg": true, 
-        "vues_plus": true
-      }, 
-      {
-        "id": "vue-coupe", 
-        "label": "Coupe", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - COUPE - {phase:val}", 
-        "vues_et_dwg": false, 
-        "vues_plus": false
-      }, 
-      {
-        "id": "vue-elevation", 
-        "label": "Élévation", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - ELEVATION - {phase:val}", 
-        "vues_et_dwg": false, 
-        "vues_plus": false
-      }, 
-      {
-        "id": "vue-3d", 
-        "label": "Vue 3D", 
-        "pieces_3d": true, 
-        "template": "{vue-pers-titre:val} - 3D - {phase:val}", 
-        "vues_et_dwg": false, 
-        "vues_plus": true
-      }, 
-      {
-        "id": "vue-dessin", 
-        "label": "Vue de dessin", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - {niveau} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val} - {phase:val}", 
-        "vues_et_dwg": true, 
-        "vues_plus": true
-      }, 
-      {
-        "id": "vue-legende", 
-        "label": "Légende", 
-        "pieces_3d": false, 
-        "template": "{vue-pers-titre:val} - {niveau} - {vue-pers-valeur-1:val} - {vue-pers-valeur-2:val} - {phase:val}", 
-        "vues_et_dwg": true, 
-        "vues_plus": true
-      }, 
-      {
-        "id": "vue-nomenclature", 
-        "label": "Nomenclature", 
-        "pieces_3d": false, 
-        "template": "{CATEGORIE} - {PHASE} - {type-nomenclature:val}", 
-        "vues_et_dwg": false, 
-        "vues_plus": false
-      }
-    ], 
-    "templates": [
-      {
-        "id": "fichiers", 
-        "label": "Fichiers", 
-        "systeme": true, 
-        "template": "{site}_{construction}_{niveau-code}_{demi-niv}_{producteur}_{specialite}_{nom-site-court}_{rest-nom}"
-      }
     ]
   }, 
-  "creer_niveaux": {
-    "Eleva_Niv_Origine": -1.0, 
-    "Eleva_Niv_Rdc": 0.0, 
-    "espacement_default": 5.0, 
-    "prefixes": [
+  "surface": {
+    "styles_palette": [
       {
-        "definition": "Batiment", 
-        "negatif": true, 
-        "positif": true, 
-        "prefixe": "R", 
-        "systeme": true
+        "nom": "SHON/SHOB - Surfaces planchers HSP>1,8m", 
+        "couleur_plan": "#F28585", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#388E3C"
       }, 
       {
-        "definition": "Toiture", 
-        "negatif": false, 
-        "positif": true, 
-        "prefixe": "T", 
-        "systeme": true
+        "nom": "SHON/SHOB - Surfaces planchers HSP<1,8m", 
+        "couleur_plan": "#F2A085", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
       }, 
       {
-        "definition": "Fondations", 
-        "negatif": true, 
-        "positif": false, 
-        "prefixe": "F", 
-        "systeme": true
+        "nom": "SHON/SHOB - Niveaux intermédiaires", 
+        "couleur_plan": "#F2BC85", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#388E3C"
       }, 
       {
-        "definition": "Origine", 
-        "negatif": true, 
-        "positif": true, 
-        "prefixe": "O", 
-        "systeme": true
+        "nom": "SHON/SHOB - Trémis - Emprises niveau bas", 
+        "couleur_plan": "#F2D785", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#37474F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Trémis - Vides de planchers", 
+        "couleur_plan": "#F2F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#37474F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Sous-sols - Locaux techniques", 
+        "couleur_plan": "#D7F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Sous-sols - Aménageables", 
+        "couleur_plan": "#BCF285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Stationnement - Véhicules", 
+        "couleur_plan": "#A0F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Stationnement - Sas de sécurité", 
+        "couleur_plan": "#85F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Rdc - Surfaces non closes", 
+        "couleur_plan": "#85F2A0", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Rdc - Terrasses non couvertes", 
+        "couleur_plan": "#85F2BC", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#37474F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Coursives extérieures", 
+        "couleur_plan": "#85F2D7", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Balcons ou loggias (Non clos)", 
+        "couleur_plan": "#85F2F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Combles - Non aménageables", 
+        "couleur_plan": "#85D7F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Combles - Aménageables", 
+        "couleur_plan": "#85BCF2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#388E3C"
+      }, 
+      {
+        "nom": "SHON/SHOB - Combles - Locaux techniques", 
+        "couleur_plan": "#85A0F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Toitures-terrasses", 
+        "couleur_plan": "#8585F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Modénatures", 
+        "couleur_plan": "#A085F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#37474F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Constructions ne formant pas de plancher", 
+        "couleur_plan": "#BC85F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#37474F"
+      }, 
+      {
+        "nom": "SHON/SHOB -  HABITA  - Surfaces planchersHSP>1,8m", 
+        "couleur_plan": "#D785F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB -  HABITA  - Déduction réfection d'immeubles", 
+        "couleur_plan": "#F285F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB - Sous-sols - Caves individuelles d'habitations", 
+        "couleur_plan": "#F28585", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB -  HABITA  - Sous-sols - Caves individuelles d'habitations", 
+        "couleur_plan": "#F285D7", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB -  AGRICOLES - Locaux exploitation", 
+        "couleur_plan": "#F285BC", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SHON/SHOB -  AGRICOLES - Serres de production", 
+        "couleur_plan": "#F285A0", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SP + Planchers", 
+        "couleur_plan": "#F28585", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#388E3C"
+      }, 
+      {
+        "nom": "SP - Trémies", 
+        "couleur_plan": "#F2CE85", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SP - Embrasures", 
+        "couleur_plan": "#CEF285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SP - Loc Techniques", 
+        "couleur_plan": "#85F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SP - Surfaces planchers HSP<1,8m", 
+        "couleur_plan": "#85F2CE", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SP - Combles non aménageables", 
+        "couleur_plan": "#85CEF2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SP - Véhicules", 
+        "couleur_plan": "#8585F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#D32F2F"
+      }, 
+      {
+        "nom": "SP + Planchers communs logements", 
+        "couleur_plan": "#CE85F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#76C97A"
+      }, 
+      {
+        "nom": "SP - Caves ou Celliers - Logements", 
+        "couleur_plan": "#F285CE", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": "#E06B6B"
+      }, 
+      {
+        "nom": "CBS - Type 1 - Pleine terre avec noues / sol naturel", 
+        "couleur_plan": "#F28585", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 7 - Surf. perméables ayant un coef. de ruissellement < 20 %", 
+        "couleur_plan": "#F2BC85", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 9 - Surf .imper. substrat principal minéral ép. 15cm  toiture faible pente", 
+        "couleur_plan": "#F2F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 8 - Surf. imper. substrat minéral ép.15 cm + drainage", 
+        "couleur_plan": "#BCF285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 6 - Surf. imper. recouvertes de terre végétale ép.40cm + drainage", 
+        "couleur_plan": "#85F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 5 - Surf. imper. recouvertes de terre végétale ép.80cm + drainage", 
+        "couleur_plan": "#85F2BC", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 10 - Surf. partiellement perméables coeff. ruissellement inf. 50 %", 
+        "couleur_plan": "#85F2F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 4 - Autres surfaces de pleine terre", 
+        "couleur_plan": "#85BCF2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 3 - Pleine terre avec surfaces classées en EBC ou EPP", 
+        "couleur_plan": "#8585F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - Type 2 - Pleine terre avec arbres existants et conservés", 
+        "couleur_plan": "#BC85F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - DP 6 - Constructions existantes et de leur extension limitée", 
+        "couleur_plan": "#F285F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "CBS - DP 7 - Équipement d'intérêt collectif, services publics ou Centre de congrès et d’exposition", 
+        "couleur_plan": "#F285BC", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Terrasse accessible", 
+        "couleur_plan": "#F28585", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Terrasse inaccessible", 
+        "couleur_plan": "#F2CE85", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Couverture Ardoises", 
+        "couleur_plan": "#CEF285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Couverture Tuiles", 
+        "couleur_plan": "#85F285", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Couverture Zinc", 
+        "couleur_plan": "#85F2CE", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI -Autres", 
+        "couleur_plan": "#85CEF2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Végétalisée", 
+        "couleur_plan": "#8585F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Couverture Synthétique", 
+        "couleur_plan": "#CE85F2", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
+      }, 
+      {
+        "nom": "TOI - Couverture Bac acier", 
+        "couleur_plan": "#F285CE", 
+        "motif_plan": "<Remplissage de solide>", 
+        "couleur": ""
       }
     ], 
-    "sens": [
+    "col_calcul_style": "ANS - SURFACE - Calcul", 
+    "param_s_plancher_auteur": "ANS - SURFACE - S Plancher - Auteur", 
+    "col_shon": "SHON", 
+    "etiquettes_par_calcul": [
       {
-        "definition": "Positif", 
-        "signe": "+"
+        "calcul": "PLUM - CBS", 
+        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
+        "repere": true
       }, 
       {
-        "definition": "Négatif", 
-        "signe": "-"
+        "calcul": "SHON/SHOB", 
+        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
+        "repere": true
+      }, 
+      {
+        "calcul": "SURFACE PLANCHER", 
+        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
+        "repere": true
+      }, 
+      {
+        "calcul": "TEST", 
+        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
+        "repere": true
+      }, 
+      {
+        "calcul": "TOITURES", 
+        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
+        "repere": true
       }
-    ]
+    ], 
+    "col_filter": "Nom", 
+    "col_shob": "SHOB", 
+    "etiquettes_actif": true, 
+    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
+    "qualifications_auteur": [
+      "Géomètre (Surfaces certifiées)", 
+      "Architecte (Surfaces certifiées)", 
+      "Service Gestion Patrimoine"
+    ], 
+    "param_s_plancher": "ANS - SURFACE - S Plancher", 
+    "param_shon": "ANS - SURFACE - SHON", 
+    "table_styles_schedule": "SURFACES  - 1 - Tables de style", 
+    "col_plancher": "Surface Plancher - SP", 
+    "etiquette_defaut": {
+      "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
+      "repere": true
+    }, 
+    "param_shob_auteur": "ANS - SURFACE - SHOB - Auteur", 
+    "param_shob": "ANS - SURFACE - SHOB", 
+    "col_commentaire_style": "Commentaires", 
+    "default_shon_schedule": "SURFACES - SHON/SHOB", 
+    "param_style": "SURFACE - Style", 
+    "param_shon_auteur": "ANS - SURFACE - SHON - Auteur"
   }, 
   "detect_pieces_dwg": {
-    "aire_min_m2": 2.0, 
     "dilatation_pix": 2, 
     "grille_max_px": 5000000, 
+    "resolution_m": 0.10000000000000001, 
     "marge_m": 1.0, 
+    "presets_qualite": [
+      {
+        "seuil_long_m": 0.29999999999999999, 
+        "dilatation_pix": 4, 
+        "description": "Résolution grossière, forte dilatation. Convient aux DWG dégradés ou très chargés.", 
+        "grille_max_px": 3000000, 
+        "resolution_m": 0.20000000000000001, 
+        "marge_m": 1.5, 
+        "aire_min_m2": 3.0, 
+        "nom": "Rapide — DWG très sale (grosse maille, beaucoup de micro-gaps)", 
+        "simplifier_tol_m": 0.20000000000000001
+      }, 
+      {
+        "seuil_long_m": 0.20000000000000001, 
+        "dilatation_pix": 2, 
+        "description": "Réglages équilibrés, adaptés à la majorité des DWG de plans architecturaux.", 
+        "grille_max_px": 5000000, 
+        "resolution_m": 0.10000000000000001, 
+        "marge_m": 1.0, 
+        "aire_min_m2": 2.0, 
+        "nom": "Standard — DWG courant (réglages par défaut)", 
+        "simplifier_tol_m": 0.10000000000000001
+      }, 
+      {
+        "seuil_long_m": 0.080000000000000002, 
+        "dilatation_pix": 1, 
+        "description": "Haute résolution pour les DWG bien dessinés sans micro-gaps. Plus lent.", 
+        "grille_max_px": 10000000, 
+        "resolution_m": 0.050000000000000003, 
+        "marge_m": 0.5, 
+        "aire_min_m2": 1.0, 
+        "nom": "Précis — DWG propre (fine maille, peu de micro-gaps)", 
+        "simplifier_tol_m": 0.050000000000000003
+      }
+    ], 
+    "aire_min_m2": 2.0, 
     "mots_cles_exclure": [
       "meuble", 
       "mobilier", 
@@ -199,44 +571,214 @@
       "arbre", 
       "parking"
     ], 
-    "presets_qualite": [
-      {
-        "aire_min_m2": 3.0, 
-        "description": "Résolution grossière, forte dilatation. Convient aux DWG dégradés ou très chargés.", 
-        "dilatation_pix": 4, 
-        "grille_max_px": 3000000, 
-        "marge_m": 1.5, 
-        "nom": "Rapide — DWG très sale (grosse maille, beaucoup de micro-gaps)", 
-        "resolution_m": 0.20000000000000001, 
-        "seuil_long_m": 0.29999999999999999, 
-        "simplifier_tol_m": 0.20000000000000001
-      }, 
-      {
-        "aire_min_m2": 2.0, 
-        "description": "Réglages équilibrés, adaptés à la majorité des DWG de plans architecturaux.", 
-        "dilatation_pix": 2, 
-        "grille_max_px": 5000000, 
-        "marge_m": 1.0, 
-        "nom": "Standard — DWG courant (réglages par défaut)", 
-        "resolution_m": 0.10000000000000001, 
-        "seuil_long_m": 0.20000000000000001, 
-        "simplifier_tol_m": 0.10000000000000001
-      }, 
-      {
-        "aire_min_m2": 1.0, 
-        "description": "Haute résolution pour les DWG bien dessinés sans micro-gaps. Plus lent.", 
-        "dilatation_pix": 1, 
-        "grille_max_px": 10000000, 
-        "marge_m": 0.5, 
-        "nom": "Précis — DWG propre (fine maille, peu de micro-gaps)", 
-        "resolution_m": 0.050000000000000003, 
-        "seuil_long_m": 0.080000000000000002, 
-        "simplifier_tol_m": 0.050000000000000003
-      }
-    ], 
-    "resolution_m": 0.10000000000000001, 
     "simplifier_tol_m": 0.10000000000000001
   }, 
+  "nomenclatures_types": [
+    {
+      "label": "2a - Saisie des caractéristiques du TYPE", 
+      "type_vue": "2 - SAISIES DES DONNEES"
+    }, 
+    {
+      "label": "2b - Saisie des caractéristiques d'OCCURRENCES", 
+      "type_vue": "2 - SAISIES DES DONNEES"
+    }, 
+    {
+      "label": "3a - Présentation des caractéristiques du TYPE", 
+      "type_vue": "3 - PRESENTATIONS DES DONNEES"
+    }, 
+    {
+      "label": "3b - Présentation des caractéristiques d'OCCURRENCES", 
+      "type_vue": "3 - PRESENTATIONS DES DONNEES"
+    }, 
+    {
+      "label": "3c - Présentation des caractéristiques AUTRES", 
+      "type_vue": "3 - PRESENTATIONS DES DONNEES"
+    }
+  ], 
+  "contraintes_hauteur_pieces": {
+    "decalage_inferieur": 0.0, 
+    "decalage_limite": 0.0, 
+    "nb_niveaux": 1
+  }, 
+  "activer_logs_scripts": false, 
+  "etiquette_masse_pieces": {
+    "types_selectionnes": [
+      "200000 - Etiquette - Pièce - Surface - 3.5 - (Ba) : 2 - Nom & Infos"
+    ]
+  }, 
+  "etiquette_masse_surfaces": {
+    "types_selectionnes": [
+      "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom"
+    ]
+  }, 
+  "profils_liaison_cao": [
+    {
+      "systeme": true, 
+      "vues": {
+        "type_personnalise": "Temporaire", 
+        "vue_par_niveau": false, 
+        "discipline": "", 
+        "phase": "", 
+        "famille": "Plan d'etage"
+      }, 
+      "label": "< Par défaut >", 
+      "ordre": 1, 
+      "options_liaisons": {
+        "layers": "Tous", 
+        "placement": "Automatique - Emplacement partage", 
+        "color_mode": "Conserver", 
+        "view_only": false, 
+        "units": "Metres", 
+        "correct_lines": true
+      }
+    }, 
+    {
+      "systeme": false, 
+      "vues": {
+        "type_personnalise": "TEMP - REPRISE DONNEES", 
+        "vue_par_niveau": true, 
+        "discipline": "020100", 
+        "phase": "EXISTANT", 
+        "famille": "Plan d'étage"
+      }, 
+      "label": "REPRISES DONNEES", 
+      "ordre": 2, 
+      "options_liaisons": {
+        "layers": "Tous", 
+        "placement": "Automatique - Emplacement partage", 
+        "color_mode": "Conserver", 
+        "view_only": true, 
+        "units": "Metres", 
+        "correct_lines": true
+      }
+    }, 
+    {
+      "systeme": false, 
+      "vues": {
+        "type_personnalise": "FM", 
+        "vue_par_niveau": true, 
+        "discipline": "401000", 
+        "phase": "EXISTANT", 
+        "famille": "Plan d'étage"
+      }, 
+      "label": "LIVRABLES FM", 
+      "ordre": 3, 
+      "options_liaisons": {
+        "layers": "Tous", 
+        "placement": "Automatique - Emplacement partage", 
+        "color_mode": "Conserver", 
+        "view_only": false, 
+        "units": "Metres", 
+        "correct_lines": true
+      }
+    }, 
+    {
+      "systeme": false, 
+      "vues": {
+        "type_personnalise": "Temporaire", 
+        "vue_par_niveau": true, 
+        "discipline": "", 
+        "phase": "", 
+        "famille": "Plan d'etage"
+      }, 
+      "label": "Coordination CAO", 
+      "ordre": 4, 
+      "options_liaisons": {
+        "layers": "Tous", 
+        "placement": "Automatique - Emplacement partage", 
+        "color_mode": "Conserver", 
+        "view_only": false, 
+        "units": "Metres", 
+        "correct_lines": true
+      }
+    }
+  ], 
+  "dispo_types_pers_familles": [
+    {
+      "familles": {
+        "vue-plan": false, 
+        "vue-coupe": false, 
+        "vue-dessin": false, 
+        "vue-legende": false, 
+        "vue-elevation": false, 
+        "vue-surface": false, 
+        "vue-3d": true, 
+        "vue-plaf": false, 
+        "vue-structure": false
+      }, 
+      "label": "PIECES 3D"
+    }, 
+    {
+      "familles": {
+        "vue-plan": true, 
+        "vue-coupe": true, 
+        "vue-dessin": true, 
+        "vue-legende": true, 
+        "vue-elevation": true, 
+        "vue-surface": true, 
+        "vue-3d": true, 
+        "vue-plaf": true, 
+        "vue-structure": true
+      }, 
+      "label": "TEMPORAIRE"
+    }, 
+    {
+      "familles": {
+        "vue-plan": true, 
+        "vue-coupe": false, 
+        "vue-dessin": false, 
+        "vue-legende": false, 
+        "vue-elevation": false, 
+        "vue-surface": false, 
+        "vue-3d": true, 
+        "vue-plaf": false, 
+        "vue-structure": false
+      }, 
+      "label": "FM"
+    }, 
+    {
+      "familles": {
+        "vue-plan": true, 
+        "vue-coupe": false, 
+        "vue-dessin": false, 
+        "vue-legende": false, 
+        "vue-elevation": false, 
+        "vue-surface": false, 
+        "vue-3d": false, 
+        "vue-plaf": false, 
+        "vue-structure": false
+      }, 
+      "label": "TEMP - REPRISE DONNEES"
+    }, 
+    {
+      "familles": {
+        "vue-plan": false, 
+        "vue-coupe": false, 
+        "vue-dessin": false, 
+        "vue-legende": false, 
+        "vue-elevation": false, 
+        "vue-surface": true, 
+        "vue-3d": false, 
+        "vue-plaf": false, 
+        "vue-structure": false
+      }, 
+      "label": "SURFACES PLANCHER"
+    }, 
+    {
+      "familles": {
+        "vue-plan": false, 
+        "vue-coupe": false, 
+        "vue-dessin": false, 
+        "vue-legende": false, 
+        "vue-elevation": false, 
+        "vue-surface": true, 
+        "vue-3d": false, 
+        "vue-plaf": false, 
+        "vue-structure": false
+      }, 
+      "label": "SURFACES SHON-SHOB"
+    }
+  ], 
   "disciplines": {
     "format": {
       "digits_par_niveau": [
@@ -245,1786 +787,2144 @@
         1, 
         1
       ], 
-      "longueur_abrev_discipline": [
-        "3", 
-        "3", 
-        "3", 
-        "3"
-      ], 
+      "niveaux_code": 2, 
       "longueur_abrev_ouvrage": [
         "3", 
         "3", 
         "3", 
         "3"
       ], 
-      "majuscules": true, 
+      "longueur_abrev_discipline": [
+        "3", 
+        "3", 
+        "3", 
+        "3"
+      ], 
+      "separateur": "-", 
       "niveaux": 4, 
-      "niveaux_code": 2, 
-      "separateur": "-"
+      "majuscules": true
     }, 
     "table": [
       {
-        "abrev_discipline": "PIL", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL", 
-        "code": "0000", 
         "code_ouvrage": "000000", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL", 
+        "sous_discipline": "", 
+        "code": "0000", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "PIL"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-GEN", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-GEN", 
-        "code": "0001", 
         "code_ouvrage": "000100", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0001", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-DIR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-DIR", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-DIR", 
-        "code": "0002", 
         "code_ouvrage": "000200", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-DIR", 
+        "sous_discipline": "DIRECTION DE PROJET", 
+        "code": "0002", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "DIRECTION DE PROJET"
+        "abrev_discipline": "{sup1}-DIR"
       }, 
       {
-        "abrev_discipline": "{sup1}-PRG", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-PRG", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-PRG", 
-        "code": "0003", 
         "code_ouvrage": "000300", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-PRG", 
+        "sous_discipline": "PROGRAMMATION", 
+        "code": "0003", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "PROGRAMMATION"
+        "abrev_discipline": "{sup1}-PRG"
       }, 
       {
-        "abrev_discipline": "{sup1}-BIM", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-BIM", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-BIM", 
-        "code": "0004", 
         "code_ouvrage": "000400", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-BIM", 
+        "sous_discipline": "MANAGEMENT BIM", 
+        "code": "0004", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "MANAGEMENT BIM"
+        "abrev_discipline": "{sup1}-BIM"
       }, 
       {
-        "abrev_discipline": "{sup1}-OPC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-OPC", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-OPC", 
-        "code": "0005", 
         "code_ouvrage": "000500", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-OPC", 
+        "sous_discipline": "ORDONNANCEMENT, PILOTAGE, COORDINATION", 
+        "code": "0005", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ORDONNANCEMENT, PILOTAGE, COORDINATION"
+        "abrev_discipline": "{sup1}-OPC"
       }, 
       {
-        "abrev_discipline": "{sup1}-SPS", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-SPS", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-SPS", 
-        "code": "0006", 
         "code_ouvrage": "000600", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-SPS", 
+        "sous_discipline": "SECURITE ET PROTECTION DE LA SANTE", 
+        "code": "0006", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SECURITE ET PROTECTION DE LA SANTE"
+        "abrev_discipline": "{sup1}-SPS"
       }, 
       {
-        "abrev_discipline": "{sup1}-CTC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-CTC", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-CTC", 
-        "code": "0007", 
         "code_ouvrage": "000700", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-CTC", 
+        "sous_discipline": "CONTROLE TECHNIQUE", 
+        "code": "0007", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CONTROLE TECHNIQUE"
+        "abrev_discipline": "{sup1}-CTC"
       }, 
       {
-        "abrev_discipline": "{sup1}-ADM", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PIL-ADM", 
+        "discipline": "PILOTAGE & MANAGEMENT", 
         "abrev_resolue": "PIL-ADM", 
-        "code": "0008", 
         "code_ouvrage": "000800", 
-        "discipline": "PILOTAGE & MANAGEMENT", 
+        "abrev_ouvrage_resolue": "PIL-ADM", 
+        "sous_discipline": "ADMINISTRATIF, SECRETARIAT GENERAL", 
+        "code": "0008", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ADMINISTRATIF, SECRETARIAT GENERAL"
+        "abrev_discipline": "{sup1}-ADM"
       }, 
       {
-        "abrev_discipline": "VRD", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD", 
-        "code": "0100", 
         "code_ouvrage": "010000", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD", 
+        "sous_discipline": "", 
+        "code": "0100", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "VRD"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-GEN", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-GEN", 
-        "code": "0101", 
         "code_ouvrage": "010100", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0101", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-TOP", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-TOP", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-TOP", 
-        "code": "0102", 
         "code_ouvrage": "010200", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-TOP", 
+        "sous_discipline": "TOPOGRAPHIE", 
+        "code": "0102", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "TOPOGRAPHIE"
+        "abrev_discipline": "{sup1}-TOP"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEO", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-GEO", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-GEO", 
-        "code": "0103", 
         "code_ouvrage": "010300", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-GEO", 
+        "sous_discipline": "GEOTECHNIQUE, ETUDE DE SOLS", 
+        "code": "0103", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GEOTECHNIQUE, ETUDE DE SOLS"
+        "abrev_discipline": "{sup1}-GEO"
       }, 
       {
-        "abrev_discipline": "{sup1}-TER", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-TER", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-TER", 
-        "code": "0104", 
         "code_ouvrage": "010400", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-TER", 
+        "sous_discipline": "TERRASSEMENTS", 
+        "code": "0104", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "TERRASSEMENTS"
+        "abrev_discipline": "{sup1}-TER"
       }, 
       {
-        "abrev_discipline": "{sup1}-VOI", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-VOI", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-VOI", 
-        "code": "0105", 
         "code_ouvrage": "010500", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-VOI", 
+        "sous_discipline": "VOIRIE ET CIRCULATIONS", 
+        "code": "0105", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "VOIRIE ET CIRCULATIONS"
+        "abrev_discipline": "{sup1}-VOI"
       }, 
       {
-        "abrev_discipline": "{sup1}-ASS", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-ASS", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-ASS", 
-        "code": "0106", 
         "code_ouvrage": "010600", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-ASS", 
+        "sous_discipline": "ASSAINISSEMENT", 
+        "code": "0106", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ASSAINISSEMENT"
+        "abrev_discipline": "{sup1}-ASS"
       }, 
       {
-        "abrev_discipline": "{sup1}-AEP", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-AEP", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-AEP", 
-        "code": "0107", 
         "code_ouvrage": "010700", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-AEP", 
+        "sous_discipline": "ADDUCTION D'EAU POTABLE", 
+        "code": "0107", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ADDUCTION D'EAU POTABLE"
+        "abrev_discipline": "{sup1}-AEP"
       }, 
       {
-        "abrev_discipline": "{sup1}-RSE", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-RSE", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-RSE", 
-        "code": "0108", 
         "code_ouvrage": "010800", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-RSE", 
+        "sous_discipline": "RESEAUX SECS", 
+        "code": "0108", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "RESEAUX SECS"
+        "abrev_discipline": "{sup1}-RSE"
       }, 
       {
-        "abrev_discipline": "{sup1}-HYD", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-HYD", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-HYD", 
-        "code": "0109", 
         "code_ouvrage": "010900", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-HYD", 
+        "sous_discipline": "HYDROLOGIE, GESTION DES EAUX", 
+        "code": "0109", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "HYDROLOGIE, GESTION DES EAUX"
+        "abrev_discipline": "{sup1}-HYD"
       }, 
       {
-        "abrev_discipline": "{sup1}-PAY", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-PAY", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-PAY", 
-        "code": "0110", 
         "code_ouvrage": "011000", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-PAY", 
+        "sous_discipline": "PAYSAGE, ESPACES VERTS", 
+        "code": "0110", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "PAYSAGE, ESPACES VERTS"
+        "abrev_discipline": "{sup1}-PAY"
       }, 
       {
-        "abrev_discipline": "{sup1}-MOB", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "VRD-MOB", 
+        "discipline": "VRD & EXTERIEURS", 
         "abrev_resolue": "VRD-MOB", 
-        "code": "0111", 
         "code_ouvrage": "011100", 
-        "discipline": "VRD & EXTERIEURS", 
+        "abrev_ouvrage_resolue": "VRD-MOB", 
+        "sous_discipline": "MOBILIER URBAIN, CLOTURES", 
+        "code": "0111", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "MOBILIER URBAIN, CLOTURES"
+        "abrev_discipline": "{sup1}-MOB"
       }, 
       {
-        "abrev_discipline": "ARC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ARC", 
+        "discipline": "ARCHITECTURE", 
         "abrev_resolue": "ARC", 
-        "code": "0200", 
         "code_ouvrage": "020000", 
-        "discipline": "ARCHITECTURE", 
+        "abrev_ouvrage_resolue": "ARC", 
+        "sous_discipline": "", 
+        "code": "0200", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "ARC"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ARC-GEN", 
+        "discipline": "ARCHITECTURE", 
         "abrev_resolue": "ARC-GEN", 
-        "code": "0201", 
         "code_ouvrage": "020100", 
-        "discipline": "ARCHITECTURE", 
+        "abrev_ouvrage_resolue": "ARC-GEN", 
+        "sous_discipline": "ARCHITECTURE GENERALE", 
+        "code": "0201", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ARCHITECTURE GENERALE"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-AGE", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ARC-AGE", 
+        "discipline": "ARCHITECTURE", 
         "abrev_resolue": "ARC-AGE", 
-        "code": "0202", 
         "code_ouvrage": "020200", 
-        "discipline": "ARCHITECTURE", 
+        "abrev_ouvrage_resolue": "ARC-AGE", 
+        "sous_discipline": "AGENCEMENT INTERIEUR, MOBILIER", 
+        "code": "0202", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "AGENCEMENT INTERIEUR, MOBILIER"
+        "abrev_discipline": "{sup1}-AGE"
       }, 
       {
-        "abrev_discipline": "{sup1}-SPA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ARC-SPA", 
+        "discipline": "ARCHITECTURE", 
         "abrev_resolue": "ARC-SPA", 
-        "code": "0203", 
         "code_ouvrage": "020300", 
-        "discipline": "ARCHITECTURE", 
+        "abrev_ouvrage_resolue": "ARC-SPA", 
+        "sous_discipline": "SPACE PLANNING, SURFACES", 
+        "code": "0203", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SPACE PLANNING, SURFACES"
+        "abrev_discipline": "{sup1}-SPA"
       }, 
       {
-        "abrev_discipline": "{sup1}-SIG", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ARC-SIG", 
+        "discipline": "ARCHITECTURE", 
         "abrev_resolue": "ARC-SIG", 
-        "code": "0204", 
         "code_ouvrage": "020400", 
-        "discipline": "ARCHITECTURE", 
+        "abrev_ouvrage_resolue": "ARC-SIG", 
+        "sous_discipline": "SIGNALETIQUE", 
+        "code": "0204", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SIGNALETIQUE"
+        "abrev_discipline": "{sup1}-SIG"
       }, 
       {
-        "abrev_discipline": "{sup1}-ACC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ARC-ACC", 
+        "discipline": "ARCHITECTURE", 
         "abrev_resolue": "ARC-ACC", 
-        "code": "0205", 
         "code_ouvrage": "020500", 
-        "discipline": "ARCHITECTURE", 
+        "abrev_ouvrage_resolue": "ARC-ACC", 
+        "sous_discipline": "ACCESSIBILITE PMR", 
+        "code": "0205", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ACCESSIBILITE PMR"
+        "abrev_discipline": "{sup1}-ACC"
       }, 
       {
-        "abrev_discipline": "{sup1}-PAT", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ARC-PAT", 
+        "discipline": "ARCHITECTURE", 
         "abrev_resolue": "ARC-PAT", 
-        "code": "0206", 
         "code_ouvrage": "020600", 
-        "discipline": "ARCHITECTURE", 
+        "abrev_ouvrage_resolue": "ARC-PAT", 
+        "sous_discipline": "PATRIMOINE, BATI ANCIEN", 
+        "code": "0206", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "PATRIMOINE, BATI ANCIEN"
+        "abrev_discipline": "{sup1}-PAT"
       }, 
       {
-        "abrev_discipline": "STR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR", 
-        "code": "0300", 
         "code_ouvrage": "030000", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR", 
+        "sous_discipline": "", 
+        "code": "0300", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "STR"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR-GEN", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR-GEN", 
-        "code": "0301", 
         "code_ouvrage": "030100", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0301", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-DEM", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR-DEM", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR-DEM", 
-        "code": "0302", 
         "code_ouvrage": "030200", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR-DEM", 
+        "sous_discipline": "DEMOLITION, DECONSTRUCTION, CURAGE", 
+        "code": "0302", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "DEMOLITION, DECONSTRUCTION, CURAGE"
+        "abrev_discipline": "{sup1}-DEM"
       }, 
       {
-        "abrev_discipline": "{sup1}-FON", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR-FON", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR-FON", 
-        "code": "0303", 
         "code_ouvrage": "030300", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR-FON", 
+        "sous_discipline": "FONDATIONS, REPRISES EN SOUS-OEUVRE", 
+        "code": "0303", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "FONDATIONS, REPRISES EN SOUS-OEUVRE"
+        "abrev_discipline": "{sup1}-FON"
       }, 
       {
-        "abrev_discipline": "{sup1}-GRO", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR-GRO", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR-GRO", 
-        "code": "0304", 
         "code_ouvrage": "030400", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR-GRO", 
+        "sous_discipline": "GROS-OEUVRE, BETON ARME", 
+        "code": "0304", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GROS-OEUVRE, BETON ARME"
+        "abrev_discipline": "{sup1}-GRO"
       }, 
       {
-        "abrev_discipline": "{sup1}-CHM", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR-CHM", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR-CHM", 
-        "code": "0305", 
         "code_ouvrage": "030500", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR-CHM", 
+        "sous_discipline": "CHARPENTE METALLIQUE", 
+        "code": "0305", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CHARPENTE METALLIQUE"
+        "abrev_discipline": "{sup1}-CHM"
       }, 
       {
-        "abrev_discipline": "{sup1}-CHB", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR-CHB", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR-CHB", 
-        "code": "0306", 
         "code_ouvrage": "030600", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR-CHB", 
+        "sous_discipline": "CHARPENTE BOIS", 
+        "code": "0306", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CHARPENTE BOIS"
+        "abrev_discipline": "{sup1}-CHB"
       }, 
       {
-        "abrev_discipline": "{sup1}-GCI", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "STR-GCI", 
+        "discipline": "STRUCTURE & GENIE CIVIL", 
         "abrev_resolue": "STR-GCI", 
-        "code": "0307", 
         "code_ouvrage": "030700", 
-        "discipline": "STRUCTURE & GENIE CIVIL", 
+        "abrev_ouvrage_resolue": "STR-GCI", 
+        "sous_discipline": "GENIE CIVIL, OUVRAGES D'ART", 
+        "code": "0307", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENIE CIVIL, OUVRAGES D'ART"
+        "abrev_discipline": "{sup1}-GCI"
       }, 
       {
-        "abrev_discipline": "ENV", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV", 
-        "code": "0400", 
         "code_ouvrage": "040000", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV", 
+        "sous_discipline": "", 
+        "code": "0400", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "ENV"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-GEN", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-GEN", 
-        "code": "0401", 
         "code_ouvrage": "040100", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0401", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-FAC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-FAC", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-FAC", 
-        "code": "0402", 
         "code_ouvrage": "040200", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-FAC", 
+        "sous_discipline": "FACADES, MURS-RIDEAUX", 
+        "code": "0402", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "FACADES, MURS-RIDEAUX"
+        "abrev_discipline": "{sup1}-FAC"
       }, 
       {
-        "abrev_discipline": "{sup1}-MEX", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-MEX", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-MEX", 
-        "code": "0403", 
         "code_ouvrage": "040300", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-MEX", 
+        "sous_discipline": "MENUISERIES EXTERIEURES", 
+        "code": "0403", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "MENUISERIES EXTERIEURES"
+        "abrev_discipline": "{sup1}-MEX"
       }, 
       {
-        "abrev_discipline": "{sup1}-COU", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-COU", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-COU", 
-        "code": "0404", 
         "code_ouvrage": "040400", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-COU", 
+        "sous_discipline": "COUVERTURE", 
+        "code": "0404", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "COUVERTURE"
+        "abrev_discipline": "{sup1}-COU"
       }, 
       {
-        "abrev_discipline": "{sup1}-ETA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-ETA", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-ETA", 
-        "code": "0405", 
         "code_ouvrage": "040500", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-ETA", 
+        "sous_discipline": "ETANCHEITE", 
+        "code": "0405", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ETANCHEITE"
+        "abrev_discipline": "{sup1}-ETA"
       }, 
       {
-        "abrev_discipline": "{sup1}-CLO", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-CLO", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-CLO", 
-        "code": "0406", 
         "code_ouvrage": "040600", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-CLO", 
+        "sous_discipline": "CLOISONS, DOUBLAGES, PLATRERIE", 
+        "code": "0406", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CLOISONS, DOUBLAGES, PLATRERIE"
+        "abrev_discipline": "{sup1}-CLO"
       }, 
       {
-        "abrev_discipline": "{sup1}-PLF", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-PLF", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-PLF", 
-        "code": "0407", 
         "code_ouvrage": "040700", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-PLF", 
+        "sous_discipline": "PLAFONDS, FAUX-PLAFONDS", 
+        "code": "0407", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "PLAFONDS, FAUX-PLAFONDS"
+        "abrev_discipline": "{sup1}-PLF"
       }, 
       {
-        "abrev_discipline": "{sup1}-MIN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-MIN", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-MIN", 
-        "code": "0408", 
         "code_ouvrage": "040800", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-MIN", 
+        "sous_discipline": "MENUISERIES INTERIEURES", 
+        "code": "0408", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "MENUISERIES INTERIEURES"
+        "abrev_discipline": "{sup1}-MIN"
       }, 
       {
-        "abrev_discipline": "{sup1}-SOL", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-SOL", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-SOL", 
-        "code": "0409", 
         "code_ouvrage": "040900", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-SOL", 
+        "sous_discipline": "REVETEMENTS DE SOL", 
+        "code": "0409", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "REVETEMENTS DE SOL"
+        "abrev_discipline": "{sup1}-SOL"
       }, 
       {
-        "abrev_discipline": "{sup1}-MUR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-MUR", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-MUR", 
-        "code": "0410", 
         "code_ouvrage": "041000", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-MUR", 
+        "sous_discipline": "REVETEMENTS MURAUX, PEINTURE", 
+        "code": "0410", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "REVETEMENTS MURAUX, PEINTURE"
+        "abrev_discipline": "{sup1}-MUR"
       }, 
       {
-        "abrev_discipline": "{sup1}-SER", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ENV-SER", 
+        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
         "abrev_resolue": "ENV-SER", 
-        "code": "0411", 
         "code_ouvrage": "041100", 
-        "discipline": "ENVELOPPE & SECOND-OEUVRE", 
+        "abrev_ouvrage_resolue": "ENV-SER", 
+        "sous_discipline": "SERRURERIE, METALLERIE", 
+        "code": "0411", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SERRURERIE, METALLERIE"
+        "abrev_discipline": "{sup1}-SER"
       }, 
       {
-        "abrev_discipline": "ELE", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE", 
-        "code": "0500", 
         "code_ouvrage": "050000", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE", 
+        "sous_discipline": "", 
+        "code": "0500", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "ELE"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-GEN", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-GEN", 
-        "code": "0501", 
         "code_ouvrage": "050100", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0501", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-CFO", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-CFO", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-CFO", 
-        "code": "0502", 
         "code_ouvrage": "050200", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-CFO", 
+        "sous_discipline": "COURANTS FORTS - HTA, BT, DISTRIBUTION", 
+        "code": "0502", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "COURANTS FORTS - HTA, BT, DISTRIBUTION"
+        "abrev_discipline": "{sup1}-CFO"
       }, 
       {
-        "abrev_discipline": "{sup1}-CFA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-CFA", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-CFA", 
-        "code": "0503", 
         "code_ouvrage": "050300", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-CFA", 
+        "sous_discipline": "COURANTS FAIBLES", 
+        "code": "0503", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "COURANTS FAIBLES"
+        "abrev_discipline": "{sup1}-CFA"
       }, 
       {
-        "abrev_discipline": "{sup1}-ECL", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-ECL", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-ECL", 
-        "code": "0504", 
         "code_ouvrage": "050400", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-ECL", 
+        "sous_discipline": "ECLAIRAGE, ECLAIRAGISME", 
+        "code": "0504", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ECLAIRAGE, ECLAIRAGISME"
+        "abrev_discipline": "{sup1}-ECL"
       }, 
       {
-        "abrev_discipline": "{sup1}-SSI", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-SSI", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-SSI", 
-        "code": "0505", 
         "code_ouvrage": "050500", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-SSI", 
+        "sous_discipline": "SYSTEME DE SECURITE INCENDIE", 
+        "code": "0505", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SYSTEME DE SECURITE INCENDIE"
+        "abrev_discipline": "{sup1}-SSI"
       }, 
       {
-        "abrev_discipline": "{sup1}-GTB", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-GTB", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-GTB", 
-        "code": "0506", 
         "code_ouvrage": "050600", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-GTB", 
+        "sous_discipline": "GTB / GTC", 
+        "code": "0506", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GTB / GTC"
+        "abrev_discipline": "{sup1}-GTB"
       }, 
       {
-        "abrev_discipline": "{sup1}-VDI", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-VDI", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-VDI", 
-        "code": "0507", 
         "code_ouvrage": "050700", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-VDI", 
+        "sous_discipline": "VOIX-DONNEES-IMAGES, RESEAUX", 
+        "code": "0507", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "VOIX-DONNEES-IMAGES, RESEAUX"
+        "abrev_discipline": "{sup1}-VDI"
       }, 
       {
-        "abrev_discipline": "{sup1}-SUR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-SUR", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-SUR", 
-        "code": "0508", 
         "code_ouvrage": "050800", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-SUR", 
+        "sous_discipline": "SURETE - ACCES, VIDEO, INTRUSION", 
+        "code": "0508", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SURETE - ACCES, VIDEO, INTRUSION"
+        "abrev_discipline": "{sup1}-SUR"
       }, 
       {
-        "abrev_discipline": "{sup1}-SEC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-SEC", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-SEC", 
-        "code": "0509", 
         "code_ouvrage": "050900", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-SEC", 
+        "sous_discipline": "SECOURS - GROUPE ELECTROGENE, ONDULEURS", 
+        "code": "0509", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SECOURS - GROUPE ELECTROGENE, ONDULEURS"
+        "abrev_discipline": "{sup1}-SEC"
       }, 
       {
-        "abrev_discipline": "{sup1}-ENR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "ELE-ENR", 
+        "discipline": "ELECTRICITE & COMMUNICATION", 
         "abrev_resolue": "ELE-ENR", 
-        "code": "0510", 
         "code_ouvrage": "051000", 
-        "discipline": "ELECTRICITE & COMMUNICATION", 
+        "abrev_ouvrage_resolue": "ELE-ENR", 
+        "sous_discipline": "RENOUVELABLE ELECTRIQUE - PV, EOLIEN", 
+        "code": "0510", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "RENOUVELABLE ELECTRIQUE - PV, EOLIEN"
+        "abrev_discipline": "{sup1}-ENR"
       }, 
       {
-        "abrev_discipline": "FLU", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU", 
-        "code": "0600", 
         "code_ouvrage": "060000", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU", 
+        "sous_discipline": "", 
+        "code": "0600", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "FLU"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-GEN", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-GEN", 
-        "code": "0601", 
         "code_ouvrage": "060100", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0601", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-CVC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-CVC", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-CVC", 
-        "code": "0602", 
         "code_ouvrage": "060200", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-CVC", 
+        "sous_discipline": "CVC TRAITE GLOBALEMENT", 
+        "code": "0602", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CVC TRAITE GLOBALEMENT"
+        "abrev_discipline": "{sup1}-CVC"
       }, 
       {
-        "abrev_discipline": "{sup1}-CHA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-CHA", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-CHA", 
-        "code": "0603", 
         "code_ouvrage": "060300", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-CHA", 
+        "sous_discipline": "CHAUFFAGE", 
+        "code": "0603", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CHAUFFAGE"
+        "abrev_discipline": "{sup1}-CHA"
       }, 
       {
-        "abrev_discipline": "{sup1}-VEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-VEN", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-VEN", 
-        "code": "0604", 
         "code_ouvrage": "060400", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-VEN", 
+        "sous_discipline": "VENTILATION, AERAULIQUE", 
+        "code": "0604", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "VENTILATION, AERAULIQUE"
+        "abrev_discipline": "{sup1}-VEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-CLI", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-CLI", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-CLI", 
-        "code": "0605", 
         "code_ouvrage": "060500", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-CLI", 
+        "sous_discipline": "CLIMATISATION, PRODUCTION DE FROID", 
+        "code": "0605", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CLIMATISATION, PRODUCTION DE FROID"
+        "abrev_discipline": "{sup1}-CLI"
       }, 
       {
-        "abrev_discipline": "{sup1}-SAN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-SAN", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-SAN", 
-        "code": "0606", 
         "code_ouvrage": "060600", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-SAN", 
+        "sous_discipline": "SANITAIRE - DISTRIBUTION, ECS, APPAREILS", 
+        "code": "0606", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SANITAIRE - DISTRIBUTION, ECS, APPAREILS"
+        "abrev_discipline": "{sup1}-SAN"
       }, 
       {
-        "abrev_discipline": "{sup1}-EVA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-EVA", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-EVA", 
-        "code": "0607", 
         "code_ouvrage": "060700", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-EVA", 
+        "sous_discipline": "EVACUATIONS, EAUX USEES", 
+        "code": "0607", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "EVACUATIONS, EAUX USEES"
+        "abrev_discipline": "{sup1}-EVA"
       }, 
       {
-        "abrev_discipline": "{sup1}-GAZ", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-GAZ", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-GAZ", 
-        "code": "0608", 
         "code_ouvrage": "060800", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-GAZ", 
+        "sous_discipline": "RESEAUX GAZ", 
+        "code": "0608", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "RESEAUX GAZ"
+        "abrev_discipline": "{sup1}-GAZ"
       }, 
       {
-        "abrev_discipline": "{sup1}-DES", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-DES", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-DES", 
-        "code": "0609", 
         "code_ouvrage": "060900", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-DES", 
+        "sous_discipline": "DESENFUMAGE", 
+        "code": "0609", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "DESENFUMAGE"
+        "abrev_discipline": "{sup1}-DES"
       }, 
       {
-        "abrev_discipline": "{sup1}-SPR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-SPR", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-SPR", 
-        "code": "0610", 
         "code_ouvrage": "061000", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-SPR", 
+        "sous_discipline": "SPRINKLER, EXTINCTION AUTOMATIQUE", 
+        "code": "0610", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "SPRINKLER, EXTINCTION AUTOMATIQUE"
+        "abrev_discipline": "{sup1}-SPR"
       }, 
       {
-        "abrev_discipline": "{sup1}-ENR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "FLU-ENR", 
+        "discipline": "FLUIDES & SANITAIRE", 
         "abrev_resolue": "FLU-ENR", 
-        "code": "0611", 
         "code_ouvrage": "061100", 
-        "discipline": "FLUIDES & SANITAIRE", 
+        "abrev_ouvrage_resolue": "FLU-ENR", 
+        "sous_discipline": "RENOUVELABLE THERMIQUE - SOLAIRE, PAC", 
+        "code": "0611", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "RENOUVELABLE THERMIQUE - SOLAIRE, PAC"
+        "abrev_discipline": "{sup1}-ENR"
       }, 
       {
-        "abrev_discipline": "LEV", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "LEV", 
+        "discipline": "TRANSPORT & LEVAGE", 
         "abrev_resolue": "LEV", 
-        "code": "0700", 
         "code_ouvrage": "070000", 
-        "discipline": "TRANSPORT & LEVAGE", 
+        "abrev_ouvrage_resolue": "LEV", 
+        "sous_discipline": "", 
+        "code": "0700", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "LEV"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "LEV-GEN", 
+        "discipline": "TRANSPORT & LEVAGE", 
         "abrev_resolue": "LEV-GEN", 
-        "code": "0701", 
         "code_ouvrage": "070100", 
-        "discipline": "TRANSPORT & LEVAGE", 
+        "abrev_ouvrage_resolue": "LEV-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0701", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-ASC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "LEV-ASC", 
+        "discipline": "TRANSPORT & LEVAGE", 
         "abrev_resolue": "LEV-ASC", 
-        "code": "0702", 
         "code_ouvrage": "070200", 
-        "discipline": "TRANSPORT & LEVAGE", 
+        "abrev_ouvrage_resolue": "LEV-ASC", 
+        "sous_discipline": "ASCENSEURS", 
+        "code": "0702", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ASCENSEURS"
+        "abrev_discipline": "{sup1}-ASC"
       }, 
       {
-        "abrev_discipline": "{sup1}-MCH", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "LEV-MCH", 
+        "discipline": "TRANSPORT & LEVAGE", 
         "abrev_resolue": "LEV-MCH", 
-        "code": "0703", 
         "code_ouvrage": "070300", 
-        "discipline": "TRANSPORT & LEVAGE", 
+        "abrev_ouvrage_resolue": "LEV-MCH", 
+        "sous_discipline": "MONTE-CHARGES", 
+        "code": "0703", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "MONTE-CHARGES"
+        "abrev_discipline": "{sup1}-MCH"
       }, 
       {
-        "abrev_discipline": "{sup1}-ESC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "LEV-ESC", 
+        "discipline": "TRANSPORT & LEVAGE", 
         "abrev_resolue": "LEV-ESC", 
-        "code": "0704", 
         "code_ouvrage": "070400", 
-        "discipline": "TRANSPORT & LEVAGE", 
+        "abrev_ouvrage_resolue": "LEV-ESC", 
+        "sous_discipline": "ESCALIERS MECANIQUES, TROTTOIRS ROULANTS", 
+        "code": "0704", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ESCALIERS MECANIQUES, TROTTOIRS ROULANTS"
+        "abrev_discipline": "{sup1}-ESC"
       }, 
       {
-        "abrev_discipline": "{sup1}-PAU", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "LEV-PAU", 
+        "discipline": "TRANSPORT & LEVAGE", 
         "abrev_resolue": "LEV-PAU", 
-        "code": "0705", 
         "code_ouvrage": "070500", 
-        "discipline": "TRANSPORT & LEVAGE", 
+        "abrev_ouvrage_resolue": "LEV-PAU", 
+        "sous_discipline": "PORTES AUTOMATIQUES", 
+        "code": "0705", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "PORTES AUTOMATIQUES"
+        "abrev_discipline": "{sup1}-PAU"
       }, 
       {
-        "abrev_discipline": "{sup1}-NAC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "LEV-NAC", 
+        "discipline": "TRANSPORT & LEVAGE", 
         "abrev_resolue": "LEV-NAC", 
-        "code": "0706", 
         "code_ouvrage": "070600", 
-        "discipline": "TRANSPORT & LEVAGE", 
+        "abrev_ouvrage_resolue": "LEV-NAC", 
+        "sous_discipline": "NACELLES, ACCES EN FACADE", 
+        "code": "0706", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "NACELLES, ACCES EN FACADE"
+        "abrev_discipline": "{sup1}-NAC"
       }, 
       {
-        "abrev_discipline": "SPE", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE", 
-        "code": "0800", 
         "code_ouvrage": "080000", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE", 
+        "sous_discipline": "", 
+        "code": "0800", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "SPE"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-GEN", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-GEN", 
-        "code": "0801", 
         "code_ouvrage": "080100", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0801", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-CUI", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-CUI", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-CUI", 
-        "code": "0802", 
         "code_ouvrage": "080200", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-CUI", 
+        "sous_discipline": "CUISINES PROFESSIONNELLES", 
+        "code": "0802", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CUISINES PROFESSIONNELLES"
+        "abrev_discipline": "{sup1}-CUI"
       }, 
       {
-        "abrev_discipline": "{sup1}-BLA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-BLA", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-BLA", 
-        "code": "0803", 
         "code_ouvrage": "080300", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-BLA", 
+        "sous_discipline": "BLANCHISSERIE", 
+        "code": "0803", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "BLANCHISSERIE"
+        "abrev_discipline": "{sup1}-BLA"
       }, 
       {
-        "abrev_discipline": "{sup1}-LAB", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-LAB", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-LAB", 
-        "code": "0804", 
         "code_ouvrage": "080400", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-LAB", 
+        "sous_discipline": "EQUIPEMENTS DE LABORATOIRE", 
+        "code": "0804", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "EQUIPEMENTS DE LABORATOIRE"
+        "abrev_discipline": "{sup1}-LAB"
       }, 
       {
-        "abrev_discipline": "{sup1}-MED", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-MED", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-MED", 
-        "code": "0805", 
         "code_ouvrage": "080500", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-MED", 
+        "sous_discipline": "FLUIDES ET EQUIPEMENTS MEDICAUX", 
+        "code": "0805", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "FLUIDES ET EQUIPEMENTS MEDICAUX"
+        "abrev_discipline": "{sup1}-MED"
       }, 
       {
-        "abrev_discipline": "{sup1}-EAU", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-EAU", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-EAU", 
-        "code": "0806", 
         "code_ouvrage": "080600", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-EAU", 
+        "sous_discipline": "TRAITEMENT D'EAU", 
+        "code": "0806", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "TRAITEMENT D'EAU"
+        "abrev_discipline": "{sup1}-EAU"
       }, 
       {
-        "abrev_discipline": "{sup1}-SPO", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-SPO", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-SPO", 
-        "code": "0807", 
         "code_ouvrage": "080700", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-SPO", 
+        "sous_discipline": "EQUIPEMENTS SPORTIFS, PISCINES", 
+        "code": "0807", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "EQUIPEMENTS SPORTIFS, PISCINES"
+        "abrev_discipline": "{sup1}-SPO"
       }, 
       {
-        "abrev_discipline": "{sup1}-SCE", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SPE-SCE", 
+        "discipline": "PROCESS & SPECIFIQUE", 
         "abrev_resolue": "SPE-SCE", 
-        "code": "0808", 
         "code_ouvrage": "080800", 
-        "discipline": "PROCESS & SPECIFIQUE", 
+        "abrev_ouvrage_resolue": "SPE-SCE", 
+        "sous_discipline": "EQUIPEMENTS SCENIQUES", 
+        "code": "0808", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "EQUIPEMENTS SCENIQUES"
+        "abrev_discipline": "{sup1}-SCE"
       }, 
       {
-        "abrev_discipline": "PER", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER", 
-        "code": "0900", 
         "code_ouvrage": "090000", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER", 
+        "sous_discipline": "", 
+        "code": "0900", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "PER"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER-GEN", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER-GEN", 
-        "code": "0901", 
         "code_ouvrage": "090100", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "0901", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-THE", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER-THE", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER-THE", 
-        "code": "0902", 
         "code_ouvrage": "090200", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER-THE", 
+        "sous_discipline": "THERMIQUE, RE2020, SIMULATION DYNAMIQUE", 
+        "code": "0902", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "THERMIQUE, RE2020, SIMULATION DYNAMIQUE"
+        "abrev_discipline": "{sup1}-THE"
       }, 
       {
-        "abrev_discipline": "{sup1}-ACO", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER-ACO", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER-ACO", 
-        "code": "0903", 
         "code_ouvrage": "090300", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER-ACO", 
+        "sous_discipline": "ACOUSTIQUE", 
+        "code": "0903", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ACOUSTIQUE"
+        "abrev_discipline": "{sup1}-ACO"
       }, 
       {
-        "abrev_discipline": "{sup1}-AIR", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER-AIR", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER-AIR", 
-        "code": "0904", 
         "code_ouvrage": "090400", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER-AIR", 
+        "sous_discipline": "QUALITE DE L'AIR INTERIEUR", 
+        "code": "0904", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "QUALITE DE L'AIR INTERIEUR"
+        "abrev_discipline": "{sup1}-AIR"
       }, 
       {
-        "abrev_discipline": "{sup1}-LUM", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER-LUM", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER-LUM", 
-        "code": "0905", 
         "code_ouvrage": "090500", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER-LUM", 
+        "sous_discipline": "LUMIERE NATURELLE, CONFORT VISUEL", 
+        "code": "0905", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "LUMIERE NATURELLE, CONFORT VISUEL"
+        "abrev_discipline": "{sup1}-LUM"
       }, 
       {
-        "abrev_discipline": "{sup1}-HQE", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER-HQE", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER-HQE", 
-        "code": "0906", 
         "code_ouvrage": "090600", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER-HQE", 
+        "sous_discipline": "ENVIRONNEMENT, ACV, BILAN CARBONE", 
+        "code": "0906", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "ENVIRONNEMENT, ACV, BILAN CARBONE"
+        "abrev_discipline": "{sup1}-HQE"
       }, 
       {
-        "abrev_discipline": "{sup1}-INC", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "PER-INC", 
+        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
         "abrev_resolue": "PER-INC", 
-        "code": "0907", 
         "code_ouvrage": "090700", 
-        "discipline": "PERFORMANCE & PHYSIQUE DU BATIMENT", 
+        "abrev_ouvrage_resolue": "PER-INC", 
+        "sous_discipline": "INGENIERIE DE SECURITE INCENDIE", 
+        "code": "0907", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "INGENIERIE DE SECURITE INCENDIE"
+        "abrev_discipline": "{sup1}-INC"
       }, 
       {
-        "abrev_discipline": "SYN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SYN", 
+        "discipline": "SYNTHESE & ASSEMBLAGE", 
         "abrev_resolue": "SYN", 
-        "code": "1000", 
         "code_ouvrage": "100000", 
-        "discipline": "SYNTHESE & ASSEMBLAGE", 
+        "abrev_ouvrage_resolue": "SYN", 
+        "sous_discipline": "", 
+        "code": "1000", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 1, 
-        "sous_discipline": ""
+        "abrev_discipline": "SYN"
       }, 
       {
-        "abrev_discipline": "{sup1}-GEN", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SYN-GEN", 
+        "discipline": "SYNTHESE & ASSEMBLAGE", 
         "abrev_resolue": "SYN-GEN", 
-        "code": "1001", 
         "code_ouvrage": "100100", 
-        "discipline": "SYNTHESE & ASSEMBLAGE", 
+        "abrev_ouvrage_resolue": "SYN-GEN", 
+        "sous_discipline": "GENERAL", 
+        "code": "1001", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "GENERAL"
+        "abrev_discipline": "{sup1}-GEN"
       }, 
       {
-        "abrev_discipline": "{sup1}-FED", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SYN-FED", 
+        "discipline": "SYNTHESE & ASSEMBLAGE", 
         "abrev_resolue": "SYN-FED", 
-        "code": "1002", 
         "code_ouvrage": "100200", 
-        "discipline": "SYNTHESE & ASSEMBLAGE", 
+        "abrev_ouvrage_resolue": "SYN-FED", 
+        "sous_discipline": "MODELE FEDERE", 
+        "code": "1002", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "MODELE FEDERE"
+        "abrev_discipline": "{sup1}-FED"
       }, 
       {
-        "abrev_discipline": "{sup1}-CLA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SYN-CLA", 
+        "discipline": "SYNTHESE & ASSEMBLAGE", 
         "abrev_resolue": "SYN-CLA", 
-        "code": "1003", 
         "code_ouvrage": "100300", 
-        "discipline": "SYNTHESE & ASSEMBLAGE", 
+        "abrev_ouvrage_resolue": "SYN-CLA", 
+        "sous_discipline": "DETECTION DE CLASHS", 
+        "code": "1003", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "DETECTION DE CLASHS"
+        "abrev_discipline": "{sup1}-CLA"
       }, 
       {
-        "abrev_discipline": "{sup1}-RES", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SYN-RES", 
+        "discipline": "SYNTHESE & ASSEMBLAGE", 
         "abrev_resolue": "SYN-RES", 
-        "code": "1004", 
         "code_ouvrage": "100400", 
-        "discipline": "SYNTHESE & ASSEMBLAGE", 
+        "abrev_ouvrage_resolue": "SYN-RES", 
+        "sous_discipline": "RESERVATIONS, PERCEMENTS", 
+        "code": "1004", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "RESERVATIONS, PERCEMENTS"
+        "abrev_discipline": "{sup1}-RES"
       }, 
       {
-        "abrev_discipline": "{sup1}-QUA", 
-        "abrev_ouvrage": "{dis}", 
-        "abrev_ouvrage_resolue": "SYN-QUA", 
-        "abrev_resolue": "SYN-QUA", 
-        "code": "1005", 
-        "code_ouvrage": "100500", 
         "discipline": "SYNTHESE & ASSEMBLAGE", 
+        "abrev_resolue": "SYN-QUA", 
+        "code_ouvrage": "100500", 
+        "abrev_ouvrage_resolue": "SYN-QUA", 
+        "sous_discipline": "CONTROLE QUALITE DES MODELES", 
+        "code": "1005", 
+        "abrev_ouvrage": "{dis}", 
         "niveau": 2, 
-        "sous_discipline": "CONTROLE QUALITE DES MODELES"
+        "abrev_discipline": "{sup1}-QUA"
+      }, 
+      {
+        "discipline": "GESTION EXPLOITATION MAINTENANCE", 
+        "abrev_resolue": "GEM", 
+        "code_ouvrage": "400000", 
+        "abrev_ouvrage_resolue": "GEM", 
+        "sous_discipline": "", 
+        "code": "4000", 
+        "abrev_ouvrage": "{dis}", 
+        "niveau": 1, 
+        "abrev_discipline": "GEM"
+      }, 
+      {
+        "discipline": "GESTION EXPLOITATION MAINTENANCE", 
+        "abrev_resolue": "GEM-PAT", 
+        "code_ouvrage": "401000", 
+        "abrev_ouvrage_resolue": "GEM-PAT", 
+        "sous_discipline": "GESTION PATRIMOINE", 
+        "code": "4010", 
+        "abrev_ouvrage": "{dis}", 
+        "niveau": 2, 
+        "abrev_discipline": "{sup1}-PAT"
       }
+    ]
+  }, 
+  "nettoyage": {
+    "pieces_espaces": true, 
+    "dwg_imports": true, 
+    "texts": true, 
+    "dwg_liens": false, 
+    "zones_pochages": true, 
+    "lignes": true
+  }, 
+  "selection_epinglage_elements": {
+    "colonnes_parametres": [], 
+    "fenetre": {
+      "largeur": 926, 
+      "hauteur": 760
+    }, 
+    "tri": [
+      "fixe:CategoryName", 
+      "asc"
+    ], 
+    "largeurs_colonnes": {
+      "fixe:Selected": 90, 
+      "fixe:PinnedLabel": 80, 
+      "fixe:TypeName": 160, 
+      "fixe:CategoryName": 160, 
+      "fixe:LevelName": 160, 
+      "fixe:FamilyName": 160, 
+      "fixe:IdText": 100, 
+      "fixe:ElementName": 160
+    }, 
+    "ordre_colonnes": [
+      "fixe:Selected", 
+      "fixe:CategoryName", 
+      "fixe:FamilyName", 
+      "fixe:TypeName", 
+      "fixe:ElementName", 
+      "fixe:LevelName", 
+      "fixe:PinnedLabel", 
+      "fixe:IdText"
+    ], 
+    "inclure_annotations": false, 
+    "portee": "projet"
+  }, 
+  "suppression_masse_etiquettes_surfaces": {
+    "types_selectionnes": [
+      "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom"
     ]
   }, 
   "dispo_types_pers_disciplines": [
     {
       "disciplines": {
-        "000000": false, 
-        "000100": false, 
-        "000200": false, 
-        "000300": false, 
-        "000400": false, 
-        "000500": false, 
-        "000600": false, 
-        "000700": false, 
-        "000800": false, 
-        "010000": false, 
-        "010100": false, 
-        "010200": false, 
-        "010300": false, 
-        "010400": false, 
-        "010500": false, 
-        "010600": false, 
-        "010700": false, 
-        "010800": false, 
-        "010900": false, 
-        "011000": false, 
-        "011100": false, 
-        "020000": true, 
-        "020100": true, 
-        "020200": false, 
-        "020300": true, 
-        "020400": false, 
-        "020500": false, 
-        "020600": false, 
-        "030000": false, 
-        "030100": false, 
-        "030200": false, 
-        "030300": false, 
-        "030400": false, 
-        "030500": false, 
-        "030600": false, 
-        "030700": false, 
-        "040000": false, 
-        "040100": false, 
-        "040200": false, 
-        "040300": false, 
-        "040400": false, 
-        "040500": false, 
-        "040600": false, 
-        "040700": false, 
-        "040800": false, 
-        "040900": false, 
-        "041000": false, 
-        "041100": false, 
-        "050000": false, 
-        "050100": false, 
         "050200": false, 
-        "050300": false, 
-        "050400": false, 
-        "050500": false, 
-        "050600": false, 
-        "050700": false, 
-        "050800": false, 
-        "050900": false, 
-        "051000": false, 
-        "060000": false, 
-        "060100": false, 
+        "000400": false, 
         "060200": false, 
+        "020600": false, 
+        "010700": false, 
+        "041000": false, 
+        "030700": false, 
+        "060000": false, 
+        "040600": false, 
+        "050300": false, 
+        "030400": false, 
+        "090700": false, 
+        "080800": false, 
+        "010900": false, 
+        "100300": false, 
+        "040300": false, 
+        "070100": false, 
+        "050000": false, 
+        "000800": false, 
+        "100400": false, 
+        "060500": false, 
+        "050800": false, 
+        "040800": false, 
+        "040500": false, 
+        "090600": false, 
+        "020300": true, 
+        "070200": false, 
+        "090300": false, 
+        "030000": false, 
         "060300": false, 
         "060400": false, 
-        "060500": false, 
-        "060600": false, 
-        "060700": false, 
-        "060800": false, 
-        "060900": false, 
-        "061000": false, 
         "061100": false, 
-        "070000": false, 
-        "070100": false, 
-        "070200": false, 
-        "070300": false, 
-        "070400": false, 
+        "020100": true, 
+        "061000": false, 
+        "050900": false, 
+        "100200": false, 
+        "040100": false, 
+        "080600": false, 
+        "010200": false, 
+        "090400": false, 
+        "401000": true, 
+        "000700": false, 
+        "060900": false, 
+        "080300": false, 
+        "060700": false, 
+        "000500": false, 
+        "060100": false, 
+        "010500": false, 
+        "040200": false, 
+        "100500": false, 
+        "010100": false, 
+        "030100": false, 
+        "040900": false, 
+        "020200": false, 
+        "090100": false, 
+        "400000": true, 
+        "011100": false, 
+        "051000": false, 
+        "080400": false, 
+        "090500": false, 
         "070500": false, 
         "070600": false, 
-        "080000": false, 
-        "080100": false, 
         "080200": false, 
-        "080300": false, 
-        "080400": false, 
-        "080500": false, 
-        "080600": false, 
-        "080700": false, 
-        "080800": false, 
-        "090000": false, 
-        "090100": false, 
+        "080000": false, 
+        "030200": false, 
+        "030300": false, 
+        "010300": false, 
+        "050600": false, 
+        "040400": false, 
+        "070300": false, 
+        "050700": false, 
+        "010800": false, 
+        "020400": false, 
         "090200": false, 
-        "090300": false, 
-        "090400": false, 
-        "090500": false, 
-        "090600": false, 
-        "090700": false, 
-        "100000": false, 
+        "080500": false, 
+        "030500": false, 
+        "060600": false, 
+        "000300": false, 
+        "040000": false, 
+        "010600": false, 
+        "050100": false, 
+        "090000": false, 
+        "020000": true, 
         "100100": false, 
-        "100200": false, 
-        "100300": false, 
-        "100400": false, 
-        "100500": false
+        "010000": false, 
+        "080100": false, 
+        "100000": false, 
+        "011000": false, 
+        "000100": false, 
+        "070000": false, 
+        "030600": false, 
+        "050400": false, 
+        "010400": false, 
+        "080700": false, 
+        "041100": false, 
+        "000200": false, 
+        "050500": false, 
+        "020500": false, 
+        "060800": false, 
+        "000600": false, 
+        "070400": false, 
+        "000000": false, 
+        "040700": false
       }, 
       "label": "PIECES 3D"
     }, 
     {
       "disciplines": {
-        "000000": false, 
-        "000100": false, 
-        "000200": false, 
-        "000300": false, 
-        "000400": false, 
-        "000500": false, 
-        "000600": false, 
-        "000700": false, 
-        "000800": false, 
-        "010000": true, 
-        "010100": true, 
-        "010200": true, 
-        "010300": true, 
-        "010400": true, 
-        "010500": true, 
-        "010600": true, 
-        "010700": true, 
-        "010800": true, 
-        "010900": true, 
-        "011000": true, 
-        "011100": true, 
-        "020000": true, 
-        "020100": true, 
-        "020200": true, 
-        "020300": true, 
-        "020400": true, 
-        "020500": true, 
-        "020600": true, 
-        "030000": true, 
-        "030100": true, 
-        "030200": true, 
-        "030300": true, 
-        "030400": true, 
-        "030500": true, 
-        "030600": true, 
-        "030700": true, 
-        "040000": true, 
-        "040100": true, 
-        "040200": true, 
-        "040300": true, 
-        "040400": true, 
-        "040500": true, 
-        "040600": true, 
-        "040700": true, 
-        "040800": true, 
-        "040900": true, 
-        "041000": true, 
-        "041100": true, 
-        "050000": true, 
-        "050100": true, 
         "050200": true, 
-        "050300": true, 
-        "050400": true, 
-        "050500": true, 
-        "050600": true, 
-        "050700": true, 
-        "050800": true, 
-        "050900": true, 
-        "051000": true, 
-        "060000": true, 
-        "060100": true, 
+        "000400": false, 
         "060200": true, 
+        "020600": true, 
+        "010700": true, 
+        "041000": true, 
+        "030700": true, 
+        "060000": true, 
+        "040600": true, 
+        "050300": true, 
+        "030400": true, 
+        "090700": true, 
+        "080800": true, 
+        "010900": true, 
+        "100300": true, 
+        "040300": true, 
+        "070100": true, 
+        "050000": true, 
+        "000800": false, 
+        "100400": true, 
+        "060500": true, 
+        "050800": true, 
+        "040800": true, 
+        "040500": true, 
+        "090600": true, 
+        "020300": true, 
+        "070200": true, 
+        "090300": true, 
+        "030000": true, 
         "060300": true, 
         "060400": true, 
-        "060500": true, 
-        "060600": true, 
-        "060700": true, 
-        "060800": true, 
-        "060900": true, 
-        "061000": true, 
         "061100": true, 
-        "070000": true, 
-        "070100": true, 
-        "070200": true, 
-        "070300": true, 
-        "070400": true, 
+        "020100": true, 
+        "061000": true, 
+        "050900": true, 
+        "100200": true, 
+        "040100": true, 
+        "080600": true, 
+        "010200": true, 
+        "090400": true, 
+        "401000": false, 
+        "000700": false, 
+        "060900": true, 
+        "080300": true, 
+        "060700": true, 
+        "000500": false, 
+        "060100": true, 
+        "010500": true, 
+        "040200": true, 
+        "100500": true, 
+        "010100": true, 
+        "030100": true, 
+        "040900": true, 
+        "020200": true, 
+        "090100": true, 
+        "400000": false, 
+        "011100": true, 
+        "051000": true, 
+        "080400": true, 
+        "090500": true, 
         "070500": true, 
         "070600": true, 
-        "080000": true, 
-        "080100": true, 
         "080200": true, 
-        "080300": true, 
-        "080400": true, 
-        "080500": true, 
-        "080600": true, 
-        "080700": true, 
-        "080800": true, 
-        "090000": true, 
-        "090100": true, 
+        "080000": true, 
+        "030200": true, 
+        "030300": true, 
+        "010300": true, 
+        "050600": true, 
+        "040400": true, 
+        "070300": true, 
+        "050700": true, 
+        "010800": true, 
+        "020400": true, 
         "090200": true, 
-        "090300": true, 
-        "090400": true, 
-        "090500": true, 
-        "090600": true, 
-        "090700": true, 
-        "100000": true, 
+        "080500": true, 
+        "030500": true, 
+        "060600": true, 
+        "000300": false, 
+        "040000": true, 
+        "010600": true, 
+        "050100": true, 
+        "090000": true, 
+        "020000": true, 
         "100100": true, 
-        "100200": true, 
-        "100300": true, 
-        "100400": true, 
-        "100500": true
+        "010000": true, 
+        "080100": true, 
+        "100000": true, 
+        "011000": true, 
+        "000100": false, 
+        "070000": true, 
+        "030600": true, 
+        "050400": true, 
+        "010400": true, 
+        "080700": true, 
+        "041100": true, 
+        "000200": false, 
+        "050500": true, 
+        "020500": true, 
+        "060800": true, 
+        "000600": false, 
+        "070400": true, 
+        "000000": false, 
+        "040700": true
       }, 
       "label": "TEMPORAIRE"
     }, 
     {
       "disciplines": {
-        "000000": false, 
-        "000100": false, 
-        "000200": false, 
-        "000300": false, 
+        "050200": false, 
         "000400": false, 
-        "000500": false, 
-        "000600": false, 
-        "000700": false, 
+        "060200": false, 
+        "020600": false, 
+        "010700": false, 
+        "041000": false, 
+        "030700": false, 
+        "060000": false, 
+        "040600": false, 
+        "050300": false, 
+        "030400": false, 
+        "090700": false, 
+        "080800": false, 
+        "010900": false, 
+        "100300": false, 
+        "040300": false, 
+        "070100": false, 
+        "050000": false, 
         "000800": false, 
-        "010000": true, 
-        "010100": true, 
-        "010200": true, 
-        "010300": true, 
-        "010400": true, 
-        "010500": true, 
-        "010600": true, 
-        "010700": true, 
-        "010800": true, 
-        "010900": true, 
-        "011000": true, 
-        "011100": true, 
-        "020000": true, 
-        "020100": true, 
-        "020200": true, 
-        "020300": true, 
-        "020400": true, 
-        "020500": true, 
-        "020600": true, 
-        "030000": true, 
-        "030100": true, 
-        "030200": true, 
-        "030300": true, 
-        "030400": true, 
-        "030500": true, 
-        "030600": true, 
-        "030700": true, 
-        "040000": true, 
-        "040100": true, 
-        "040200": true, 
-        "040300": true, 
-        "040400": true, 
-        "040500": true, 
-        "040600": true, 
-        "040700": true, 
-        "040800": true, 
-        "040900": true, 
-        "041000": true, 
-        "041100": true, 
-        "050000": true, 
-        "050100": true, 
-        "050200": true, 
-        "050300": true, 
-        "050400": true, 
-        "050500": true, 
-        "050600": true, 
-        "050700": true, 
-        "050800": true, 
-        "050900": true, 
-        "051000": true, 
-        "060000": true, 
-        "060100": true, 
-        "060200": true, 
-        "060300": true, 
-        "060400": true, 
-        "060500": true, 
-        "060600": true, 
-        "060700": true, 
-        "060800": true, 
-        "060900": true, 
-        "061000": true, 
-        "061100": true, 
-        "070000": true, 
-        "070100": true, 
-        "070200": true, 
-        "070300": true, 
-        "070400": true, 
-        "070500": true, 
-        "070600": true, 
-        "080000": true, 
-        "080100": true, 
-        "080200": true, 
-        "080300": true, 
-        "080400": true, 
-        "080500": true, 
-        "080600": true, 
-        "080700": true, 
-        "080800": true, 
-        "090000": true, 
-        "090100": true, 
-        "090200": true, 
-        "090300": true, 
-        "090400": true, 
-        "090500": true, 
-        "090600": true, 
-        "090700": true, 
-        "100000": true, 
-        "100100": true, 
-        "100200": true, 
-        "100300": true, 
-        "100400": true, 
-        "100500": true
+        "100400": false, 
+        "060500": false, 
+        "050800": false, 
+        "040800": false, 
+        "040500": false, 
+        "090600": false, 
+        "020300": false, 
+        "070200": false, 
+        "090300": false, 
+        "030000": false, 
+        "060300": false, 
+        "060400": false, 
+        "061100": false, 
+        "020100": false, 
+        "061000": false, 
+        "050900": false, 
+        "100200": false, 
+        "040100": false, 
+        "080600": false, 
+        "010200": false, 
+        "090400": false, 
+        "401000": true, 
+        "000700": false, 
+        "060900": false, 
+        "080300": false, 
+        "060700": false, 
+        "000500": false, 
+        "060100": false, 
+        "010500": false, 
+        "040200": false, 
+        "100500": false, 
+        "010100": false, 
+        "030100": false, 
+        "040900": false, 
+        "020200": false, 
+        "090100": false, 
+        "400000": true, 
+        "011100": false, 
+        "051000": false, 
+        "080400": false, 
+        "090500": false, 
+        "070500": false, 
+        "070600": false, 
+        "080200": false, 
+        "080000": false, 
+        "030200": false, 
+        "030300": false, 
+        "010300": false, 
+        "050600": false, 
+        "040400": false, 
+        "070300": false, 
+        "050700": false, 
+        "010800": false, 
+        "020400": false, 
+        "090200": false, 
+        "080500": false, 
+        "030500": false, 
+        "060600": false, 
+        "000300": false, 
+        "040000": false, 
+        "010600": false, 
+        "050100": false, 
+        "090000": false, 
+        "020000": false, 
+        "100100": false, 
+        "010000": false, 
+        "080100": false, 
+        "100000": false, 
+        "011000": false, 
+        "000100": false, 
+        "070000": false, 
+        "030600": false, 
+        "050400": false, 
+        "010400": false, 
+        "080700": false, 
+        "041100": false, 
+        "000200": false, 
+        "050500": false, 
+        "020500": false, 
+        "060800": false, 
+        "000600": false, 
+        "070400": false, 
+        "000000": false, 
+        "040700": false
       }, 
       "label": "FM"
     }, 
     {
       "disciplines": {
-        "000000": false, 
-        "000100": false, 
-        "000200": false, 
-        "000300": false, 
-        "000400": false, 
-        "000500": false, 
-        "000600": false, 
-        "000700": false, 
-        "000800": false, 
-        "010000": false, 
-        "010100": false, 
-        "010200": false, 
-        "010300": false, 
-        "010400": false, 
-        "010500": false, 
-        "010600": false, 
-        "010700": false, 
-        "010800": false, 
-        "010900": false, 
-        "011000": false, 
-        "011100": false, 
-        "020000": false, 
-        "020100": false, 
-        "020200": false, 
-        "020300": true, 
-        "020400": false, 
-        "020500": false, 
-        "020600": false, 
-        "030000": false, 
-        "030100": false, 
-        "030200": false, 
-        "030300": false, 
-        "030400": false, 
-        "030500": false, 
-        "030600": false, 
-        "030700": false, 
-        "040000": false, 
-        "040100": false, 
-        "040200": false, 
-        "040300": false, 
-        "040400": false, 
-        "040500": false, 
-        "040600": false, 
-        "040700": false, 
-        "040800": false, 
-        "040900": false, 
-        "041000": false, 
-        "041100": false, 
-        "050000": false, 
-        "050100": false, 
         "050200": false, 
-        "050300": false, 
-        "050400": false, 
-        "050500": false, 
-        "050600": false, 
-        "050700": false, 
-        "050800": false, 
-        "050900": false, 
-        "051000": false, 
-        "060000": false, 
-        "060100": false, 
+        "000400": false, 
         "060200": false, 
+        "020600": false, 
+        "010700": false, 
+        "041000": false, 
+        "030700": false, 
+        "060000": false, 
+        "040600": false, 
+        "050300": false, 
+        "030400": false, 
+        "090700": false, 
+        "080800": false, 
+        "010900": false, 
+        "100300": false, 
+        "040300": false, 
+        "070100": false, 
+        "050000": false, 
+        "000800": false, 
+        "100400": false, 
+        "060500": false, 
+        "050800": false, 
+        "040800": false, 
+        "040500": false, 
+        "090600": false, 
+        "020300": false, 
+        "070200": false, 
+        "090300": false, 
+        "030000": false, 
         "060300": false, 
         "060400": false, 
-        "060500": false, 
-        "060600": false, 
-        "060700": false, 
-        "060800": false, 
-        "060900": false, 
-        "061000": false, 
         "061100": false, 
-        "070000": false, 
-        "070100": false, 
-        "070200": false, 
-        "070300": false, 
-        "070400": false, 
+        "020100": false, 
+        "061000": false, 
+        "050900": false, 
+        "100200": false, 
+        "040100": false, 
+        "080600": false, 
+        "010200": false, 
+        "090400": false, 
+        "401000": true, 
+        "000700": false, 
+        "060900": false, 
+        "080300": false, 
+        "060700": false, 
+        "000500": false, 
+        "060100": false, 
+        "010500": false, 
+        "040200": false, 
+        "100500": false, 
+        "010100": false, 
+        "030100": false, 
+        "040900": false, 
+        "020200": false, 
+        "090100": false, 
+        "400000": true, 
+        "011100": false, 
+        "051000": false, 
+        "080400": false, 
+        "090500": false, 
         "070500": false, 
         "070600": false, 
-        "080000": false, 
-        "080100": false, 
         "080200": false, 
-        "080300": false, 
-        "080400": false, 
-        "080500": false, 
-        "080600": false, 
-        "080700": false, 
-        "080800": false, 
-        "090000": false, 
-        "090100": false, 
+        "080000": false, 
+        "030200": false, 
+        "030300": false, 
+        "010300": false, 
+        "050600": false, 
+        "040400": false, 
+        "070300": false, 
+        "050700": false, 
+        "010800": false, 
+        "020400": false, 
         "090200": false, 
-        "090300": false, 
-        "090400": false, 
-        "090500": false, 
-        "090600": false, 
-        "090700": false, 
-        "100000": false, 
+        "080500": false, 
+        "030500": false, 
+        "060600": false, 
+        "000300": false, 
+        "040000": false, 
+        "010600": false, 
+        "050100": false, 
+        "090000": false, 
+        "020000": false, 
         "100100": false, 
-        "100200": false, 
+        "010000": false, 
+        "080100": false, 
+        "100000": false, 
+        "011000": false, 
+        "000100": false, 
+        "070000": false, 
+        "030600": false, 
+        "050400": false, 
+        "010400": false, 
+        "080700": false, 
+        "041100": false, 
+        "000200": false, 
+        "050500": false, 
+        "020500": false, 
+        "060800": false, 
+        "000600": false, 
+        "070400": false, 
+        "000000": false, 
+        "040700": false
+      }, 
+      "label": "TEMP - REPRISE DONNEES"
+    }, 
+    {
+      "disciplines": {
+        "050200": false, 
+        "000400": false, 
+        "060200": false, 
+        "020600": false, 
+        "010700": false, 
+        "041000": false, 
+        "030700": false, 
+        "060000": false, 
+        "040600": false, 
+        "050300": false, 
+        "030400": false, 
+        "090700": false, 
+        "080800": false, 
+        "010900": false, 
         "100300": false, 
+        "040300": false, 
+        "070100": false, 
+        "050000": false, 
+        "000800": false, 
         "100400": false, 
-        "100500": false
+        "060500": false, 
+        "050800": false, 
+        "040800": false, 
+        "040500": false, 
+        "090600": false, 
+        "020300": true, 
+        "070200": false, 
+        "090300": false, 
+        "030000": false, 
+        "060300": false, 
+        "060400": false, 
+        "061100": false, 
+        "020100": false, 
+        "061000": false, 
+        "050900": false, 
+        "100200": false, 
+        "040100": false, 
+        "080600": false, 
+        "010200": false, 
+        "090400": false, 
+        "000700": false, 
+        "060900": false, 
+        "080300": false, 
+        "060700": false, 
+        "000500": false, 
+        "060100": false, 
+        "010500": false, 
+        "040200": false, 
+        "100500": false, 
+        "010100": false, 
+        "030100": false, 
+        "040900": false, 
+        "020200": false, 
+        "090100": false, 
+        "011100": false, 
+        "051000": false, 
+        "080400": false, 
+        "090500": false, 
+        "070500": false, 
+        "070600": false, 
+        "080200": false, 
+        "080000": false, 
+        "030200": false, 
+        "030300": false, 
+        "010300": false, 
+        "050600": false, 
+        "040400": false, 
+        "070300": false, 
+        "050700": false, 
+        "010800": false, 
+        "020400": false, 
+        "090200": false, 
+        "080500": false, 
+        "030500": false, 
+        "060600": false, 
+        "000300": false, 
+        "040000": false, 
+        "010600": false, 
+        "050100": false, 
+        "090000": false, 
+        "020000": false, 
+        "100100": false, 
+        "010000": false, 
+        "080100": false, 
+        "100000": false, 
+        "011000": false, 
+        "000100": false, 
+        "070000": false, 
+        "030600": false, 
+        "050400": false, 
+        "010400": false, 
+        "080700": false, 
+        "041100": false, 
+        "000200": false, 
+        "050500": false, 
+        "020500": false, 
+        "060800": false, 
+        "000600": false, 
+        "070400": false, 
+        "000000": false, 
+        "040700": false
       }, 
       "label": "SURFACES PLANCHER"
     }, 
     {
       "disciplines": {
-        "000000": false, 
-        "000100": false, 
-        "000200": false, 
-        "000300": false, 
-        "000400": false, 
-        "000500": false, 
-        "000600": false, 
-        "000700": false, 
-        "000800": false, 
-        "010000": false, 
-        "010100": false, 
-        "010200": false, 
-        "010300": false, 
-        "010400": false, 
-        "010500": false, 
-        "010600": false, 
-        "010700": false, 
-        "010800": false, 
-        "010900": false, 
-        "011000": false, 
-        "011100": false, 
-        "020000": false, 
-        "020100": false, 
-        "020200": false, 
-        "020300": true, 
-        "020400": false, 
-        "020500": false, 
-        "020600": false, 
-        "030000": false, 
-        "030100": false, 
-        "030200": false, 
-        "030300": false, 
-        "030400": false, 
-        "030500": false, 
-        "030600": false, 
-        "030700": false, 
-        "040000": false, 
-        "040100": false, 
-        "040200": false, 
-        "040300": false, 
-        "040400": false, 
-        "040500": false, 
-        "040600": false, 
-        "040700": false, 
-        "040800": false, 
-        "040900": false, 
-        "041000": false, 
-        "041100": false, 
-        "050000": false, 
-        "050100": false, 
         "050200": false, 
-        "050300": false, 
-        "050400": false, 
-        "050500": false, 
-        "050600": false, 
-        "050700": false, 
-        "050800": false, 
-        "050900": false, 
-        "051000": false, 
-        "060000": false, 
-        "060100": false, 
+        "000400": false, 
         "060200": false, 
+        "020600": false, 
+        "010700": false, 
+        "041000": false, 
+        "030700": false, 
+        "060000": false, 
+        "040600": false, 
+        "050300": false, 
+        "030400": false, 
+        "090700": false, 
+        "080800": false, 
+        "010900": false, 
+        "100300": false, 
+        "040300": false, 
+        "070100": false, 
+        "050000": false, 
+        "000800": false, 
+        "100400": false, 
+        "060500": false, 
+        "050800": false, 
+        "040800": false, 
+        "040500": false, 
+        "090600": false, 
+        "020300": true, 
+        "070200": false, 
+        "090300": false, 
+        "030000": false, 
         "060300": false, 
         "060400": false, 
-        "060500": false, 
-        "060600": false, 
-        "060700": false, 
-        "060800": false, 
-        "060900": false, 
-        "061000": false, 
         "061100": false, 
-        "070000": false, 
-        "070100": false, 
-        "070200": false, 
-        "070300": false, 
-        "070400": false, 
+        "020100": false, 
+        "061000": false, 
+        "050900": false, 
+        "100200": false, 
+        "040100": false, 
+        "080600": false, 
+        "010200": false, 
+        "090400": false, 
+        "000700": false, 
+        "060900": false, 
+        "080300": false, 
+        "060700": false, 
+        "000500": false, 
+        "060100": false, 
+        "010500": false, 
+        "040200": false, 
+        "100500": false, 
+        "010100": false, 
+        "030100": false, 
+        "040900": false, 
+        "020200": false, 
+        "090100": false, 
+        "011100": false, 
+        "051000": false, 
+        "080400": false, 
+        "090500": false, 
         "070500": false, 
         "070600": false, 
-        "080000": false, 
-        "080100": false, 
         "080200": false, 
-        "080300": false, 
-        "080400": false, 
-        "080500": false, 
-        "080600": false, 
-        "080700": false, 
-        "080800": false, 
-        "090000": false, 
-        "090100": false, 
+        "080000": false, 
+        "030200": false, 
+        "030300": false, 
+        "010300": false, 
+        "050600": false, 
+        "040400": false, 
+        "070300": false, 
+        "050700": false, 
+        "010800": false, 
+        "020400": false, 
         "090200": false, 
-        "090300": false, 
-        "090400": false, 
-        "090500": false, 
-        "090600": false, 
-        "090700": false, 
-        "100000": false, 
+        "080500": false, 
+        "030500": false, 
+        "060600": false, 
+        "000300": false, 
+        "040000": false, 
+        "010600": false, 
+        "050100": false, 
+        "090000": false, 
+        "020000": false, 
         "100100": false, 
-        "100200": false, 
-        "100300": false, 
-        "100400": false, 
-        "100500": false
+        "010000": false, 
+        "080100": false, 
+        "100000": false, 
+        "011000": false, 
+        "000100": false, 
+        "070000": false, 
+        "030600": false, 
+        "050400": false, 
+        "010400": false, 
+        "080700": false, 
+        "041100": false, 
+        "000200": false, 
+        "050500": false, 
+        "020500": false, 
+        "060800": false, 
+        "000600": false, 
+        "070400": false, 
+        "000000": false, 
+        "040700": false
       }, 
       "label": "SURFACES SHON-SHOB"
     }
   ], 
-  "dispo_types_pers_familles": [
+  "creer_niveaux": {
+    "prefixes": [
+      {
+        "systeme": true, 
+        "negatif": true, 
+        "prefixe": "R", 
+        "definition": "Batiment", 
+        "positif": true
+      }, 
+      {
+        "systeme": true, 
+        "negatif": false, 
+        "prefixe": "T", 
+        "definition": "Toiture", 
+        "positif": true
+      }, 
+      {
+        "systeme": true, 
+        "negatif": true, 
+        "prefixe": "F", 
+        "definition": "Fondations", 
+        "positif": false
+      }, 
+      {
+        "systeme": true, 
+        "negatif": true, 
+        "prefixe": "O", 
+        "definition": "Origine", 
+        "positif": true
+      }
+    ], 
+    "sens": [
+      {
+        "signe": "+", 
+        "definition": "Positif"
+      }, 
+      {
+        "signe": "-", 
+        "definition": "Négatif"
+      }
+    ], 
+    "Eleva_Niv_Origine": -1.0, 
+    "espacement_default": 5.0, 
+    "Eleva_Niv_Rdc": 0.0
+  }, 
+  "suppression_masse_legendes_surfaces": {
+    "types_selectionnes": [
+      "Par projet"
+    ]
+  }, 
+  "types_vues": [
     {
-      "familles": {
-        "vue-3d": true, 
-        "vue-coupe": false, 
-        "vue-dessin": false, 
-        "vue-elevation": false, 
-        "vue-legende": false, 
-        "vue-plaf": false, 
-        "vue-plan": false, 
-        "vue-structure": false, 
-        "vue-surface": false
+      "types": {
+        "vue-plan": "", 
+        "vue-coupe": "", 
+        "vue-dessin": "", 
+        "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "", 
+        "vue-3d": "Vue 3D", 
+        "vue-plaf": "", 
+        "vue-structure": ""
       }, 
       "label": "PIECES 3D"
     }, 
     {
-      "familles": {
-        "vue-3d": true, 
-        "vue-coupe": true, 
-        "vue-dessin": true, 
-        "vue-elevation": true, 
-        "vue-legende": true, 
-        "vue-plaf": true, 
-        "vue-plan": true, 
-        "vue-structure": true, 
-        "vue-surface": true
+      "types": {
+        "vue-plan": "Plan d'étage", 
+        "vue-coupe": "Coupe du bâtiment", 
+        "vue-dessin": "Dessin détails", 
+        "vue-legende": "Légende", 
+        "vue-elevation": "Elévation", 
+        "vue-surface": "", 
+        "vue-3d": "Vue 3D", 
+        "vue-plaf": "Plan du plafond", 
+        "vue-structure": "Plan structurel - Vers le haut"
       }, 
       "label": "TEMPORAIRE"
     }, 
     {
-      "familles": {}, 
+      "types": {
+        "vue-plan": "Plan d'étage", 
+        "vue-coupe": "Coupe du bâtiment", 
+        "vue-dessin": "Dessin détails", 
+        "vue-legende": "Légende", 
+        "vue-elevation": "Elévation", 
+        "vue-surface": "", 
+        "vue-3d": "Vue 3D", 
+        "vue-plaf": "Plan du plafond", 
+        "vue-structure": "Plan structurel - Vers le haut"
+      }, 
       "label": "FM"
     }, 
     {
-      "familles": {
-        "vue-3d": false, 
-        "vue-coupe": false, 
-        "vue-dessin": false, 
-        "vue-elevation": false, 
-        "vue-legende": false, 
-        "vue-plaf": false, 
-        "vue-plan": false, 
-        "vue-structure": false, 
-        "vue-surface": true
+      "types": {
+        "vue-plan": "Plan d'étage", 
+        "vue-coupe": "", 
+        "vue-dessin": "", 
+        "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "", 
+        "vue-3d": "", 
+        "vue-plaf": "", 
+        "vue-structure": ""
+      }, 
+      "label": "TEMP - REPRISE DONNEES"
+    }, 
+    {
+      "types": {
+        "vue-plan": "", 
+        "vue-coupe": "", 
+        "vue-dessin": "", 
+        "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "SURFACE PLANCHER", 
+        "vue-3d": "", 
+        "vue-plaf": "", 
+        "vue-structure": ""
       }, 
       "label": "SURFACES PLANCHER"
     }, 
     {
-      "familles": {
-        "vue-3d": false, 
-        "vue-coupe": false, 
-        "vue-dessin": false, 
-        "vue-elevation": false, 
-        "vue-legende": false, 
-        "vue-plaf": false, 
-        "vue-plan": false, 
-        "vue-structure": false, 
-        "vue-surface": true
+      "types": {
+        "vue-plan": "", 
+        "vue-coupe": "", 
+        "vue-dessin": "", 
+        "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "SHON/SHOB", 
+        "vue-3d": "", 
+        "vue-plaf": "", 
+        "vue-structure": ""
       }, 
       "label": "SURFACES SHON-SHOB"
     }
   ], 
-  "dispo_types_pers_lier_cao": [
+  "types_vues_personnalises": [
     {
+      "titre": "PIECES 3D", 
+      "systeme": true, 
+      "valeur_1": "", 
+      "valeur_2": "", 
       "label": "PIECES 3D", 
-      "lier_cao": false, 
-      "pieces_3d": true, 
-      "vues_plus": false
+      "usage": "Livrable", 
+      "ordre": "0"
     }, 
     {
+      "titre": "TEMPORAIRE", 
+      "systeme": true, 
+      "valeur_1": "", 
+      "valeur_2": "", 
       "label": "TEMPORAIRE", 
-      "lier_cao": true, 
-      "pieces_3d": false, 
-      "vues_plus": true
+      "usage": "Temporaire", 
+      "ordre": "1"
     }, 
     {
+      "titre": "FM", 
+      "systeme": true, 
+      "valeur_1": "", 
+      "valeur_2": "", 
       "label": "FM", 
-      "lier_cao": true, 
-      "pieces_3d": false, 
-      "vues_plus": true
+      "usage": "Livrable", 
+      "ordre": "2"
     }, 
     {
+      "titre": "TEMPORAIRE", 
+      "systeme": true, 
+      "valeur_1": "", 
+      "valeur_2": "", 
+      "label": "TEMP - REPRISE DONNEES", 
+      "usage": "Temporaire", 
+      "ordre": "3"
+    }, 
+    {
+      "titre": "SURFACES SP", 
+      "systeme": true, 
+      "valeur_1": "", 
+      "valeur_2": "", 
       "label": "SURFACES PLANCHER", 
-      "lier_cao": true, 
-      "pieces_3d": false, 
-      "vues_plus": true
+      "usage": "Livrable", 
+      "ordre": "SURF-01"
     }, 
     {
+      "titre": "SURFACES SHON-SHOB", 
+      "systeme": true, 
+      "valeur_1": "", 
+      "valeur_2": "", 
       "label": "SURFACES SHON-SHOB", 
-      "lier_cao": true, 
-      "pieces_3d": false, 
-      "vues_plus": true
+      "usage": "Livrable", 
+      "ordre": "SURF-02"
     }
   ], 
-  "emplacements": {
-    "enregistrements_rvt": {
-      "nb_rep_parents_enregistrement_rvt": 2
-    }
-  }, 
-  "etiquette_masse_pieces": {
-    "types_selectionnes": [
-      "200000 - Etiquette - Pièce - Commentaire - 2.0 - (Ba) : 1 - Nom"
+  "nomenclatures_colonnes_couleurs": {
+    "colonnes_types": [
+      232, 
+      113, 
+      134
+    ], 
+    "colonnes_occurrences": [
+      255, 
+      255, 
+      151
+    ], 
+    "colonnes_readonly": [
+      192, 
+      192, 
+      192
     ]
   }, 
-  "etiquette_masse_surfaces": {
-    "types_selectionnes": [
-      "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom"
-    ]
+  "nm_convention_noms_fichiers": {
+    "valeur_si_nul": "X", 
+    "groupes": [
+      {
+        "regex": "s\\d{7}", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Site", 
+        "id": "site"
+      }, 
+      {
+        "regex": "\\d{3}", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Construction (bâtiment)", 
+        "id": "construction"
+      }, 
+      {
+        "regex": "[RTFO]", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Préfixe niveau", 
+        "id": "pref-niv"
+      }, 
+      {
+        "regex": "[+\\-]", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Sens niveau", 
+        "id": "sens-niv"
+      }, 
+      {
+        "regex": "\\d{2}", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Numéro niveau", 
+        "id": "num-niv"
+      }, 
+      {
+        "regex": "\\d{1}", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Demi-niveau", 
+        "id": "demi-niv"
+      }, 
+      {
+        "regex": "p\\d{3}", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Producteur", 
+        "id": "producteur"
+      }, 
+      {
+        "regex": "\\d{3}", 
+        "optionnel": false, 
+        "systeme": true, 
+        "label": "Spécialité", 
+        "id": "specialite"
+      }, 
+      {
+        "regex": "[A-Z0-9-]{5,30}", 
+        "optionnel": false, 
+        "systeme": false, 
+        "label": "Nom site court", 
+        "id": "nom-site-court"
+      }, 
+      {
+        "regex": "[A-Za-z0-9()_-]+", 
+        "optionnel": true, 
+        "systeme": false, 
+        "label": "Reste du nom", 
+        "id": "rest-nom"
+      }
+    ], 
+    "valeur_si_bim_2d": "BIM-2D"
   }, 
   "fichiers_lies_dwg": {
-    "color_mode_default": "conserver", 
-    "correct_lines": true, 
     "include_sub": false, 
-    "layers_default": "Visibles", 
     "placement_default": "shared", 
     "unit_default": "Mètres", 
-    "view_only": false
+    "view_only": false, 
+    "color_mode_default": "conserver", 
+    "correct_lines": true, 
+    "layers_default": "Visibles"
   }, 
   "gabarits_vues": [
     {
@@ -2035,207 +2935,116 @@
     }, 
     {
       "gabarits": {
-        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
+        "vue-plan": "", 
         "vue-coupe": "", 
         "vue-dessin": "", 
-        "vue-elevation": "", 
         "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
         "vue-plaf": "", 
-        "vue-plan": "", 
-        "vue-structure": "", 
-        "vue-surface": ""
+        "vue-structure": ""
       }, 
       "label": "TEMPORAIRE"
     }, 
     {
       "gabarits": {
-        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D"
+        "vue-plan": "S4R_9000000.02 - GEM - PLAN BATIMENT - FM", 
+        "vue-coupe": "", 
+        "vue-dessin": "", 
+        "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
+        "vue-plaf": "", 
+        "vue-structure": ""
       }, 
       "label": "FM"
     }, 
     {
       "gabarits": {
-        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
+        "vue-plan": "zzzTEMPORAIRE_REPRISES_DONNEES", 
         "vue-coupe": "", 
         "vue-dessin": "", 
-        "vue-elevation": "", 
         "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
         "vue-plaf": "", 
+        "vue-structure": ""
+      }, 
+      "label": "TEMP - REPRISE DONNEES"
+    }, 
+    {
+      "gabarits": {
         "vue-plan": "", 
-        "vue-structure": "", 
-        "vue-surface": "S4R_200000.00 - ARCHITECTURE - ANALYSES - Surfaces PLANCHER (SP)"
+        "vue-coupe": "", 
+        "vue-dessin": "", 
+        "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "S4R_200000.00 - ARCHITECTURE - ANALYSES - Surfaces PLANCHER (SP)", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
+        "vue-plaf": "", 
+        "vue-structure": ""
       }, 
       "label": "SURFACES PLANCHER"
     }, 
     {
       "gabarits": {
-        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
+        "vue-plan": "", 
         "vue-coupe": "", 
         "vue-dessin": "", 
-        "vue-elevation": "", 
         "vue-legende": "", 
+        "vue-elevation": "", 
+        "vue-surface": "S4R_200000.00 - ARCHITECTURE - ANALYSES - Surfaces SHON/SHOB", 
+        "vue-3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
         "vue-plaf": "", 
-        "vue-plan": "", 
-        "vue-structure": "", 
-        "vue-surface": "S4R_200000.00 - ARCHITECTURE - ANALYSES - Surfaces SHON/SHOB"
+        "vue-structure": ""
       }, 
       "label": "SURFACES SHON-SHOB"
     }
   ], 
-  "mises_a_jour": {
-    "source_url": "https://github.com/data8bim/py-NM-BATII"
-  }, 
-  "nettoyage": {
-    "dwg_imports": true, 
-    "dwg_liens": false, 
-    "lignes": true, 
-    "pieces_espaces": true, 
-    "texts": true, 
-    "zones_pochages": true
-  }, 
-  "niveaux_defaut_types_pers": [
+  "dispo_types_pers_lier_cao": [
     {
       "label": "PIECES 3D", 
-      "niveaux": {
-        "autres": false, 
-        "batiment": true, 
-        "fondations": false, 
-        "origine": false, 
-        "toiture": false
-      }
+      "vues_plus": false, 
+      "lier_cao": false, 
+      "pieces_3d": true
     }, 
     {
       "label": "TEMPORAIRE", 
-      "niveaux": {
-        "autres": true, 
-        "batiment": true, 
-        "fondations": true, 
-        "origine": true, 
-        "toiture": true
-      }
+      "vues_plus": true, 
+      "lier_cao": true, 
+      "pieces_3d": false
     }, 
     {
       "label": "FM", 
-      "niveaux": {
-        "autres": false, 
-        "batiment": true, 
-        "fondations": false, 
-        "origine": false, 
-        "toiture": false
-      }
+      "vues_plus": true, 
+      "lier_cao": true, 
+      "pieces_3d": false
+    }, 
+    {
+      "label": "TEMP - REPRISE DONNEES", 
+      "vues_plus": false, 
+      "lier_cao": true, 
+      "pieces_3d": false
     }, 
     {
       "label": "SURFACES PLANCHER", 
-      "niveaux": {
-        "autres": false, 
-        "batiment": true, 
-        "fondations": false, 
-        "origine": false, 
-        "toiture": true
-      }
+      "vues_plus": true, 
+      "lier_cao": true, 
+      "pieces_3d": false
     }, 
     {
       "label": "SURFACES SHON-SHOB", 
-      "niveaux": {
-        "autres": false, 
-        "batiment": true, 
-        "fondations": false, 
-        "origine": false, 
-        "toiture": true
-      }
+      "vues_plus": true, 
+      "lier_cao": true, 
+      "pieces_3d": false
     }
   ], 
-  "nm_convention_noms_fichiers": {
-    "groupes": [
-      {
-        "id": "site", 
-        "label": "Site", 
-        "optionnel": false, 
-        "regex": "s\\d{7}", 
-        "systeme": true
-      }, 
-      {
-        "id": "construction", 
-        "label": "Construction (bâtiment)", 
-        "optionnel": false, 
-        "regex": "\\d{3}", 
-        "systeme": true
-      }, 
-      {
-        "id": "pref-niv", 
-        "label": "Préfixe niveau", 
-        "optionnel": false, 
-        "regex": "[RTFO]", 
-        "systeme": true
-      }, 
-      {
-        "id": "sens-niv", 
-        "label": "Sens niveau", 
-        "optionnel": false, 
-        "regex": "[+\\-]", 
-        "systeme": true
-      }, 
-      {
-        "id": "num-niv", 
-        "label": "Numéro niveau", 
-        "optionnel": false, 
-        "regex": "\\d{2}", 
-        "systeme": true
-      }, 
-      {
-        "id": "demi-niv", 
-        "label": "Demi-niveau", 
-        "optionnel": false, 
-        "regex": "\\d{1}", 
-        "systeme": true
-      }, 
-      {
-        "id": "producteur", 
-        "label": "Producteur", 
-        "optionnel": false, 
-        "regex": "p\\d{3}", 
-        "systeme": true
-      }, 
-      {
-        "id": "specialite", 
-        "label": "Spécialité", 
-        "optionnel": false, 
-        "regex": "\\d{3}", 
-        "systeme": true
-      }, 
-      {
-        "id": "nom-site-court", 
-        "label": "Nom site court", 
-        "optionnel": false, 
-        "regex": "[A-Z0-9-]{5,30}", 
-        "systeme": false
-      }, 
-      {
-        "id": "rest-nom", 
-        "label": "Reste du nom", 
-        "optionnel": true, 
-        "regex": "[A-Za-z0-9()_-]+", 
-        "systeme": false
-      }
-    ], 
-    "valeur_si_bim_2d": "BIM-2D", 
-    "valeur_si_nul": "X"
-  }, 
-  "nomenclatures_colonnes_couleurs": {
-    "colonnes_occurrences": [
-      255, 
-      255, 
-      151
-    ], 
-    "colonnes_readonly": [
-      192, 
-      192, 
-      192
-    ], 
-    "colonnes_types": [
-      232, 
-      113, 
-      134
+  "suppression_masse_etiquettes_pieces": {
+    "types_selectionnes": [
+      "200000 - Etiquette - Pièce - Commentaire - 2.0 - (Ba) : 1 - Nom"
     ]
   }, 
   "nomenclatures_titres_couleurs": {
@@ -2260,674 +3069,106 @@
       192
     ]
   }, 
-  "nomenclatures_types": [
+  "mises_a_jour": {
+    "source_url": "https://github.com/data8bim/py-NM-BATII"
+  }, 
+  "emplacements": {
+    "enregistrements_rvt": {
+      "nb_rep_parents_enregistrement_rvt": 2
+    }
+  }, 
+  "niveaux_defaut_types_pers": [
     {
-      "label": "2a - Saisie des caractéristiques du TYPE", 
-      "type_vue": "2 - SAISIES DES DONNEES"
+      "label": "PIECES 3D", 
+      "niveaux": {
+        "origine": false, 
+        "batiment": true, 
+        "autres": false, 
+        "toiture": false, 
+        "fondations": false
+      }
     }, 
     {
-      "label": "2b - Saisie des caractéristiques d'OCCURRENCES", 
-      "type_vue": "2 - SAISIES DES DONNEES"
+      "label": "TEMPORAIRE", 
+      "niveaux": {
+        "origine": true, 
+        "batiment": true, 
+        "autres": true, 
+        "toiture": true, 
+        "fondations": true
+      }
     }, 
     {
-      "label": "3a - Présentation des caractéristiques du TYPE", 
-      "type_vue": "3 - PRESENTATIONS DES DONNEES"
+      "label": "FM", 
+      "niveaux": {
+        "origine": false, 
+        "batiment": true, 
+        "autres": false, 
+        "toiture": true, 
+        "fondations": false
+      }
     }, 
     {
-      "label": "3b - Présentation des caractéristiques d'OCCURRENCES", 
-      "type_vue": "3 - PRESENTATIONS DES DONNEES"
+      "label": "TEMP - REPRISE DONNEES", 
+      "niveaux": {
+        "origine": false, 
+        "batiment": true, 
+        "autres": false, 
+        "toiture": true, 
+        "fondations": false
+      }
     }, 
     {
-      "label": "3c - Présentation des caractéristiques AUTRES", 
-      "type_vue": "3 - PRESENTATIONS DES DONNEES"
+      "label": "SURFACES PLANCHER", 
+      "niveaux": {
+        "origine": false, 
+        "batiment": true, 
+        "autres": false, 
+        "toiture": true, 
+        "fondations": false
+      }
+    }, 
+    {
+      "label": "SURFACES SHON-SHOB", 
+      "niveaux": {
+        "origine": false, 
+        "batiment": true, 
+        "autres": false, 
+        "toiture": true, 
+        "fondations": false
+      }
     }
   ], 
   "pieces_3d": {
-    "gabarit_vue_3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D", 
-    "nom_vue_3d": "3D - PIECES 3D"
+    "nom_vue_3d": "3D - PIECES 3D", 
+    "gabarit_vue_3d": "zzZ_000000.07 - ARCHITECTURE - 3D - PIECES 3D"
   }, 
-  "profils_liaison_cao": [
-    {
-      "label": "< Par défaut >", 
-      "options_liaisons": {
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "layers": "Tous", 
-        "placement": "Automatique - Emplacement partage", 
-        "units": "Metres", 
-        "view_only": false
-      }, 
-      "ordre": 1, 
-      "systeme": true, 
-      "vues": {
-        "discipline": "", 
-        "famille": "Plan d'etage", 
-        "phase": "", 
-        "type_personnalise": "Temporaire", 
-        "vue_par_niveau": false
-      }
-    }, 
-    {
-      "label": "Coordination CAO", 
-      "options_liaisons": {
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "layers": "Tous", 
-        "placement": "Automatique - Emplacement partage", 
-        "units": "Metres", 
-        "view_only": false
-      }, 
-      "ordre": 2, 
-      "systeme": false, 
-      "vues": {
-        "discipline": "", 
-        "famille": "Plan d'etage", 
-        "phase": "", 
-        "type_personnalise": "Temporaire", 
-        "vue_par_niveau": true
-      }
-    }, 
-    {
-      "label": "Traitements", 
-      "options_liaisons": {
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "layers": "Tous", 
-        "placement": "Automatique - Emplacement partage", 
-        "units": "Metres", 
-        "view_only": true
-      }, 
-      "ordre": 3, 
-      "systeme": false, 
-      "vues": {
-        "discipline": "", 
-        "famille": "Plan d'etage", 
-        "phase": "", 
-        "type_personnalise": "Temporaire", 
-        "vue_par_niveau": true
-      }
-    }, 
-    {
-      "label": "FM", 
-      "options_liaisons": {
-        "color_mode": "Conserver", 
-        "correct_lines": true, 
-        "layers": "Tous", 
-        "placement": "Automatique - Emplacement partage", 
-        "units": "Metres", 
-        "view_only": false
-      }, 
-      "ordre": 4, 
-      "systeme": false, 
-      "vues": {
-        "discipline": "", 
-        "famille": "Plan d'etage", 
-        "phase": "", 
-        "type_personnalise": "FM", 
-        "vue_par_niveau": true
-      }
-    }
-  ], 
-  "selection_epinglage_elements": {
-    "colonnes_parametres": [], 
-    "fenetre": {
-      "hauteur": 760, 
-      "largeur": 926
-    }, 
-    "inclure_annotations": false, 
-    "largeurs_colonnes": {
-      "fixe:CategoryName": 160, 
-      "fixe:ElementName": 160, 
-      "fixe:FamilyName": 160, 
-      "fixe:IdText": 100, 
-      "fixe:LevelName": 160, 
-      "fixe:PinnedLabel": 80, 
-      "fixe:Selected": 90, 
-      "fixe:TypeName": 160
-    }, 
-    "ordre_colonnes": [
-      "fixe:Selected", 
-      "fixe:CategoryName", 
-      "fixe:FamilyName", 
-      "fixe:TypeName", 
-      "fixe:ElementName", 
-      "fixe:LevelName", 
-      "fixe:PinnedLabel", 
-      "fixe:IdText"
-    ], 
-    "portee": "projet", 
-    "tri": [
-      "fixe:CategoryName", 
-      "asc"
-    ]
-  }, 
-  "suppression_masse_etiquettes_pieces": {
-    "types_selectionnes": [
-      "200000 - Etiquette - Pièce - Commentaire - 2.0 - (Ba) : 1 - Nom"
-    ]
-  }, 
-  "suppression_masse_etiquettes_surfaces": {
-    "types_selectionnes": [
-      "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom"
-    ]
-  }, 
-  "suppression_masse_legendes_surfaces": {
-    "types_selectionnes": [
-      "Par projet"
-    ]
-  }, 
-  "surface": {
-    "col_calcul_style": "ANS - SURFACE - Calcul", 
-    "col_commentaire_style": "Commentaires", 
-    "col_filter": "Nom", 
-    "col_plancher": "Surface Plancher - SP", 
-    "col_shob": "SHOB", 
-    "col_shon": "SHON", 
-    "default_plancher_schedule": "SURFACES - SURFACE PLANCHER", 
-    "default_shon_schedule": "SURFACES - SHON/SHOB", 
-    "etiquette_defaut": {
-      "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
-      "repere": true
-    }, 
-    "etiquettes_actif": true, 
-    "etiquettes_par_calcul": [
-      {
-        "calcul": "PLUM - CBS", 
-        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
-        "repere": true
-      }, 
-      {
-        "calcul": "SHON/SHOB", 
-        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
-        "repere": true
-      }, 
-      {
-        "calcul": "SURFACE PLANCHER", 
-        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
-        "repere": true
-      }, 
-      {
-        "calcul": "TEST", 
-        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
-        "repere": true
-      }, 
-      {
-        "calcul": "TOITURES", 
-        "etiquette": "200000 - Etiquette - SURFACES - Construction brute - 2.5 - (Ba) : 1 - Nom", 
-        "repere": true
-      }
-    ], 
-    "param_s_plancher": "ANS - SURFACE - S Plancher", 
-    "param_s_plancher_auteur": "ANS - SURFACE - S Plancher - Auteur", 
-    "param_shob": "ANS - SURFACE - SHOB", 
-    "param_shob_auteur": "ANS - SURFACE - SHOB - Auteur", 
-    "param_shon": "ANS - SURFACE - SHON", 
-    "param_shon_auteur": "ANS - SURFACE - SHON - Auteur", 
-    "param_style": "SURFACE - Style", 
-    "qualifications_auteur": [
-      "Géomètre (Surfaces certifiées)", 
-      "Architecte (Surfaces certifiées)", 
-      "Service Gestion Patrimoine"
-    ], 
-    "styles_palette": [
-      {
-        "couleur": "#388E3C", 
-        "couleur_plan": "#F28585", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Surfaces planchers HSP>1,8m"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#F2A085", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Surfaces planchers HSP<1,8m"
-      }, 
-      {
-        "couleur": "#388E3C", 
-        "couleur_plan": "#F2BC85", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Niveaux intermédiaires"
-      }, 
-      {
-        "couleur": "#37474F", 
-        "couleur_plan": "#F2D785", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Trémis - Emprises niveau bas"
-      }, 
-      {
-        "couleur": "#37474F", 
-        "couleur_plan": "#F2F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Trémis - Vides de planchers"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#D7F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Sous-sols - Locaux techniques"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#BCF285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Sous-sols - Aménageables"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#A0F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Stationnement - Véhicules"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Stationnement - Sas de sécurité"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85F2A0", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Rdc - Surfaces non closes"
-      }, 
-      {
-        "couleur": "#37474F", 
-        "couleur_plan": "#85F2BC", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Rdc - Terrasses non couvertes"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85F2D7", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Coursives extérieures"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85F2F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Balcons ou loggias (Non clos)"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85D7F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Combles - Non aménageables"
-      }, 
-      {
-        "couleur": "#388E3C", 
-        "couleur_plan": "#85BCF2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Combles - Aménageables"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85A0F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Combles - Locaux techniques"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#8585F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Toitures-terrasses"
-      }, 
-      {
-        "couleur": "#37474F", 
-        "couleur_plan": "#A085F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Modénatures"
-      }, 
-      {
-        "couleur": "#37474F", 
-        "couleur_plan": "#BC85F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Constructions ne formant pas de plancher"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#D785F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB -  HABITA  - Surfaces planchersHSP>1,8m"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#F285F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB -  HABITA  - Déduction réfection d'immeubles"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#F28585", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB - Sous-sols - Caves individuelles d'habitations"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#F285D7", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB -  HABITA  - Sous-sols - Caves individuelles d'habitations"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#F285BC", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB -  AGRICOLES - Locaux exploitation"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#F285A0", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SHON/SHOB -  AGRICOLES - Serres de production"
-      }, 
-      {
-        "couleur": "#388E3C", 
-        "couleur_plan": "#F28585", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP + Planchers"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#F2CE85", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP - Trémies"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#CEF285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP - Embrasures"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP - Loc Techniques"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85F2CE", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP - Surfaces planchers HSP<1,8m"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#85CEF2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP - Combles non aménageables"
-      }, 
-      {
-        "couleur": "#D32F2F", 
-        "couleur_plan": "#8585F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP - Véhicules"
-      }, 
-      {
-        "couleur": "#76C97A", 
-        "couleur_plan": "#CE85F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP + Planchers communs logements"
-      }, 
-      {
-        "couleur": "#E06B6B", 
-        "couleur_plan": "#F285CE", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "SP - Caves ou Celliers - Logements"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F28585", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 1 - Pleine terre avec noues / sol naturel"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F2BC85", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 7 - Surf. perméables ayant un coef. de ruissellement < 20 %"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F2F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 9 - Surf .imper. substrat principal minéral ép. 15cm  toiture faible pente"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#BCF285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 8 - Surf. imper. substrat minéral ép.15 cm + drainage"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#85F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 6 - Surf. imper. recouvertes de terre végétale ép.40cm + drainage"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#85F2BC", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 5 - Surf. imper. recouvertes de terre végétale ép.80cm + drainage"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#85F2F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 10 - Surf. partiellement perméables coeff. ruissellement inf. 50 %"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#85BCF2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 4 - Autres surfaces de pleine terre"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#8585F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 3 - Pleine terre avec surfaces classées en EBC ou EPP"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#BC85F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - Type 2 - Pleine terre avec arbres existants et conservés"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F285F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - DP 6 - Constructions existantes et de leur extension limitée"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F285BC", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "CBS - DP 7 - Équipement d'intérêt collectif, services publics ou Centre de congrès et d’exposition"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F28585", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Terrasse accessible"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F2CE85", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Terrasse inaccessible"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#CEF285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Couverture Ardoises"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#85F285", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Couverture Tuiles"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#85F2CE", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Couverture Zinc"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#85CEF2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI -Autres"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#8585F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Végétalisée"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#CE85F2", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Couverture Synthétique"
-      }, 
-      {
-        "couleur": "", 
-        "couleur_plan": "#F285CE", 
-        "motif_plan": "<Remplissage de solide>", 
-        "nom": "TOI - Couverture Bac acier"
-      }
-    ], 
-    "table_styles_schedule": "SURFACES  - 1 - Tables de style"
-  }, 
-  "types_vues": [
-    {
-      "label": "PIECES 3D", 
-      "types": {}
-    }, 
-    {
-      "label": "TEMPORAIRE", 
-      "types": {
-        "vue-3d": "", 
-        "vue-coupe": "Coupe du bâtiment", 
-        "vue-dessin": "", 
-        "vue-elevation": "", 
-        "vue-legende": "", 
-        "vue-plaf": "Plan du plafond", 
-        "vue-plan": "Plan d'étage", 
-        "vue-structure": "Plan structurel - Vers le haut", 
-        "vue-surface": ""
-      }
-    }, 
-    {
-      "label": "FM", 
-      "types": {}
-    }, 
-    {
-      "label": "SURFACES PLANCHER", 
-      "types": {
-        "vue-3d": "", 
-        "vue-coupe": "", 
-        "vue-dessin": "", 
-        "vue-elevation": "", 
-        "vue-legende": "", 
-        "vue-plaf": "", 
-        "vue-plan": "", 
-        "vue-structure": "", 
-        "vue-surface": "SURFACE PLANCHER"
-      }
-    }, 
-    {
-      "label": "SURFACES SHON-SHOB", 
-      "types": {
-        "vue-3d": "", 
-        "vue-coupe": "", 
-        "vue-dessin": "", 
-        "vue-elevation": "", 
-        "vue-legende": "", 
-        "vue-plaf": "", 
-        "vue-plan": "", 
-        "vue-structure": "", 
-        "vue-surface": "SHON/SHOB"
-      }
-    }
-  ], 
-  "types_vues_defaut": {
-    "vue-3d": "Vue 3D", 
-    "vue-coupe": "Coupe du bâtiment", 
-    "vue-dessin": "Dessin détails", 
-    "vue-elevation": "Elévation", 
-    "vue-legende": "Légende", 
-    "vue-plaf": "Plan du plafond", 
-    "vue-plan": "Plan d'étage", 
-    "vue-structure": "Plan structurel - Vers le haut", 
-    "vue-surface": "SURFACE PLANCHER"
-  }, 
-  "types_vues_personnalises": [
-    {
-      "label": "PIECES 3D", 
-      "ordre": "0", 
-      "systeme": true, 
-      "titre": "PIECES 3D", 
-      "usage": "Livrable", 
-      "valeur_1": "", 
-      "valeur_2": ""
-    }, 
-    {
-      "label": "TEMPORAIRE", 
-      "ordre": "1", 
-      "systeme": true, 
-      "titre": "TEMPORAIRE", 
-      "usage": "Temporaire", 
-      "valeur_1": "", 
-      "valeur_2": ""
-    }, 
-    {
-      "label": "FM", 
-      "ordre": "2", 
-      "systeme": true, 
-      "titre": "FM", 
-      "usage": "Livrable", 
-      "valeur_1": "", 
-      "valeur_2": ""
-    }, 
-    {
-      "label": "SURFACES PLANCHER", 
-      "ordre": "SURF-01", 
-      "systeme": true, 
-      "titre": "SURFACES SP", 
-      "usage": "Livrable", 
-      "valeur_1": "", 
-      "valeur_2": ""
-    }, 
-    {
-      "label": "SURFACES SHON-SHOB", 
-      "ordre": "SURF-02", 
-      "systeme": true, 
-      "titre": "SURFACES SHON-SHOB", 
-      "usage": "Livrable", 
-      "valeur_1": "", 
-      "valeur_2": ""
-    }
-  ], 
   "vues_en_masse": {
-    "filtres_types_niveaux_defaut": {
-      "autres": false, 
-      "batiment": true, 
-      "fondations": false, 
-      "origine": false, 
-      "toiture": false
-    }, 
     "types_vues": [
       {
-        "famille": "Plan d'étage", 
         "nom": "Plans de repérage", 
+        "famille": "Plan d'étage", 
         "nom_type_vue": "TRAITEMENTS DONNEES EXISTANTES", 
         "template_nom": "{nom_niveau} - Repérage"
       }
-    ]
+    ], 
+    "filtres_types_niveaux_defaut": {
+      "origine": false, 
+      "batiment": true, 
+      "autres": false, 
+      "toiture": false, 
+      "fondations": false
+    }
+  }, 
+  "types_vues_defaut": {
+    "vue-plan": "Plan d'étage", 
+    "vue-coupe": "Coupe du bâtiment", 
+    "vue-dessin": "Dessin détails", 
+    "vue-legende": "Légende", 
+    "vue-elevation": "Elévation", 
+    "vue-surface": "SURFACE PLANCHER", 
+    "vue-3d": "Vue 3D", 
+    "vue-plaf": "Plan du plafond", 
+    "vue-structure": "Plan structurel - Vers le haut"
   }
 }

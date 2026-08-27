@@ -367,6 +367,14 @@ class NotesWindow(forms.WPFWindow):
         self._action_handler = _action_handler
         self._ext_event      = _ext_event
 
+        # Phase de la vue active : GetRoomAtPoint sans phase utilise la dernière
+        # phase du projet et rate les pièces d'une autre phase.
+        try:
+            _php = doc.ActiveView.get_Parameter(BuiltInParameter.VIEW_PHASE)
+            self._view_phase_id = _php.AsElementId() if _php else None
+        except Exception:
+            self._view_phase_id = None
+
         # État
         self.all_notes     = all_notes
         self.unique_texts  = sorted(set(n.text      for n in all_notes), key=lambda t: t.lower())
@@ -1171,7 +1179,11 @@ class NotesWindow(forms.WPFWindow):
         if isinstance(view, ViewPlan):
             lvl = view.GenLevel
             if lvl:
-                return lvl.Elevation + 0.1
+                # ProjectElevation = Z interne (repère origine projet). lvl.Elevation
+                # est la valeur UI, relative à la base d'élévation du niveau : dès
+                # qu'elle est non nulle, le point de sonde sort de toutes les pièces
+                # et GetRoomAtPoint renvoie None partout.
+                return lvl.ProjectElevation + 0.1
         return 0.0
 
     def _reload_target_params(self):
@@ -1311,6 +1323,13 @@ class NotesWindow(forms.WPFWindow):
                else BuiltInCategory.OST_Rooms)
         cat_label = u'Espace' if use_spaces else u'Pi\xe8ce'
 
+        phase = None
+        if not use_spaces and getattr(self, '_view_phase_id', None):
+            try:
+                phase = doc.GetElement(self._view_phase_id)
+            except Exception:
+                phase = None
+
         target_to_notes = {}   # elem_id_int → [NoteInfo]
         target_names    = {}   # elem_id_int → nom affiché
         no_target       = []   # NoteInfo sans cible trouvée
@@ -1322,6 +1341,8 @@ class NotesWindow(forms.WPFWindow):
                 pt3d = XYZ(pt2d.X, pt2d.Y, z)
                 if use_spaces:
                     target = doc.GetSpaceAtPoint(pt3d)
+                elif phase:
+                    target = doc.GetRoomAtPoint(pt3d, phase)
                 else:
                     target = doc.GetRoomAtPoint(pt3d)
                 if target is None:
