@@ -2566,6 +2566,13 @@ def _disc_section(fmt, lignes, txt):
             'abrev_ouvrage_resolue':
                 txt(_row['abrev_ouvrage_resolue']).strip(),
         })
+    # Enregistree triee par code_ouvrage (deja zero-pade a longueur fixe,
+    # donc comparable comme texte), PAS dans l'ordre d'affichage courant de
+    # la grille : utils/disciplines.lister_disciplines() retrie de toute
+    # facon par code_ouvrage a chaque lecture (l'ordre brut du fichier n'est
+    # pas fiable), donc figer cet ordre a l'ecriture n'a aucun effet sur les
+    # scripts consommateurs — seulement sur la lisibilite des diffs Git.
+    _table.sort(key=lambda e: e['code_ouvrage'] or e['code'])
     return {
         'format': {
             'niveaux':                    _nb,
@@ -5384,6 +5391,29 @@ def _profil_vues_lire(dlg, _opts):
     }
 
 
+# Profils de liaison CAO : reglages par defaut + label du profil systeme
+# verrouille. Constantes pures (ne dependent ni de cfg ni de wpf) sorties au
+# niveau module — main() en fait lecture depuis une dizaine de fermetures
+# imbriquees (table des profils) ; les y definir en local sature son scope
+# IronPython (MutableTuple) sans aucun gain, voir le gotcha « scope sature ».
+_DEFAULT_PROFIL_OPTIONS = {
+    u'color_mode': u'Conserver', u'layers': u'Tous', u'units': u'Metres',
+    u'placement': u'Automatique - Emplacement partage',
+    u'correct_lines': True, u'view_only': False,
+}
+# `discipline` porte un CODE OUVRAGE, `phase` un NOM de phase de projet.
+# Vides par defaut : aucune valeur n'a de sens tant que l'utilisateur n'a pas
+# ouvert « Configurer... ». Un profil ecrit avant l'ajout de ces deux cles se
+# comporte donc comme un profil neuf sur ces deux points — c'est « Lier CAO →
+# Vues » qui demandera de choisir.
+_DEFAULT_PROFIL_VUES = {
+    u'famille': u"Plan d'etage", u'discipline': u'',
+    u'type_personnalise': u'FM', u'phase': u'',
+    u'vue_par_niveau': True,
+}
+_LOCKED_PROFIL_LABEL = u'< Par d\xe9faut >'
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -5406,22 +5436,9 @@ def main():
     cn   = cfg.setdefault('creer_niveaux', {})
     nc   = cfg.setdefault('nm_convention_noms_fichiers', {})
     dwg  = cfg.setdefault('fichiers_lies_dwg', {})
-    _DEFAULT_PROFIL_OPTIONS = {
-        u'color_mode': u'Conserver', u'layers': u'Tous', u'units': u'Metres',
-        u'placement': u'Automatique - Emplacement partage',
-        u'correct_lines': True, u'view_only': False,
-    }
-    # `discipline` porte un CODE OUVRAGE, `phase` un NOM de phase de projet.
-    # Vides par defaut : aucune valeur n'a de sens tant que l'utilisateur n'a
-    # pas ouvert « Configurer... ». Un profil ecrit avant l'ajout de ces deux
-    # cles se comporte donc comme un profil neuf sur ces deux points — c'est
-    # « Lier CAO → Vues » qui demandera de choisir.
-    _DEFAULT_PROFIL_VUES = {
-        u'famille': u"Plan d'etage", u'discipline': u'',
-        u'type_personnalise': u'FM', u'phase': u'',
-        u'vue_par_niveau': True,
-    }
-    _LOCKED_PROFIL_LABEL = u'< Par d\xe9faut >'
+    # _DEFAULT_PROFIL_OPTIONS / _DEFAULT_PROFIL_VUES / _LOCKED_PROFIL_LABEL :
+    # constantes de module (juste au-dessus), pas de locales ici — voir leur
+    # commentaire.
     _profils_raw = cfg.get(u'profils_liaison_cao', [])
     if not any(p.get(u'label') == _LOCKED_PROFIL_LABEL for p in _profils_raw):
         _profils_raw = [{

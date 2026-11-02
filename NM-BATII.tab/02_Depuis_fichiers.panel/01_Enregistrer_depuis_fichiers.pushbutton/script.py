@@ -130,7 +130,11 @@ def save_last_state(checkboxes, chk_bim2d):
     state["__bim2d__"] = bool(chk_bim2d.IsChecked)
     try:
         with codecs.open(_LAST_SAVE_FILE, "w", "utf-8") as f:
-            json.dump(state, f, indent=2, ensure_ascii=False)
+            # sort_keys : l'ordre d'iteration d'un dict n'est pas garanti
+            # stable entre deux lancements sous IronPython 2.7 — sans ca,
+            # le fichier change a chaque enregistrement meme a etat egal
+            # (meme convention que save_config()).
+            json.dump(state, f, indent=2, ensure_ascii=False, sort_keys=True)
     except Exception:
         pass
 

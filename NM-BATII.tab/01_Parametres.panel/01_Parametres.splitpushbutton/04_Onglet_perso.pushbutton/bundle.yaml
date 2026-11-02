@@ -1,0 +1,18 @@
+title:
+  en_us: |
+    Custom
+    Tab
+  fr_fr: |
+    Onglet
+    perso
+tooltip:
+  en_us: "Build a custom ribbon tab from panels taken from other tabs
+         (native or third-party add-ins), and hide tabs left empty.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+  fr_fr: "Construit un onglet ruban personnalisé à partir de panneaux
+         pris dans d'autres onglets (natifs ou add-ins tiers), et masque
+         les onglets devenus vides.
+         \n\nVersion: {{version}}-[{{date}}.002]"
+
+help_url: 'https://d8b.fr/'
+author: '{{author}}'

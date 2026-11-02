@@ -1,0 +1,136 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NM-BATII — Onglet personnalisé" Height="700" Width="1180"
+        MinHeight="560" MinWidth="980"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Colonne gauche : profils (= onglets ruban personnalises), -->
+        <!-- leur ordre dans la liste = leur ordre d'affichage dans Revit -->
+        <DockPanel Grid.Column="0">
+            <Label Content="Onglets personnalisés :" DockPanel.Dock="Top" FontWeight="Bold"/>
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Button x:Name="btnNouveauProfil" Content="Nouveau" Width="97" Height="30" Margin="0,0,6,0"
+                            Style="{DynamicResource NMButtonSecondaire}"/>
+                    <Button x:Name="btnSupprimerProfil" Content="Supprimer" Width="97" Height="30"
+                            Style="{DynamicResource NMButtonSecondaire}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="btnProfilMonter" Content="▲ Monter" Width="97" Height="30" Margin="0,0,6,0"
+                            Style="{DynamicResource NMButtonSecondaire}"/>
+                    <Button x:Name="btnProfilDescendre" Content="▼ Descendre" Width="97" Height="30"
+                            Style="{DynamicResource NMButtonSecondaire}"/>
+                </StackPanel>
+            </StackPanel>
+            <ListBox x:Name="lstProfils"/>
+        </DockPanel>
+
+        <!-- Colonne droite : contenu de l'onglet personnalise selectionne -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Nom de l'onglet personnalise courant -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                <Label Content="Nom de l'onglet :" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                <TextBox x:Name="txtNomOnglet" VerticalContentAlignment="Center" Height="26"/>
+            </DockPanel>
+
+            <!-- Trois colonnes : onglets disponibles / panneaux disponibles / transferes -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Onglets disponibles -->
+                <DockPanel Grid.Column="0">
+                    <Label Content="Onglets disponibles :" DockPanel.Dock="Top" FontWeight="Bold"/>
+                    <ListBox x:Name="lstOngletsDispo"/>
+                </DockPanel>
+
+                <!-- Panneaux disponibles -->
+                <DockPanel Grid.Column="2">
+                    <Label Content="Panneaux disponibles :" DockPanel.Dock="Top" FontWeight="Bold"/>
+                    <Button x:Name="btnAjouterPanneau" DockPanel.Dock="Bottom" Content="Ajouter →"
+                            Height="30" Margin="0,6,0,0"
+                            Style="{DynamicResource NMButtonSecondaire}"/>
+                    <ListBox x:Name="lstPanneauxDispo" SelectionMode="Extended"/>
+                </DockPanel>
+
+                <!-- Panneaux transferes vers l'onglet personnalise courant -->
+                <DockPanel Grid.Column="4">
+                    <Label Content="Transféré vers l'onglet personnalisé :" DockPanel.Dock="Top" FontWeight="Bold"/>
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,6,0,0">
+                        <Button x:Name="btnPanneauMonter" Content="▲" Width="36" Height="30" Margin="0,0,4,0"
+                                Style="{DynamicResource NMButtonSecondaire}"/>
+                        <Button x:Name="btnPanneauDescendre" Content="▼" Width="36" Height="30" Margin="0,0,4,0"
+                                Style="{DynamicResource NMButtonSecondaire}"/>
+                        <Button x:Name="btnSupprimerPanneau" Content="← Retirer" Height="30" Width="110"
+                                Style="{DynamicResource NMButtonSecondaire}"/>
+                    </StackPanel>
+                    <ListBox x:Name="lstTransferes" SelectionMode="Extended"/>
+                </DockPanel>
+            </Grid>
+
+            <!-- Onglets masques manuellement (independant des profils) -->
+            <Grid Grid.Row="2" Margin="0,10,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="160"/>
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0">
+                    <Label Content="Onglets masqués (indépendamment des onglets personnalisés) :"
+                           DockPanel.Dock="Top" FontWeight="Bold"/>
+                    <ListBox x:Name="lstOngletsMasques" Height="80"/>
+                </DockPanel>
+                <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                    <Button x:Name="btnMasquerOnglet" Content="Masquer la sélection" Height="30" Margin="0,0,0,6"
+                            Style="{DynamicResource NMButtonSecondaire}"/>
+                    <Button x:Name="btnDemasquerOnglet" Content="Réafficher" Height="30"
+                            Style="{DynamicResource NMButtonSecondaire}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Pied de dialogue : proportions standard NM-BATII -->
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="130"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="btnImporter" Grid.Column="0" Content="Importer..."
+                        Style="{DynamicResource NMButtonSecondaire}"/>
+                <Button x:Name="btnExporter" Grid.Column="2" Content="Exporter..."
+                        Style="{DynamicResource NMButtonSecondaire}"/>
+                <Button x:Name="btnReinitialiser" Grid.Column="4" Content="Réinitialiser"
+                        Style="{DynamicResource NMButtonSecondaire}"/>
+                <Button x:Name="btnEnregistrerAppliquer" Grid.Column="5"
+                        Content="Enregistrer et appliquer"
+                        Style="{DynamicResource NMButtonAppliquer}"/>
+                <Button x:Name="btnFermer" Grid.Column="7"
+                        Content="Fermer"
+                        Style="{DynamicResource NMButtonAnnuler}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
